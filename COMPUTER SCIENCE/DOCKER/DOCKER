@@ -1,0 +1,72 @@
+
+What is hardware-virtualization ?
+        Put in simple terms , "a standard OS gets installed on a fictious piece of hardware".
+It means , we cheat the Operating System by letting it believe that it has it's own dedicated
+H/w resources like  CPU, memory, storage, networking and more.  But in reality this Operating 
+System will be unknowingly pooling resources with other similarly oblivious Operating Systems
+on the same host machine.
+
+
+
+What is a Virtual Machine (VM) ?
+    A Virtual Machine is an emulation of a computer system.We can have multiple VMs (also           ------------------------------------------
+    called guest machines) running on a single host machine, where each VM will have it's           | A kernel is a computer program which   |
+    own  Operating System ( i.e, an own kernel )  and  other  virtualized  H/w  resources           | is the central part of any OS.         |
+    (hardware-virtualization).            ^---------------------------------------------------------| It is responsible for  communication   |
+        Hypervisor is  the piece of  software responsible for pooling h/w resources of the          | b/w application(i.e, software )  and   |
+    host machine  among multiple VMs , without them knowing . It is also  responsible  for          | the hardware.                          |
+    logically  isolating VMs from each other , or in other words , letting each VM believe          ------------------------------------------
+    that it's alone and it's  h/w resources are real & dedicated.....not virtual!!!
+    
+There are two types of Hypervisor. Both of them perform hardware-virtualization, but the
+difference is in the location from where they perform hardware-virtualization :
+
+1. TYPE-1 HYPERVISOR , also called BARE METAL HYPERVISOR.
+2. TYPE-2 HYPERVISOR , also called HOSTED HYPERVISOR.
+
+
+----------------  ----------------
+| ------------ |  | ------------ |
+| | GUEST OS | |  | | GUEST OS | |          As we can see, a TYPE-1 HYPERVISOR ,  also called
+| ------------ |  | ------------ |          BARE METAL HYPERVISOR runs directly on top of the 
+|    VM-1      |  |    VM-2      |          host's physical hardware , because of which it is
+----------------  ----------------          more faster and efficient than TYPE-2.
+----------------------------------
+|                                |          Examples : 
+|           HYPERVISOR           |              Windows HYPER-V
+|                                |
+----------------------------------
+----------------------------------
+|                                |
+|      HOST PHYSICAL HARDWARE    |
+|                                |
+----------------------------------
+
+
+
+----------------  ----------------
+| ------------ |  | ------------ |
+| | GUEST OS | |  | | GUEST OS | |          
+| ------------ |  | ------------ |           
+|    VM-1      |  |    VM-2      |          
+----------------  ----------------          
+----------------------------------          As we can see , a TYPE-2 HYPERVISOR, also called 
+|                                |          HOSTED HYPERVISOR, runs on the HOST OS.           
+|           HYPERVISOR           |          It relies on the underlying  HOST OS  to  manage              
+|                                |          calls to HOST PHYSICAL HARDWARE. This introduces
+----------------------------------          some unavoidable latency in performance.
+----------------------------------
+|                                |          Examples:
+|            HOST OS             |              VMWARE WORKSTATION
+|                                |              ORACLE VIRTUALBOX
+----------------------------------
+----------------------------------
+|                                |
+|     HOST  PHYSICAL HARDWARE    |
+|                                |
+----------------------------------
+
+
+
+
+What are CONTAINERS ?
