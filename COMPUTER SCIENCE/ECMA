@@ -1,0 +1,127 @@
+9.2.15 FunctionDeclarationInstantiation ( func, argumentsList )
+        11.Let varNames be the VarDeclaredNames of code.
+                                  |
+                                  |
+                                  V
+14.1.16 Static Semantics: VarDeclaredNames
+
+      FunctionStatementList : StatementList
+          1. Return TopLevelVarDeclaredNames of StatementList.
+                          |
+                          |
+                          |
+                          V
+13.2.9 Static Semantics : TopLevelVarDeclaredNames
+          Block:{}
+                  Return a new empty List.
+          StatementList : StatementList  StatementListItem
+                  1.Let names be TopLevelVarDeclaredNames of StatementList.
+                  2.Append to names the elements of the TopLevelVarDeclaredNames of StatementListItem.
+                  3.Return names.
+          StatementListItem : Declaration ---------------------------------------------|
+                  1.If Declaration is Declaration : HoistableDeclaration , then        |
+                          a.Return the BoundNames of HoistableDeclaration. ------------|
+                  3.Return a new empty List.                                           |
+          StatementListItem : Statement------------------------------------------------|
+                  1.If Statement is Statement : LabelledStatement , return TopLevelVarDeclaredNames of Statement.
+                  2.Return VarDeclaredNames of Statement.                              |
+NOTE:                                                                                  |
+At the top level of a function or script, inner function declarations are treated like var declarations.
+                                                                                       |
+13 ECMAScript Language: Statements and Declarations                                    |
+    Syntax                                                                             |
+          Declaration :                   <<-------------------------------------------|
+                  HoistableDeclaration                                                 |
+                  ClassDeclaration                                                     |
+                  LexicalDeclaration                                                   |
+          HoistableDeclaration :                    <<---------------------------------|
+                  FunctionDeclaration                                                  |
+                  GeneratorDeclaration                                                 |
+                  AsyncFunctionDeclaration                                             |
+                  AsyncGeneratorDeclaration                                            |
+                                                                                       |
+          Statement:                    <<---------------------------------------------|
+                  BlockStatement
+                  VariableStatement
+              X   EmptyStatement
+              X   ExpressionStatement
+                  IfStatement
+                  BreakableStatement
+              X   ContinueStatement
+              X   BreakStatement
+              X   ReturnStatement
+                  WithStatement
+                  LabelledStatement
+              X   ThrowStatement
+                  TryStatement
+              X   DebuggerStatement
+
+(13.2  Block)
+
+          BlockStatement:
+                  Block
+
+          Block :
+                  {StatementList opt}
+
+          StatementList :
+                  StatementListItem
+                  StatementList , StatementListItem
+
+          StatementListItem :
+                  Statement
+                  Declaration
+
+
+
+13.1.5 Static Semantics: VarDeclaredNames
+          Statement:
+                  EmptyStatement
+                  ExpressionStatement
+                  ContinueStatement
+                  BreakStatement
+                  ReturnStatement
+                  ThrowStatement
+                  DebuggerStatement
+
+          1.Return a new empty List.
+
+
+13.2.11 Static Semantics: VarDeclaredNames
+          Block : {}
+                  1.Return a new empty List.
+
+          StatementList : StatementList  StatementListItem
+                  1.Let names be VarDeclaredNames of StatementList.
+                  2.Append to names the elements of the VarDeclaredNames of StatementListItem.
+                  3.Return names.
+
+          StatementListItem : Declaration
+                  1.Return a new empty List.
+
+
+
+13.3.2.2 Static Semantics: VarDeclaredNames
+          VariableStatement : var VariableDeclarationList;
+                  1.Return BoundNames of VariableDeclarationList.
+
+//////////
+
+
+
+
+
+I met a girl once. She was an angel , and she spoke to the god with her music.
+There were no words in her language and yet I understood it .
+I couldn't speak back , I didn't knew how to.
+
+Anyone can understand her language , but nobody can speak it.
+
+
+
+
+
+
+
+
+////////////////

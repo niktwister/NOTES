@@ -1,0 +1,208 @@
+LABELLED STATEMENTS
+===================
+
+we can label ANY statement in JavaScript with the following syntax ->
+
+          identifier : statement
+              ^
+              |
+              |
+          can be any legal identifier that is not a reserved word.
+
+
+we make use of LABELLED statements only with (break and continue).
+
+Please note that label can only be referenced within the statement to which they
+are applied ( that's why it is only useful to label statements that have bodies
+like loops and conditionals , so that we can use the label within their body )
+
+Limiting the scope of labels will also save the coders from dangerous perils of
+making nonsensical jumps (like the infamous GOTO in C) across the program.
+
+Two statements can have the same label as long as neither one is nested within
+the other.
+
+
+BREAK STATEMENT
+===============
+
+                              It has two forms
+                                /         \
+               (w/o label)     /           \     (with label)
+                              /             \
+                           break;        break label;
+
+(w/o label) =>
+    using "break;" we can immediately exit out of a SWITCH statement or the
+    nearest enclosing loop.
+
+    It is only legal to use this form inside a loop or a switch , placing it anywhere
+    else will throw Syntax Error.
+
+(with label) =>
+    using "break label;" we can break out of the enclosing statement that has the
+    specified label.(need not be the nearest enclosing)
+
+    In this form , the enclosing labelled statement need not be a switch or a loop,
+    We can break out of any labelled enclosing statement(except function).
+    Even from a labelled block statement ->
+                  label : {
+                      ...
+                      break label;
+                      ...
+                  }
+
+Please note that we cannot have a line terminator b/w "break" and "label" in the
+second form , otherwise ASI will insert ";" b/w them.
+
+>> let matrix = [[1,2,3],
+						     [4,5,6],
+						     [7,8,9]];
+>> let sum = 0,success=true;
+
+>> computeSum : for(let row of matrix){
+
+					for(let ele of row){               //we need to use the second form of
+									if(isNaN(ele)){           // break statement if we want to break
+												success=false;     // out of a loop that is not the
+												break computeSum; //nearest enclosing loop.
+									}else                  // In this example ,  w/o the label ,
+												sum+=ele;       // "break" would have only been able
+					}                            // to break out of the inner loop.
+
+   }
+
+Please note that we can label a function , but we cannot break out of it by placing
+a <break label;> statement inside it.
+
+
+CONTINUE STATEMENT
+==================
+
+Just like break , continue also has two forms ->
+                              /         \
+             (w/o label)     /           \     (with label)
+                            /             \
+                        continue;        continue label;
+    ( upon execution , the current        (upon execution , the current
+iteration of the nearest enclosing          iteration of the enclosing loop
+    loop is terminated, and it's next      with the specified label is terminated,
+    iteration begins).                      and it's next iteration begins).
+
+But in both forms , continue statement should be placed within the body of a loop.
+Using it anywhere else will cause Syntax Error.
+
+Like the break statement, the continue statement can be used in its labeled form
+within nested loops when the loop to be restarted is not the nearest enclosing
+loop.
+
+Just like the break statement, line breaks are not allowed between the continue
+statement and its label.
+
+>> let matrix = [[1,2,3],       //In this example we add all the odd numbers in the
+						     [4,5,6],      // matrix , skipping even numbers.
+						     [7,8,9]];
+>> let oddSum = 0;
+
+>> for(let row of matrix){
+
+  for(let ele of row){  <----------------------------------------------
+                                                                      |
+      if(ele%2===0){        //For even numbers , current iteration of |
+        continue;          // nearest enclosing loop ------------------
+      }                   //will be terminated at "continue" , and it's next iteration
+                         //will begin.
+      oddSum+=ele;
+  }
+
+}
+
+
+
+RETURN STATEMENT
+================
+
+Syntax ->   return [no line terminator] expression;     OR,
+            return;
+               |
+               |
+               ---> undefined is returned
+
+return statement should only appear within the body of a function.
+
+if there is no return statement in the body of function , function invocation
+expression will evaluate to undefined.
+
+
+THROW STATEMENT
+===============
+
+An EXCEPTION signals the occurrence of some exceptional condition or an error.
+
+we can explicitly throw an exception using throw statement , and we can handle an
+exception using catch clause of try/catch/finally statement . If an exception is not
+handled , it will stop the execution of program.
+
+SYNTAX --->      throw expression;
+                          |
+                          |
+                          V
+              this expression can evaluate to any value . But when JS itself
+              throws an exception , it uses object of Error class (or object of
+              one of it's subclasses).
+
+we can also throw object of Error class (or object of one of it's subclasses)
+
+>> let err = new Error("This is error message")
+>> err.name                    // As we can see that Error object has two properties(among others)
+Error                        // named "name" and "message".
+>> err.message               //"name" property is just the name of the class from which object
+"This is error message"    //was created.
+                          //And "message" is the string passed to the constructor.
+
+>> let rerr = new ReferenceError("reference error message")
+                          //ReferenceError is subclass of Error class.
+>> rerr.name
+ReferenceError
+>> rerr.message
+"reference error message"
+
+Example of throwing exception ->
+
+function factorial(num){
+
+  if(num < 0)
+    throw new Error("number is smaller than 0");    //Please note that we are not handling
+                                                   // the thrown error.
+  let fact=1;                                     // That means if function receives a -ve
+  for(;num>=1;num--) fact *= num ;               // number , execution of the program will
+                                                // stop.
+    return fact;
+}
+
+PROPAGATION OF EXCEPTION --->
+When an exception is thrown , JS will halt the execution of program. If the block
+of code in which the exception was thrown does not have an associated catch clause,
+JS checks the next-nearest enclosing block of code to see if it has an exception
+handler( i.e , a catch clause) associated with it. This continues until a handler is found.
+
+If an exception is thrown in a function that does not contain a try/catch/finally
+statement to handle it, the exception propagates up to the code that invoked the function.
+
+If no exception handler is ever found, the exception is treated as an error and is
+reported to the user.
+
+
+TRY/CATCH/FINALLY STATEMENT
+===========================
+
+
+
+
+
+
+
+
+
+
+///
