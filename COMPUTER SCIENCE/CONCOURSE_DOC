@@ -1,0 +1,344 @@
+
+
+pipeline.yml ---->
+
+-----------PIPELINE-----------------
+|                                   |
+|   resources:                      | OPTIONAL
+|       - resource1                 |
+|       - resource2                 |
+|   jobs:                           | REQUIRED
+|       - job1                      |
+|       - job2                      |
+|       - job3                      |
+------------------------------------
+
+
+
+
+NOTE : CONFIG is an arbitrary object representing configuration  that is not directly interpreted
+       by concourse.
+
+------------RESOURCE-------------------------
+|                                           |
+|    name: identifier                       |  REQUIRED
+|    type: name of resource                 |  REQUIRED
+|          (eg. git , time, registry-image, |
+|             docker-image)                 |
+|    source: config                         |  REQUIRED
+---------------------------------------------
+
+NOTE: In case of type: git , config will be { uri: url , branch: branch }
+
+NOTE: We can make the CONCOURSE automatically trigger a particular job in regular intervals of some
+fixed duration by creating a TRIGGERING "time RESOURCE" and fetching it in a get-step of that particular job.
+"time RESOURCE" has ->
+                                name: identifier
+                                type: time
+                                source: {interval: trigger_time}
+
+example,
+                                name: my-timer
+                                type: time
+                                source: {interval: 2m}    # where 2m means two minutes.
+
+Then to make this "time RESOURCE" TRIGGERING , we need to set "trigger: true" for the
+get-step fetching this "time RESOURCE".
+
+
+
+
+
+
+
+-------------JOB--------------------
+|                                  |
+|   name: job_name                 | REQUIRED
+|   public: boolean (DEF : false)  | OPTIONAL
+|   plan:                          | REQUIRED
+|      - step1                     |
+|      - step2                     |
+|      - step3                     |
+------------------------------------
+
+
+
+
+step object can be of multiple types -->
+        task step (runs task)
+        get step (get a resource)
+        put step (update a resource)
+        load_var step (loads variables)
+        ...
+
+------------GET STEP--------------------
+|                                      |
+|   get: resource_name || identifier   |  REQUIRED
+|   resource: resource_name            |  OPTIONAL   // defaults to the value of get.
+|   trigger: boolean (DEF :false)      |  OPTIONAL
+|   passed: [job1,job2]                |  OPTIONAL
+|   params: config                     |  OPTIONAL      // Arbitrary configuration to pass to the resource.
+----------------------------------------               //  Refer to the resource type's documentation to see what it supports.
+
+NOTE:
+
+1) The resource in get-step will be stored/cloned/fetched somewhere locally on the concourse-server and registered
+   in build plan's artifact namespace under the given identifier(GET-STEP.get) , so that it will be accessible
+   to all the later steps in build plan with <GET-STEP.get> .
+2) If trigger:true , new build of the job will be automatically created when a new version of this resource
+   becomes available.
+3) When passed is specified , only the versions of the resource that have made it through the provided list of jobs ,
+   will be considered when triggering and fetching.
+      We say that a "version of resource" has "made it through a job" when that "version of resource" has been fetched
+   using either an implicit (using put-step) or an explicit get-step , in any one of the builds of that job.
+
+
+
+-----------TASK STEP--------------------------------------------
+|                                                              |
+|   task: identifier                                           | REQUIRED
+|   config: TASK object                                        | OPTIONAL
+|   file: path to task's yml file.                             | OPTIONAL
+|         < First segment of the path is GET-STEP.get of some  |    NOTE: "file" can be used in place of "config" in case
+|           previous get-step in the same build plan,which is  |    we want to fetch the task from an external .yml file
+|           fetching a resource (containing our file).         |    rather than writing the whole task in "config".
+|         GET-STEP.get (registered under build plan's artifact |
+|         namespace)   will   point  to the  cloned repository |
+|         sitting  somewhere  locally on the  concourse-server.|
+|         Rest of the path is  relative  to the   repository's |
+|         directory structure. >                               |
+|  image: image-resource using which this task will run.       | OPTIONAL
+|         < We will need to provide GET-STEP.get  of some      |
+|           previous get-step which is fetching an             |
+|           image-resource.                                    |
+|           In this case , GET-STEP.get  will point to the     |
+|           copy of the image-resource sitting somewhere       |
+|           locally on the concourse-server.                   |
+|           This image will override any image provided in the |
+|           task configuration. >                              |
+|  params:                                                     | OPTIONAL
+|     key1: value1                                             |    NOTE: These keys defined and assigned in params will become  environment
+|     key2: value2                                             |    variables in the container running the task of this  task-step.
+|     key3: value3                                             |    And  they will override any confilcting environment variables configured
+|     key4: value4                                             |    in the task of this task-step .
+|                                                              |
+|  vars:                                                       | OPTIONAL
+|     var1: value1                                             |    NOTE: This is ONLY used with  external  task defined  using  task-step.file!!!
+|     var2: value2                                             |    We can place   ((varN))   in external task's yml file , and when that external
+|     var3: value3                                             |    task's yml file is executed ,concourse will automatically substitute  ((varN))
+----------------------------------------------------------------    with valueN using the the binding <varN: valueN> defined here in "vars".
+
+
+-------------------------PUT STEP----------------------
+|                                                     |
+|     put: resource.name || identifier                | REQUIRED
+|     resource: resource.name                         | OPTIONAL  // defaults to the value of put.
+|     params: config                                  | OPTIONAL
+|             < config object depends upon the        |
+|               resource we are trying to update >    |
+-------------------------------------------------------
+
+NOTE:
+1) put-step is used to update a resource.
+2) In case the resource we are updating has type "git" , put-step can be used to push a commit :
+      The config object will have atleast the following parameter  -->
+                        repository: Path of the repository to push to the source.
+                                    <     First segment of the path will be an identifier registered in
+                                      build  plan's  artifact  namespace ,  which either directly points
+                                      to  the   " cloned repository "  (of  our  git-resource)   sitting
+                                      somewhere locally on concourse-server  (in which case we wont need
+                                      any other   segment  in our path) , OR it points to some directory
+                                      in  which our desired " cloned repository " resides (in which case
+                                      rest of the path will be relative to directory structure).
+                                          This "cloned repository" (of our git-resource) should  contain
+                                      the commit we want to push.   >
+
+3) After we update a resource in  put-step  , concourse will implicitly perform a  get-step  to fetch the
+   updated resource , which will be registered to the build plan's artifact namespace under the identifier
+   PUT-STEP.put and hence made available to later steps under the same.
+
+
+
+
+
+          ------------------ LOAD_VAR STEP-------------------------------------
+          |                                                                   |
+REQUIRED  |     load_var: identifier                                          |
+REQUIRED  |     file: file-path                                               |
+          |           < First segment of the path is GET-STEP.get  of some    |
+          |             previous get-step in the same build plan, which is    |
+          |             fetching a resource (containing our file).            |
+          |             GET-STEP.get (registered under build plan's artifact  |
+          |             namespace)   will   point  to the  cloned repository  |
+          |             sitting  somewhere  locally on the  concourse-server. |
+          |             Rest of the path is  relative  to the   repository's  |
+          |             directory structure. >                                |
+OPTIONAL  |     format: json | yaml | yml | trim | raw                        |
+OPTIONAL  |     reveal: Boolean (DEF :false)                                  |
+          ---------------------------------------------------------------------
+
+NOTE:
+1) LOAD_VAR step allows you to load a value for a variable at runtime , making it available to the subsequent
+   steps (within the same build plan) under the given identifier (i.e, LOAD_VAR.load_var ).
+2) LOAD_VAR.file will be read and used as the value for our var (LOAD_VAR.load_var).
+3) If LOAD_VAR.format  is ,
+
+                raw                    ->  the var will be set to the content of the file without modification.
+                trim                   ->  the var will be set to the content of the file with any trailing and leading
+                                           whitespace removed.
+                json | yaml | yml      ->  the file content will be parsed accordingly and the resulting structure will
+                                           be the value of the var.
+                unset                  ->  Concourse will try to detect the format from the file extension. If the file
+                                           format cannot be determined, Concourse will fallback to trim.
+
+4) LOAD_VAR.reveal is false by default. If set to true , allow the var's content to be printed in the build output even
+   with secret redaction enabled.
+5) LOAD_VAR uses the "local var source" (explained below). Thus the subsequent steps can access the   LOAD_VAR.load_var
+   variable as follows :  ((.:LOAD_VAR.load_var)) .
+
+
+
+
+NOTE: We can run individual tasks using "fly execute" .
+NOTE: ANONYMOUS_RESOURCE is similar( NOT SAME ) to RESOURCE object but w/o "name" property.
+
+
+                                                            --->    ---------ANONYMOUS_RESOURCE-----------
+                                                            |       |                                    |
+                                                            |       |       type: type_of_resource       | REQUIRED
+            --------------TASK-------------------------     |       |       source: config               | REQUIRED
+            |                                         |     |       --------------------------------------
+REQUIRED    |     platform: linux | darwin | windows  |     |
+REQUIRED    |     image_resource: anonymous_resource--|-----
+OPTIONAL    |     inputs:                             |
+            |        - input1 ------------------------|------>     ------------------------INPUT-----------------------
+            |        - input2                         |            |                                                  |
+OPTIONAL    |     outputs:                            |            |       name : identifier                          | REQUIRED
+            |        - output1--------------------    |            |       path: < path in container where input      | OPTIONAL
+            |        - output2                   |    |            |               will be placed. If not specified   |
+REQUIRED    |     run: command-------------      |    |            |               then a new folder with input's name|
+OPTIONAL    |     params: ------------    |      |    |            |               will be created in current working |
+            |        key1: value1    |    |      |    |            |               directory of container before the  |
+            |        key2: value2    |    |      |    |            |               task runs.>                        |
+            |                        |    |      |    |            ----------------------------------------------------
+            -------------------------|----|------|-----
+                                     |    |      |
+                                     |    |      |
+   The  keys defined and assigned  <--    |      -------------->    -----------------------OUTPUT------------------------
+in params will become  environment        |                         |                                                   |
+variables in the container running        |                         |       name : identifier                           | REQUIRED
+this task.                                |                         |              < The content under path will be     |
+                                          |                         |                made available to the rest of the  |
+                                          |                         |                plan's steps under this name.>     |
+                                          |                         |       path: < path to the directory in container  | OPTIONAL
+                                          |                         |               from where the output will be taken.|
+                                          |                         |               If not specified then a directory   |
+                                          |                         |               in PWD with output's name will be   |
+                                          |                         |               created before the task runs.       |
+                                          |                         |               Path is relative to the current     |
+                                          |                         |               working directory of the task.>     |
+                                          V                         -----------------------------------------------------
+                  -----------------------COMMAND---------------------------
+                  |                                                       |
+                  |   path: <path of the executable file, inside the      | REQUIRED
+                  |          container in which above task will run.      |
+                  |          path is relative to working directory.       |
+                  |          If "dir" is specified to set the working     |
+                  |          directory ,then path is relative to it.>     |
+                  |   args: array of args passed to executable            | OPTIONAL
+                  |   dir:  <A directory relative to the initial working  | OPTIONAL
+                  |          directory , to set as the working directory  |
+                  |          when running the executable file.>           |
+                  |                                                       |
+                  ---------------------------------------------------------
+
+NOTE:
+inputs is a set of multiple INPUT objects.
+These INPUT objects can be provided by a previous get-step , or task.outputs of a previous task ,
+or using --input option of fly execute(In case we are running the task independently rather than inside some pipeline).
+
+outputs is a set of                 -------------------------------------------------------------------------------------------
+multiple OUTPUT objects.            |                                                                                          |
+                                    v                                                                                          |
+Each OUTPUT object will create a directory (OUTPUT.name) (stored somewhere locally on the concourse-server / registered in the |
+build plan's artifact namespace with identifier OUTPUT.name / outside the task's container ) to make available to later steps  |
+in the build plan. The directory will be automatically created before the task runs. Task should place (using TASK.run)  any   |
+artifact it wants to export in OUTPUT.path , from where the artifacts  will be exported to -------------------------------------
+
+Also note that In case  we are running the task independently rather than inside some pipeline , output can
+be exported to some local directory in our system using --output option of fly execute.
+
+
+
+Value Substitution in Pipelines
+--------------------------------
+We can place ((var)) in our pipeline's yml file. The "value" which will be substituted in place of ((var)) can either be
+provided  ,
+                 1) by a var_source , OR
+                 2) using --var (-v) option of set-pipeline.
+                 3) using --load-vars-from (-l) option of set-pipeline , in case the variables are defined
+                    in a separate yml file.
+
+Example of (2) ->
+  ./fly.exe -t localserver set-pipeline -c ./path/to/pipeline.yml -p demo-pipeline -v VAR1=VALUE1 -v VAR2=VALUE2
+
+Example of (3) ->
+  ./fly.exe -t localserver set-pipeline -c ./path/to/pipeline.yml -p demo-pipeline -l myvariables.yml
+                                                                                             |
+                                                     -------myvariables.yml----------        |
+                                                     | VAR1: VALUE1                 |  <------
+                                                     | VAR2: VALUE2                 |
+                                                     --------------------------------
+
+
+NOTE: Just like pipelines , we can also place ((var)) in an individual task's yml file. The "value" for this var
+can be provided ,
+                     1) (In case the task's yml file is run independently)
+                        using --var (-v) , --load-vars-from (-l) options of execute command.
+
+                     2) (In case task's yml file is pointed by TASK-STEP.file of some task-step in a job)
+                         by listing a <varN:valueN> binding in TASK-STEP.vars of that task-step .
+
+
+what is a var_source ?  [[Experimental at the time of writing : SEPT 2021]]
+  A var_source is exactly what it says it is , a source from where we can fetch variables. At the time of writing
+there were only two types of var_source : "vault" and "dummy".
+
+  ---------PIPELINE------------
+  |   var_sources:            |                                                  Vaults are  third party  credential  managers
+  |     - var_source1 --------|-----------> ------ VAR_SOURCE ----------      where we can  keep our secrets  ( like passwords
+  |     - var_source2         |             |     name: identifier     |      or api keys ) . We can  bring those  secrets  in
+  |     - var_source3 --------|----         |     type: vault          |      in our pipeline through "vault" type var_source.
+  |                           |   |         |     config: vault_config-|----  Those secrets will be  used as variables  in our
+  -----------------------------   |         ----------------------------   |  pipeline and will never be exposed to anyone.
+                                  |                                        |
+                                  |                                        ---> ----- VAULT_CONFIG ----
+                                  |                                             | url: string         | REQUIRED
+                                  |                                             -----------------------
+                                  |                                                 To access a secret in a vault we can write
+                                  |                                           something like :
+                                  |                                           ((VAR_SOURCE.name:path/in/vault/to/secret.field))
+                                  |
+                                  |
+                                  ------------>   ------ VAR_SOURCE ---------
+                                                  |                         |
+                                                  |   name: identifier      | REQUIRED
+    The var_source of type "dummy"  just          |   type: dummy           | REQUIRED
+  imitate a variable source.   Otherwise          |   config: dummy_config  | REQUIRED
+  all it's variables are declared in the          |             |           |
+  pipeline itself.  ( As evident on  the          --------------|------------
+  right side )                                                  |
+                                                                |
+  To access a variable in a "dummy" var_source                  ----> ----- DUMMY_CONFIG ------
+  we can write something like:                                        |   vars:               | REQUIRED
+          ((VAR_SOURCE.name:varN))                                    |     var1: value1      |
+                                                                      |     var2: value2      |
+                                                                      |     var3: value3      |
+                                                                      -------------------------
+
+
+NOTE:
+                      The special var source name '.' is referred as the "local var source".
+         The  precise scope  for these   local vars   depends  on where  they're being used.
+         Currently the only mechanism that uses the "local var source" is the LOAD_VAR step,
+         which is explained above.
