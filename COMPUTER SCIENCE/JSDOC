@@ -1,0 +1,480 @@
+Every time any function is invoked an EXECUTION CONTEXT gets created and pushed
+to the top of EXECUTION CONTEXT STACK.
+EXECUTION CONTEXT STACK are used to track the order of execution of the
+Execution Contexts.
+
+When the code starts running , a global execution context is also created for global
+code and pushed to the EXECUTION CONTEXT STACK.
+
+The running execution context is always the top element of this stack.
+
+
+There are some named internal components inherent to each Execution Context ,
+their set is called STATE COMPONENTS of the EXECUTION CONTEXT.
+
+**STATE COMPONENTS can contain as many item as required by the specific
+implementation , However, the specification describes four components, which
+are the absolute minimum of what must be implemented by each implementation.
+
+
+EXECUTION CONTEXT
+      |
+      |---state components
+              |
+              |---code evaluation state
+              |
+              |---Function : If the code associated with a particular Execution
+              |  Context is the code of a function, then this component is a kind of
+              |  reference to that function. But if the Execution Context is
+              |  associated with a module or a script code, then the value of this
+              |  State Component is null.
+              |
+              |  ** The value of the Function component of the RUNNING execution
+              |     context is also called the active function object.
+              |
+              |---ScriptorModule : This component contains information about the
+              |  script or module within which the context-bound code is executed.
+              |
+              |---Realm
+              |
+      (Below are few additional state components)
+              |
+              |---Generator : If the code associated with a particular Execution
+              |   Context is the code of the generator function, then this component
+              |   contains a reference to the generator function itself.
+              |   And if not , then this component won't exist at all.
+              |
+              |
+          **  |---LexicalEnvironment : (EXPLAINED LATER)
+              |        \
+              |         \
+              |          \
+              |       (Both of them are  "Lexical Environment")
+              |           /
+              |          /
+              |         /
+          **  |---VariableEnvironment: (EXPLAINED LATER)
+              |
+              -
+
+
+**An execution context is purely a specification mechanism and need not
+correspond to any particular artefact of an ECMAScript implementation.
+
+
+
+
+A "Lexical Environment" gets created for specific syntactic structures such as ->
+a function(whenever it's invoked) ,
+a block statement (whenever the block starts getting executed) ,
+a catch clause of tryStatement (whenever the catch clause starts getting executed).
+
+
+"Lexical Environment" for a function/block/... determines which
+variables/functions are visible in their scope and which are not.
+
+A "Lexical Environment" for above mentioned syntactic structures consist of two things :
+                |
+                |
+                |---EnvironmentRecord : it stores the identifier bindings.i.e,
+                |  mapping b/w identifiers( defined within the scope of the
+                |  syntactic structure for which this "Lexical Environment" is created )
+                |   and the values represented by them.
+                |
+                |
+                |--- reference to the outer "Lexical Environment"
+                |
+                |
+                -
+
+consider these two points - >
+  1)whenever a function is invoked ,an execution context is created ,
+  2)any execution context has a LexicalEnvironment as one of it's state
+    component,
+
+These two statements implies that whenever a function is invoked , it's
+"Lexical Environment" will get created called "function Environment",
+whose reference will be stored in function's execution context's state component
+LexicalEnvironment.
+
+(Please note that the state component VariableEnvironment is also
+a "Lexical Environment" which also gets created ,but ignore it for now )
+
+
+We know that there  exist a global execution context , and hence there is also
+a global "Lexical Environment" (for global scope) called "global Environment"
+whose reference is stored in global execution context's state component ->
+LexicalEnvironment.
+
+
+As mentioned above every "Lexical Environment" will have a reference to it's outer
+"Lexical Environment" , meaning what??
+It means that "Lexical Environment" of the inner syntactic structure(a block
+or a function) will have a link to the "Lexical Environment" of outer syntactic
+structure(a block or a function) which surrounds the (inner) syntactic structure
+in the program code.
+
+**For functions and blocks that resides in global domain ,when  their
+"Lexical Environment" is formed , it will store a reference to the "global Environment".
+Also the outer reference of "global Environment"  is null.
+
+____________________________________________________________________________________
+|What does Lexical(or static) scoping means??                                  |
+|It means that the inner block/function  will  have access to the  variables and    |
+|resources of the outer block/function surrounding it.                              |
+|Not true the other way around.                                                     |
+|___________________________________________________________________________________|
+
+This link b/w inner "Lexical Environment" and outer "Lexical Environment" allow
+the identifiers in JS to be lexically scoped . How??
+When we are in a block or a function and we stumble upon an identifier (either a
+variable or a function being invoked) , the JS will first check that whether a binding
+for this identifier exist in the current "Lexical Environment" or not. If it doesn't,
+then using the outer reference  , JS will look for the identifier binding  in the
+"Lexical Environment" of outer block or function that surrounds our (inner) block
+or function. If a binding is found , then that binding will be used,
+else JS will once again use the outer reference of this "Lexical Environment" to
+further go down and check all the "Lexical Environment"(s) down the chain.
+
+At the end of this chain , JS will reach the "global Environment" , and if even here
+also the required binding doesnt exist , JS wont have any further "Lexical Environment"
+to check , because outer reference of "global Environment" is null , hence JS
+will throw ReferenceError.
+
+
+NOTE : mutable bindings are those that can be changed , for example declaring a
+variable with var or let creates a mutable binding , we can change the value of that
+variable.
+On the other hand we have immutable bindings that cannot be changed , for example
+declaring a variable with const , once a value is assigned to this variable(at the time
+of declaration) we cannot change the value of this variable later.
+
+
+
+Remember that we said that the function's execution context's state component
+LexicalEnvironment will point to the "function Environment" i.e,
+function's own "Lexical Environment".
+BUT NOT ALWAYS...i.e, as we execute the function's body we may stumble upon a
+block , a new "Lexical Environment" will be formed for this block and then
+that block will get executed. At this point function's execution context's
+LexicalEnvironment will point to the block's "Lexical  Environment"(which is the
+current "Lexical Environment") rather than the "function Environment".
+
+Thus we conclude that the function's execution context's state component
+LexicalEnvironment will keep changing during execution , always pointing to the
+"Lexical Environment" of the block getting executed.And when we are outside every block,
+then  LexicalEnvironment point's to the "function Environment".
+
+
+
+
+As we have discussed before that , whenever a function is invoked , function's execution
+context gets created.
+Now before actually executing the function body , JS will sort of
+look through the function's body and identifies all the identifiers defined , that are
+going to be visible within the scope of function's body. All these identifiers
+will be placed in the EnvironmentRecord of the "Function Environment".
+This is called creation phase.
+               --------------
+At this point execution context's LexicalEnvironment is pointing to the
+"Function Environment".
+Now we enter the execution phase , and start executing function's body.
+                 ---------------
+
+Now , during execution of function's body if we stumble upon a block , once again we
+will enter into the creation phase in which JS will sort of look through block's body
+and then create it's "Lexical Environment" .
+At this point function's execution context's LexicalEnvironment will be set to the
+block's "Lexical Environment" , after this..... block will get executed.
+
+We can check the specification for the exact steps taken before executing a block
+(sec-13.2.13 ECMAScript 2019) ---->
+
+---------------------------------------------------------------------------------------
+|    1.Let oldEnv be the running execution context's LexicalEnvironment.              |
+|    2.Let blockEnv be NewDeclarativeEnvironment(oldEnv).                             |
+|    3.Perform BlockDeclarationInstantiation(StatementList, blockEnv).                |
+|    4.Set the running execution context's LexicalEnvironment to blockEnv.            |
+|    5.Let blockValue be the result of evaluating StatementList.                      |
+|    6.Set the running execution context's LexicalEnvironment to oldEnv.              |
+|    7.Return blockValue.                                                             |
+--------------------------------------------------------------------------------------|
+| EXPLANATION --->                                                                    |
+|   In (1) ,before entering the block the reference to the current                    |
+|   "Lexical Environment" is being saved in a spearate variable  called oldEnv.       |
+|                                                                                     |
+|   In (2) NewDeclarativeEnvironment(oldEnv) will create a new "Lexical Environment"  |
+|   for our block (called blockEnv) while setting it's outer reference to oldEnv.     |
+|                                                                                     |
+|   (3) is basically performing the creation phase for our block by calling           |
+|   BlockDeclarationInstantiation(StatementList, blockEnv).                           |
+|                                                                                     |
+|   In (4) we set the execution context's LexicalEnvironment to blockEnv.i.e,         |
+|   block's "Lexical Environment".                                                    |
+|                                                                                     |
+|   In (5) we execute the block.                                                      |
+|                                                                                     |
+|   In (6) after completing the block's execution, before leaving the block we reset  |
+|   the execution context's LexicalEnvironment to oldEnv.                             |
+|                                                                                     |
+--------------------------------------------------------------------------------------
+
+
+
+What makes a "function Environment" different from a normal "Lexical Environment" ??
+
+One of those things is that "function Environment" determines the value of "this"
+inside the function.
+
+"this" is the only variable defined by the ECMAScript, the value of which is
+scoped dynamically.
+
+dynamically scoped ???
+Consider an example in which we have a function A nested inside another function B.
+Let's assume that we define a variable "v" in B() only , and then use it in A().
+If A() is called from any location, we can be assured that the variable "v" referenced
+ in A() is  the same variable "v" that is defined in B(). Because variable "v" is
+statically(i.e, lexically) scoped.
+
+BUT in case of "this" binding , the value of "this" inside A() has nothing to do
+with the value "this" has/had inside B(). It will entirely depend upon how A() was
+called.
+
+
+
+
+-----------------------------------------------------------------------------------
+|VariableStatement ->                                                             |
+|                                                                                 |
+|     var identifier , identifier , identifier initializer , identifier;          |
+-----------------------------------------------------------------------------------
+
+
+
+
+
+
+COMPLETE EXPLANATION of the CREATION PHASE OF FUNCTION ----->
+
+when a function is invoked , it's internal method  :
+                  [[Call]](thisArgument,argumentsList)
+is called.
+We can check the steps taken by this method in sec-9.2.1 of ECMAScript 2020.
+In step (4) of [[Call]](..)  method ,
+PrepareForOrdinaryCall(F,undefined) is called. We can check this method in sec-9.2.1.1
+of ECMAScript 2020.
+
+PrepareForOrdinaryCall(F,undefined) will do the following things ->
+        1.Will create a new execution context for the invoked function .
+        2.will create a new "Function Environment" for this method , whose
+          outer reference will be set as F.[[Environment]]
+        3.Both the state components LexicalEnvironment and VariableEnvironment
+          will point to the same newly created "Function Environment".
+        4.Will push this execution context on the top of stack , thus making it the
+          currently running execution context.
+
+After this , step (7) of [[Call]](..) will call this method -->
+OrdinaryCallEvaluateBody(F, argumentsList)     // sec-9.2.1.3 ECMAScript 2020
+
+which in turn will call ->
+EvaluateBody(F , argumentsList)       //sec-14.1.21 ECMAScript 2020
+
+
+there  are only 2 steps in EvaluateBody(F , argumentsList)   ---->
+
+          1.Perform ? FunctionDeclarationInstantiation(functionObject, argumentsList).
+          2.Return the result of evaluating FunctionStatementList.
+
+
+step (1) calls FunctionDeclarationInstantiation(...) which performs the creation
+phase.
+step (2) is the execution phase.
+
+
+Let's decipher FunctionDeclarationInstantiation(...) to understand what exactly
+happens during the creation phase of function.   //  sec - 9.2.10  ECMAScript 2020
+
+
+within this method , 4 possible outcomes are there based on these 4 cases -->
+
+
+                  (CASE I)              |           (CASE II)
+                non - strict            |             strict
+          no parameterExpressions       |     no parameterExpressions
+        --------------------------------|--------------------------------
+                                        |
+                 (CASE III)             |           (CASE IV)
+                non-strict              |             strict
+            parameterExpressions        |      parameterExpressions
+
+
+
+CASE I :
+          At this point both LexicalEnvironment and VariableEnvironment are pointing
+      to  "Function Environment" .
+      "Function Environment" will be populated with parameters(intialized with
+      the arguments passed) and "arguments" object.
+      Since there are no parameterExpressions , therefore --->
+      Within this same "Function Environment" , we will register all variables declared
+      with "var" inside the function's body but outside any inner function (but they can
+      be inside any block!!) and these variables will be initialized with "undefined".
+
+      And since function is being executed in non-strict mode,
+      a new "Lexical Environment" will be created whose outer reference will point
+      to "Function Environment". State component LexicalEnvironment will now point
+      to this new "Lexical Environment".
+      In this "Lexical Environment" we will register all the top level(outside any
+      block or inner function) lexical declarations(let or const). But they will
+      not be initialized.
+
+      At this point VariableEnvironment is pointing to "Function Environment"
+      containg parameters,var delcarations, "arguments" object.
+      And , LexicalEnvironment is pointing to a "Lexical Environment" containing
+      top level lexical  declarations and whose outer reference is pointing
+      to "Function Environment".
+
+      Now all the top level inner functions will be instantiated in memory ,
+      they will get registered in VariableEnvironment->"Lexical Environment"
+      i.e "function Environment" in this case, but their [[Environment]] will point
+      to the LexicalEnvironment->"Lexical Environment" .
+
+
+CASE II :
+            At this point both LexicalEnvironment and VariableEnvironment are pointing
+      to  "Function Environment" .
+      "Function Environment" will be populated with parameters(intialized with
+      the arguments passed) and "arguments" object.
+      Since there are no parameterExpressions , therefore --->
+      Within this same "Function Environment" , we will register all variables declared
+      with "var" inside the function's body but outside any inner function (but they can
+      be inside any block!!) and these variables will be initialized with "undefined".
+
+      And since function is being executed in strict mode,
+      NO new "Lexical Environment" will be created for lexical declarations.
+      LexicalEnvironment will now point to "Function Environment" (it already was!!).
+      We will register all the top level(outside any block or inner function)
+      lexical declarations(let or const)(uninitialized) within the same
+      LexicalEnvironment->VariableEnvironment->"Function Environment".
+
+      At this point both VariableEnvironment and LexicalEnvironment are pointing
+      to the same "Function Environment" containg parameters,var delcarations, top level
+      lexical declarations and "arguments" object.
+
+
+      Now all the top level inner functions will be instantiated in memory ,
+      they will get registered in
+      VariableEnvironment->LexicalEnvironment->"Lexical Environment" ,
+      and their [[Environment]] will also point to the
+      VariableEnvironment->LexicalEnvironment->"Lexical Environment" .
+
+
+CASE III :
+            At this point both LexicalEnvironment and VariableEnvironment are pointing
+      to  "Function Environment" whose EnvironmentRecord is empty.
+
+      Since we are in non-strict mode and parameterExpressions do exist therefore,
+      a new "Lexical Environment" will be created whose outer reference will be
+      "Function Environment".The state component LexicalEnvironment will now point
+      to this new "Lexical Environment".
+
+      Now the LexicalEnvironment->"Lexical Environment" will be populated with
+      parameters (initialized with the arguments passed) and an "arguments" object.
+
+      At this point we have 2 "Lexical Environment"(s)-->
+      (First) is VariableEnvironment->"Function Environment" with empty EnvironmentRecord.
+      (Second) is LexicalEnvironment->"Lexical Environment"  whose outer reference
+      is VariableEnvironment->"Function Environment" and it contains parameters
+      (initialized with the arguments passed) and an "arguments" object.
+
+      Since there exist parameterExpressions , therefore --->
+      A new "Lexical Environment" will be created whose outer reference points to the
+      LexicalEnvironment->"Lexical Environment" . State component VariableEnvironment
+      will now point to this newly created "Lexical Environment" in which we will
+      register all variables declared with "var" inside the function's body but outside
+      any inner function (but they can be inside any block!!) and these variables will
+      be initialized with "undefined".
+
+      At this point we have 3 "Lexical Environment"(s) -->
+      (first) is "function Environment" with empty EnvironmentRecord and no
+      state component pointing to it.
+      (Second) we have LexicalEnvironment->"Lexical Environment" whose outer
+      reference is "function Environment" and whose EnvironmentRecord contains
+      parameters and "arguments" object.
+      (Third) we have VariableEnvironment->"Lexical Environment" whose outer
+      reference is LexicalEnvironment->"Lexical Environment" and whose
+      EnvironmentRecord contains var declarations.
+
+
+      And since function is being executed in non-strict mode,
+      a new "Lexical Environment" will be created whose outer reference will point
+      to VariableEnvironment->"Lexical Environment". State component
+      LexicalEnvironment will now point to this new "Lexical Environment".
+      In this "Lexical Environment" we will register all the top level(outside any
+      block or inner function) lexical declarations(let or const). But they will
+      not be initialized.
+
+      At this point we have 4 different "Lexical Environment"(s) --->
+      (first) is "function Environment" with empty EnvironmentRecord and no
+      state component pointing to it.
+      (Second) is a "Lexical Environment" whose EnvironmentRecord contains
+      parameters and "arguments" object. No state component is pointing to it.
+      (Third) is VariableEnvironment->"Lexical Environment" whose outer reference
+      points to the (Second) "Lexical Environment" above and whose EnvironmentRecord
+      contains all the var declarations.
+      (Fourth) is LexicalEnvironment->"Lexical Environment" whose outer reference
+      points to VariableEnvironment->"Lexical Environment" , and which contains
+      top level lexical declarations.
+
+
+      Now all the top level inner functions will be instantiated in memory ,
+      they will get registered in VariableEnvironment->"Lexical Environment"
+      but their [[Environment]] will point to the
+      LexicalEnvironment->"Lexical Environment" .
+
+
+CASE IV :
+            At this point both LexicalEnvironment and VariableEnvironment are pointing
+      to  "Function Environment" .
+      "Function Environment" will be populated with parameters(intialized with
+      the arguments passed) and "arguments" object.
+
+      Since there exist parameterExpressions , therefore --->
+      A new "Lexical Environment" will be created whose outer reference points to the
+      "Function Environment" . State component VariableEnvironment will now point to
+      this newly created "Lexical Environment" in which we will register all variables
+      declared with "var" inside the function's body but outside any inner function
+      (but they can be inside any block!!) and these variables will be initialized
+      with "undefined".
+
+      And since function is being executed in strict mode,
+      NO new "Lexical Environment" will be created for lexical declarations.
+      LexicalEnvironment will now point to  VariableEnvironment->"Lexical Environment",
+      We will register all the top level(outside any block or inner function)
+      lexical declarations(let or const)(uninitialized) within the
+      LexicalEnvironment->VariableEnvironment->"Lexical Environment".
+
+
+      At this point we have 2 different "Lexical Environment"(s) --->
+          First is "Function Environment" which contains parameters(intialized with
+      the arguments passed) and "arguments" object.Also there is no state component
+      which directly points to it .
+          Second is LexicalEnvironment->VariableEnvironment->"Lexical Environment"
+      whose outer reference points to "Function Environment", and which contains
+      top level lexical declarations , var declarations.
+
+
+      Now all the top level inner functions will be instantiated in memory ,
+      they will get registered in
+      VariableEnvironment->LexicalEnvironment->"Lexical Environment" ,
+      and their [[Environment]] will also point to the
+      VariableEnvironment->LexicalEnvironment->"Lexical Environment" .
+
+
+
+
+
+
+
+
+
+/////////////
