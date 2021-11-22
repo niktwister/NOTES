@@ -1,0 +1,1309 @@
+
+// This is a single line comment.
+
+/*  This is a multiple
+    line comment.       */
+
+
+
+****************************************************************************************************
+                               STAGES OF EXECUTING A C++ PROGRAM
+****************************************************************************************************
+
+
+
+
+STAGE I : PREPROCESSING
+------------------------
+All the pre-processing directives (beginning with #) will be processed. 
+For example ,
+->  The directive to include the header file ( #include <header_file> ) will literally expand to 
+    the content(code) of header_file.h .
+->  The directive ( #define NAME VALUE ) will literally replace all the mentions of NAME in the source
+    code with constant VALUE.
+
+    ...
+
+>> g++ -E src_code.cpp   // this will only pre-process the .cpp file 
+
+
+
+STAGE II : COMPILATION
+----------------------
+In this stage , compilation will take place in two steps internally :
+-> c++ code (.cpp) is translated into assembly language code (.s) 
+-> then assembly language code is converted into the machine code (object file)(.o).
+
+While translating , the compiler will simultaneously check the syntax of your c++ code , and will
+throw error if any incorrect syntax is encountered.
+The compiler will also check if the symbol (identifier) (variable name/function name/class name...)
+it encounters has been declared (before being used) in appropriate scope  , or not . 
+
+NOTE :     At this stage , if a symbol has external linkage then compiler wouldn't mind if only declaration
+        of the symbol is present in the program file but no definition . The defintion of such a symbol may
+        exist in some other program file. Such symbols are resolved during the linking stage , where object
+        files corresponding to all the program files are linked together into a single executable.
+        Symbols with internal linkage should provide a definition , otherwise compiler will throw an error.
+
+
+NOTE :  BTW the header files you include in your source code also contains declarations  only , and no 
+        definitions. While compiling , compiler would have already gone through all the declarations in
+        those header files before it reaches your code (**because header files are included in the beginning)
+        and hence will not throw any error when it encounters one of those symbols (declared in header files) 
+        being used in your source code. 
+
+>> g++ -S src_code.cpp   // this will pre-process the .cpp file and translate it into assembly code.
+                        // Corresponding assembly file (.s) will be created as output.
+
+>> g++ -c src_code.cpp //this will pre-process , translate to assembly and create the corresponding
+                        // object file (.o) as output.
+
+
+STAGE III : LINKING
+-------------------
+In this stage , we will provide all the object files (of individual .cpp files) to the linker ,
+which will link them together into a single unified executable.
+
+The linker will resolve all the symbols  (declared and used in one file but defined in another).
+
+NOTE :  What's a LIBRARY ?
+        Library is a re-usable pre-compiled code (meaning...binary files). It comes with corresponding
+        header file(s) which you include in your source code. Those header files will contain declarations
+        for symbols that you will use in your source code , while library will contain the definitions
+        for all those symbols.
+
+We can use the standard library's header files (like <iostream>,<string>,<vector>...) in our program
+because linker will automatically link your personal object files with standard library's binary files.
+
+>> g++ <list of object files to be linked>
+
+
+
+                  source file (.cpp)  source file (.cpp)   source file (.cpp) 
+                        |                   |                   |
+                        |                   |                   |
+                        |                   |                   |
+                        V                   V                   V
+                    ------------        ------------        ------------
+                    |          |        |          |        |          |
+                    | COMPILER |        | COMPILER |        | COMPILER |
+                    |          |        |          |        |          |
+                    ------------        ------------        ------------
+                        |                   |                   |
+                        |                   |                   |
+                        V                   V                   V
+                  object file(.o)     object file(.o)    object file(.o)
+                              \             |             /
+                               \            |            /
+                                \           |           /
+                                 \          |          /
+                                  \_        |        _/
+                                    |       |       |
+                                    V       V       V  
+                                    -----------------
+    -----------                     |               |
+    | LIBRARY | --------------->    |    LINKER     |
+    -----------                     |               |
+                                    -----------------
+                                            | 
+                                            |
+                                            V
+                                        executable (.exe or .out)
+
+
+           
+The execution of a C++ program starts from the main() function. Its return type should be "int".
+NOTE : We can omit the return statement from main() function , which will be equivalent to 
+       returning a zero value. But this behavior is only applicable to main() function , other
+       functions with "int" return-type should explicitly return an integer.
+
+NOTE : gcc stands for GNU Compiler Collection
+
+NOTE :  g++ vs gcc ? 
+        Both are GNU compilers. Their main difference is :
+
+            ->  gcc will compile: *.c\*.cpp files as C and C++ respectively.
+            ->  g++ will compile: *.c\*.cpp files but they will all be treated as C++ files.
+            ->  Also g++ automatically links in the std C++ libraries (gcc does not do this).
+            ...
+
+NOTE : We can specify the c++ standard to used while compiling in g++ using --std option.
+
+            --std=c++03     
+            --std=c++11
+            --std=c++14
+            --std=c++17
+            --std=c++2a
+
+****************************************************************************************************
+****************************************************************************************************
+
+
+****************************************************************************************************
+                            ARITHMETIC TYPES AND IMPLICIT CONVERSIONS
+****************************************************************************************************
+
+
+list of c++ arithmetic types : 
+
+------------------------------------------------------------------------------
+Type                Meaning                             Typical Size (Bytes)      
+------------------------------------------------------------------------------
+
+bool                boolean                                     1                    
+
+char                character                                   1
+
+char8_t             is used for storing a single                1
+[c++20]             "UTF-8" code unit (8-bits)
+
+char16_t            is used for storing a single                2
+[c++11]             "UTF-16" code unit (16-bits)
+
+char32_t            is used for storing a single                4
+[c++11]             "UTF-32" code unit (32-bits)
+
+short               short integer                               2
+short int
+
+int                 integer                                     4
+
+long                long integer                                4 or 8
+long int
+
+long long           long integer                                8
+long long int
+
+float               single-precision floating-point             4
+
+double              double-precision floating point             8
+
+long double         extended-precision floating point           16
+
+------------------------------------------------------------------------------
+
+NOTE :  1 byte is the smallest addressable unit in a system. It need not be 8 bits by the
+        way. (Shocking!!!!)
+        https://stackoverflow.com/questions/4266771/char-size-confusion
+
+NOTE :  "char" type will always be  1 byte on every  m/c  ,  but for other integral  types
+        "short", "int", "long" and "long long" , the size will depend upon the compiler. 
+        But the following inequality will always hold true :
+                sizeof(short) <= sizeof(int) <= sizeof(long) <= sizeof(long long)
+ 
+NOTE : except for "bool" and extended char type ("char16_t" , "char32_t") , the integral types
+       maybe be signed or unsigned.
+       The type "short" , "int" , "long" and "long long" are already signed by default .i.e ,
+                        "short"      ==equivalent to==>  "signed short"
+                        "int"        ==equivalent to==>  "signed int"
+                        "long"       ==equivalent to==>  "signed long"   
+                        "long long"  ==equivalent to==>  "signed long long"
+
+        Also ,          "signed"     ==equivalent to==>  "signed int"
+                        "unsigned"   ==equivalent to==>  "unsigned int"
+
+        unlike other integral types "char" is not equivalent to "signed char" by default.
+        "char" maybe equivalent to "signed char" or "unsigned char" depending on the compiler.
+
+NOTE:   please note that floating-point types are signed by default , and they cannot be unsigned.
+
+
+
+IMPLICIT CONVERSION AMONG ARITHMETIC TYPES
+-------------------------------------------
+
+causes of implicit converison among arithmetic types : 
+
+    ->  In conditions ,  non-bool expressions are converted to bool. 
+
+    ->  In initializations, the initializer is converted to the type of the variable. In assignments,
+        the right-hand operand is converted to the type of the left-hand.
+
+    ->  In arithmetic and relational expressions with operands of mixed types, the operands are converted
+        to a common type.
+
+
+
+some points to notice when one arithmetic type is converted to another : 
+
+    ->  When we assign one of the nonbool arithmetic types to a bool object, the result is false if the
+        value is 0 and true otherwise.
+    
+    ->  When we assign a bool to one of the other arithmetic types, the resulting value is 1 if the bool
+        is true and 0 if the bool is false.
+
+    ->  When we assign a floating-point value to an object of integral type, the value is truncated. 
+        The value that is stored is the part before the decimal point.
+        Eg :                    int x = 3.14 ;  // 3.14 is a double literal , it will be truncated to
+                                                // 3 when converted to int.
+
+                                                // This was an example of "narrowing conversion" , when
+                                                // a higher arithmetic type is converted to a lower
+                                                // arithmetic type resulting in the loss of data.
+    
+    ->  When we assign an integral value to an object of floating-point type, the fractional part is zero.
+        Precision may be lost if the integer has more bits than the floating-point object can accommodate.
+
+    ->  When we assign out-of-range integral value to an integral type , the value wraps around.
+        Eg:
+                unsigned char uc = -1 ;  // range of unsigned char is 0 to 255. -1 is an int literal
+                                         // and when converted to unsigned char , it will become 255
+                                         // i.e,  it will wrap around.  It is  also  an  example  of  
+                                         // narrowing conversion.
+
+                int  i = 2147483648L  ; // range of int  is  -2,14,74,83,648 to 2,14,74,83,647
+                                        // 2147483648 is a long literal which when converted to
+                                        // int will wrap around to -2147483648.
+                                        // Narrowing conversion.
+
+
+                short s = 30565  // 30565 is an int literal , but it's also in the range of short.
+                                 // So no data loss when converting it to short type. 
+                                 // Hence no narrowing conversion.
+
+
+
+IMPLICIT CONVERSION IN EXPRESSIONS
+-----------------------------------
+
+In an expression , if the operands of the following operators are of different types , then they will be
+implicitly converted to a common arithmetic type : 
+    binary arithmetic *, /, %, +, -
+    relational operators <, >, <=, >=, ==, !=
+    binary bitwise arithmetic &, ^, |,
+    the conditional operator ?:
+
+Before going over the rules for "implicit converison in expressions" , understand the concept of "rank"
+and "integer propmotion".
+
+"rank" is a property of every integral type and is defined as belows :
+
+    1) The ranks of all signed integer types are different and increase with their precision:
+       rank of signed char < rank of short < rank of int < rank of long int < rank of long long int
+
+    2) The ranks of all signed integer types equal the ranks of the corresponding unsigned integer types
+
+    3) The rank of any standard integer type is greater than the rank of any extended integer type of the
+       same size (that is, rank of int_32t < rank of int, but rank of int < rank of int_64t due to the rule 1)
+
+    4) rank of char equals rank of signed char and rank of unsigned char
+
+    5) the rank of bool is less than the rank of any other standard integer type
+    
+    6) the rank of any enumerated type equals the rank of its compatible integer type
+    
+    7) ranking is transitive: 
+       if rank of T1 < rank of T2 and rank of T2 < rank of T3 then rank of T1 < rank of T3
+    
+    8) any aspects of relative ranking of extended integer types not covered above are implementation defined
+
+
+INTEGER PROMOTION : 
+
+    In an expression, any integral type with rank less than or equal to int, will always 
+be implicitly converted to type "int" ,  given "int" can represent entire range of their 
+values. Otherwise they will be converted to "unsigned int". 
+
+    The larger char types (wchar_t, char16_t, and char32_t)  are promoted to the smallest
+type of int, unsigned int, long, unsigned long, long long, or unsigned long long in which
+all possible values of that character type fit.
+                                 
+        Example :
+                   short s;
+                   char ch;
+                   long l;
+
+                   s + ch    // both s and ch will be promoted to int and then added.
+
+                   l + s    // s will be promoted to int first, and then converted to long.
+
+
+integer promotion are applicable in :
+    -> as part of usual arithmetic conversions ( binary arithmetic / relational operators / 
+                                                 binary bitwise arithmetic / the conditional operator)
+    -> to the operand of the unary arithmetic operators + and -
+    -> to the operand of the unary bitwise operator ~
+    -> to both operands of the shift operators << and >>
+
+
+
+RULES FOR IMPLICIT CONVERSIONS IN EXPRESSIONS :
+
+    1) If one operand is long double, the other operand ( integer or real floating type) is implicitly
+    converted to long double.
+
+    2) Otherwise, if one operand is double, the other operand (integer or real floating type) is implicitly
+    converted to double.
+
+    3) Otherwise, if one operand is float, the other operand (integer type) is implicitly converted to float.
+
+    4) Otherwise, both operands are integers. Both operands may undergo integer promotions then, after integer
+    promotion, one of the following cases applies:
+
+                -> If the types are the same, that type is the common type.
+
+                -> Else, the types are different:
+
+                        -> If the types have the same signedness (both signed or both unsigned), the operand whose
+                        type has the lesser rank is implicitly converted to the other type.
+
+                        -> Else, the operands have different signedness:
+
+                            -> If the unsigned type has conversion rank greater than or equal to the rank of the
+                            signed type, then the operand with the signed type is implicitly converted to the
+                            unsigned type.
+
+                            -> Else, the unsigned type has conversion rank less than the signed type:
+
+                                    -> If the signed type can represent all values of the unsigned type, then
+                                    the operand with the unsigned type is implicitly converted to the signed
+                                    type.
+                                    
+                                    -> Else, both operands undergo implicit conversion to the unsigned type 
+                                    counterpart of the signed operand's type.
+
+
+EXAMPLES :
+
+1.0 + 20000001; // int is converted to double, giving 20000000.00
+                // addition and then rounding to double gives 20000000.00
+ 
+'a' + 1L;       // first, char 'a', which is 97, is promoted to int
+                // different types: int and long
+                // same signedness: both signed
+                // different rank: long is of greater rank than int
+                // therefore, int 97 is converted to long 97
+                // the result is 97 + 1 = 98 of type signed long
+ 
+2u - 10; // different types: unsigned int and signed int
+         // different signedness
+         // same rank
+         // therefore, signed int 10 is converted to unsigned int 10
+         // since the arithmetic operation is performed for unsigned integers,
+         // if unsigned int is 32-bit long, then 
+         // the result is 4294967288 of type unsigned int
+ 
+5UL - 2ULL; // different types: unsigned long and unsigned long long
+            // same signedness
+            // different rank: rank of unsigned long long is greater
+            // therefore, unsigned long 5 is converted to unsigned long long 5
+            // if unsigned long long is 64-bit long, then
+            // the result is 3 of type unsigned long long
+ 
+0UL - 1LL; // different types: unsigned long and signed long long
+           // different signedness
+           // different rank: rank of signed long long is greater.
+           // Assuming both types to be of size 64 bits. Thus signed long long cannot represent all
+           // the values of unsigned long.
+           // therefore, this is the last case: both operands are converted to unsigned long long
+           // unsigned long 0 is converted to unsigned long long 0
+           // long long 1 is converted to unsigned long long 1
+           // if unsigned long long is 64-bit long, then  
+           // thus, the result is 18446744073709551615  of type unsigned long long
+
+
+NOTE :  INTEGER DIVISION
+
+        consider the expression:  5/2   , what will be the result ?
+
+        since both the literals are of type int , the expression will also be of type int. Thus the 
+        result 2.5 will be implicitly converted to 2 i.e, an int.
+
+        On the other hand , 5.0/2 or 5/2.0 will yield 2.5 , because in both expressions one literal
+        is of type double and other is of type int , the int literal will be promoted to type double
+        and hence the type of expression will be double , meaning the output 2.5 will remain 2.5 .
+
+
+****************************************************************************************************
+****************************************************************************************************
+
+
+
+****************************************************************************************************
+                                        LITERALS
+****************************************************************************************************
+
+source character set consist of 96 characters :
+    a) 5 whitespace characters (space,horizontal tab,vertical tab,form feed,new-line)
+    b) 10 digit characters '0'-'9'
+    c) 52 letters from 'a' to 'z'  and  'A' to 'Z'
+    d) 29 punctuation characters:  _ { } [ ] # ( ) < > % : ; . ? * + - / ^ & | ~ ! = , \ " '
+
+
+character literals
+-------------------
+
+'c-char'        -(1)
+
+u8'c-char'      -(2)    [c++17]
+
+u'c-char'       -(3)    [c++11]
+
+U'c-char'       -(4)    [c++11]
+
+
+here c-char is either :
+        ->  a character from the source character set except (') and (\) or new-line character
+        ->  an escape sequence
+        ->  a universal character name
+
+
+NOTE : universal character name (UCN) ?
+       \uXXXX       where XXXX      = 4 hexadecimal digits code point of a character in unicode
+       \UXXXXXXXX   where XXXXXXXX  = 8 hexadecimal digits code point of a character in unicode 
+
+
+NOTE : In UTF-8 , a single code unit is 1 byte i.e, 8 bits. UTF-8 encodes unicode characters in :
+
+                code-point range                code units used             total bytes
+                U+0000  - U+007F                     1                         1
+                U+0080  - U+07FF                     2                         2
+                U+0800  - U+FFFF                     3                         3
+                U+10000 - U+10FFFF                   4                         4
+
+NOTE : In UTF-16 , a single code unit is 2 bytes i.e, 16 bits. UTF-16 encodes unicode characters in :
+
+                code-point range                code units used             total bytes
+                U+0000  - U+D7FF                     1                         2
+                U+E000  - U+FFFF                     1                         2
+                U+10000 - U+10FFFF                   2                         4                
+
+
+NOTE : In UTF-32 , a single code unit is 4 bytes i.e, 32 bits. UTF-32 encodes all the characters in 
+       a single code unit.
+
+
+(1) character literal of type 'char'. Encoding is compiler dependent.
+
+(2) UTF-8 encoded character literal with type 'char' (until c++20) or 'char8_t' (since c++20). But it can
+    store only those unicode characters that are representable with a single UTF-8 code unit (8 bits).
+
+    Example :
+                char8_t ch = u8'A'; // this is fine , because UTF-8 encoded 'A' will only occupy
+                                    // a single UTF-8 code unit (8 bits).
+
+                char8_t ch = u8'チ'; // this will give error ,  because UTF-8 encoded 'チ' occupies
+                                     // three UTF-8 code units (i.e, total of 24 bits). 
+
+(3) UTF-16 encoded character literal with type 'char16_t'. But it can store only those unicode characters
+    that are representable with a single UTF-16 code unit (16 bits).
+
+    Example :
+                char16_t ch = u'チ'; // this will be fine ,  because UTF-16 encoded 'チ' occupies
+                                     // only a single UTF-16 code unit (16 bits).
+
+                codepoint of 'チ' is U+30C1 , therefore above declaration can also be written 
+                using UCN as follows :
+                                char16_t ch = u'\U000030C1'; or char16_t ch = u'\u30C1'; 
+
+
+                char16_t ch = u'😃'; // this will give error , because UTF-16 encoded '😃' occupies
+                                     // two UTF-16 code units (i.e, total of 32 bits).
+                            
+
+(4) UTF-32 encoded character literal with type 'char32_t'. All unicode characters are representable with
+    a single UTF-32 code unit (32 bits).
+
+    Example :
+
+                char32_t ch = U'😃'; // this will be fine , because UTF-32 encoded '😃' occupies
+                                    // only a single UTF-32 code unit (32 bits).
+
+                codepoint of '😃' is U+1F600 , therefore above declaration can also be written 
+                using UCN as follows :
+                                        char16_t ch = U'\U0001F600';
+
+            
+
+string literals
+---------------
+
+
+"s-char-sequence"       -(1)
+
+u8"s-char-sequence"     -(2)    [c++11]
+
+u"s-char-sequence"      -(3)    [c++11]
+
+U"s-char-sequence"      -(4)    [c++11]
+
+
+Here "s-char-sequence" is a sequence of 0 or more s-char(s) , where s-char is :
+        ->  a character from the source character set except (') and (\) or new-line character
+        ->  an escape sequence
+        ->  a universal character name
+
+
+(1) String literal of the type "const char[N]" where N is the size of the string in code units 
+    of the respective compiler-dependent encoding , which also include the null terminator (\0)
+    placed at the end. For gcc , the default encoding in this case is UTF-8.
+
+(2) UTF-8 encoded string literal of the type "const char[N]" (until c++20) OR "const char8_t[N]"
+    (since c++20) , where N is the size of the string in UTF-8 code units , including the null
+    terminator.
+    Example : 
+                    u8"😃 is a happy face."   will have the type:  const char[22]
+
+                    22 code units = 17 code units for letters / spaces / punctuation             +
+                                    4 code units for 😃                                          +
+                                    1 code unit for null terminator
+
+(3) UTF-16 encoded string literal of the type "const char16_t[N]" , where N is the size of the string
+    in UTF-16 code units , including the null terminator.
+    Example : 
+                    u"😃 is a happy face."   will have the type:  const char16_t[20]
+
+                    20 code units = 17 code units for letters / spaces / punctuation             +
+                                    2 code units for 😃                                          +
+                                    1 code unit for null terminator
+
+
+(4) UTF-32 encoded string literal of the type "const char32_t[N]" , where N is the size of the string
+    in UTF-32 code units , including the null terminator.
+    Example : 
+                    U"😃 is a happy face."   will have the type:  const char32_t[19]
+
+                    19 code units = 17 code units for letters / spaces / punctuation            +
+                                    1 code unit for 😃                                          +
+                                    1 code unit for null terminator
+
+
+
+NOTE :  string literals placed side-by-side are concatenated. For example , 
+
+        std::cout << "My name is " "James Bond."  << std::endl;   //  "My name is James Bond." will be
+                                                                  //  printed on the console.
+
+        can also be written on separate lines as :
+
+        std::cout << "My name is "
+                     "James Bond." << std::endl;
+
+
+        If both the string literals have the same encoding prefix (or neither has one) , the resulting
+        string will have the same encoding prefix (or no prefix).
+
+        If one string literal has an encoding prefix and the other doesn't , then the one that doesn't 
+        will be considered to have the same encoding prefix as the other.
+
+        Any other combination of encoding prefixes is ill-formed.
+
+
+NOTE :
+          As of current year [2021] , in g++ (GNU c++ compiler) , streams (like std::cout) do not support 
+    character literals of type char8_t / char16_t / char32_t. And neither do they support string literals
+    of type const char8_t[N] / const char16_t[N] / const char32_t[N].
+       
+            char16_t ch = u'A';
+
+            std::cout << ch << std::endl ; //  output is 65 , rather than 'A'
+                                           // ch is integer promoted and then its integer value is printed.
+
+            std::cout << U"Hello hi!!" << std::endl; // output will be some address like 0x55a7b932e009
+                                                     // where the string literal is stored.
+
+          String prefixed with u8 will work if the compiler is following c++11 / c++14 / c++17 standards ,
+    because in those standards  u8"..." is of type "const char[N]"  and 'char' is a widely supported type.
+    On the other hand if compiler is following c++20 standards, u8"..." will be of type "const char8_t[N]"
+    and hence output will not be as expected.
+
+        std::cout << u8"😃 is a happy face." << std::endl;  // given compiler is not folllowing c++20 , 
+                                                            // output will be "😃 is a happy face."
+
+
+
+integer literal
+---------------
+
+
+prefix                  type                Example
+-----------------------------------------------------------------------------------
+no-prefix               decimal             3456
+
+0                       octal               032     , equivalent to 26 in decimal
+
+0x / 0X                 hexadecimal         0xff    , equivalent to 255 in decimal
+
+0b / 0B                 binary              0b10101 , equivalent to 21 in decimal
+[c++14]
+-----------------------------------------------------------------------------------
+
+
+we can use the following suffix with integer literals :
+
+    ->  u / U   :  unsigned
+    ->  l / L   :  long
+    ->  ll / LL :  long long
+
+
+
+determining the type of integer literal ->
+
+The type of integer literal will be the first type in which its value fits ,  from the list of types which
+depends on the numeric base and the suffix used : 
+
+
+suffix                          decimal                             binaru,octal,hexadecimal
+---------------------------------------------------------------------------------------------
+
+no-suffix                       int                                 int
+                                long int                            unsigned int
+                                long long int                       long int
+                                                                    unsigned long int
+                                                                    long long int
+                                                                    unsigned long long int
+
+
+u or U                          unsigned int                        unsigned int
+                                unsigned long int                   unsigned long int
+                                unsigned long long int              unsigned long long int
+
+
+l or L                          long int                            long int
+                                long long int                       unsigned long int
+                                                                    long long int
+                                                                    unsigned long long int
+
+                                                                
+ll or LL                        long long int                       long long int
+                                                                    unsigned long long int
+
+                            
+both l/L                        unsigned long int                   unsigned long int
+and u/U                         unsigned long long int              unsigned long long int
+
+
+both ll/LL                      unsigned long long int              unsigned long long int
+and u/U
+
+
+---------------------------------------------------------------------------------------------
+
+
+NOTE : [c++14] optional single quote (') can be inserted b/w the digits as a separator. They are
+       ignored by the compiler.
+       Example :
+                    1'23'34'500  is same as 12334500
+
+
+NOTE :  There are no negative integer literals !!!
+        Expressions such as -1 simply apply the unary minus operator on the value of integer 
+        literal (1 in this case).
+
+        Example :
+                consider the expression  -2'147'483'648 , what is its type ? 
+                (Assuming int -> 4 bytes and long -> 8 bytes )
+
+                Even though the expression -2'147'483'648 is in the range of int , but its type is not int.
+                Here the integer literal is 2'147'483'648, which does not fit in the range of int and hence
+                its type will be the next best type in which its value fits i.e, long.  Hence 2'147'483'648
+                is of type long , applying unary minus operator will not change the type of expression  and
+                therefore the epxression is of type long.
+                (note:even though the expression is of type long, we can assign it to an int variable, and the
+                 expression will implicitly convert to type int w/o any data loss because the expression is in
+                 the range of int.)
+
+NOTE : In case of binary,octal and hexadecimal bases , if MSB = 0 then they will be signed type ,
+       and if MSB = 1 then they will become unsigned type.
+
+       For example ,  ( Assuming int is 4 bytes  )
+
+       0x7fffffff  is of type int           // 0111 1111 1111 1111 1111 1111 1111 1111
+
+       0x80000000  is of type unsigned int  // 1000 0000 0000 0000 0000 0000 0000 0000
+
+
+
+floating point literal
+----------------------
+
+floating point literals can either be written using simple decimal notation such as 23.3420 , 0.0001 , 3.0
+or  using scientific notation such as  3.4E01 ,  0.001E-1 , 20E11 ....
+
+type according to prefixes :
+
+prefix                  type
+-------------------------------------
+no-prefix               double
+
+f or F                  float
+
+l or L                  long double
+-------------------------------------
+
+
+
+boolean and pointer literal
+---------------------------
+
+true and false are boolean literals of type bool.
+
+NOTE : nullptr is a pointer literal. When a pointer is initialized with nullptr , it means that it is
+       not pointing to anything or anywhere in the memory.
+
+
+****************************************************************************************************
+****************************************************************************************************
+
+
+NOTE :   c++ programmers tends to use "variable" and "objects" interchangeably. Programmers programming in
+       other languages tends to think of objects specifically as instance of classes , but c++ programmers
+       generally think of objects as a region of memory that contains data and has a type.
+
+
+list initialization
+-------------------
+
+we can initialize a variable as follows :
+
+int age {34} ;               // this is called list initialization
+char letter{u8'A'} ;         // the space b/w variable and first brace is optional.
+float radius{3.245f} ;
+
+The thing which makes it stand out is the fact that it doesn't allow narrowing conversions. Narrowing 
+conversions in case of  list initialization results in an error from the compiler or a warning at the
+least.
+
+
+int age = 3.1415 ;  // this is fine , 3.1415 (double) will be implicitly converted to 3 (int) by truncating
+                    // the fractional part and hence this will result in loss of data.
+int age {3.1415} ;  // This is not fine, compiler will raise an error , no narrowing conversions allowed in
+                    // case of list initialization.
+
+
+NOTE : Objects of built-in type that are not explicitly initialized and are defined globally , will be 
+       implicitly initialized to a zero value.On the other hand, uninitialized objects of built-in type 
+       defined inside a function body have a garbage value.
+
+       Objects of class-type that we do not explicitly initialize will have a value that is defined by
+       the class. For example ,
+
+                    std::string name; // object of string class , if not provided with an initial value ,
+                                      // will be initialized to an empty string.
+
+
+
+translation unit and linkage
+----------------------------
+
+    In a C++ program, a symbol, for example a variable or function name, can be declared any number of times
+within its scope. However , it can only be defined once. This rule  is the  "One Definition Rule"  (ODR) . A
+declaration introduces ( or reintroduces ) a name into the program , along with enough  information to later
+associate the name with a definition. A definition introduces a name and provides all the information needed
+to create it. If the name represents a variable, a definition explicitly creates storage and initializes it. 
+A function definition consists of the signature plus the function body. A  class  definition consists of the
+class name followed by a block that lists all the class members. 
+
+       A program consists of one or more translation units. A translation unit consists of an implementation
+file and  all the  headers  that it includes  directly  or indirectly. Implementation files typically have a
+file extension of  .cpp  or  .cxx . Header files typically have an extension of .h or .hpp. Each translation
+unit is compiled independently by the  compiler. After  the compilation is complete , the  linker merges the
+compiled  translation units  into a single program. Violations of the  ODR rule  typically show up as linker
+errors. Linker errors occur when the same name has two different definitions in different translation units.
+
+In some cases, it may be necessary to declare a global variable or class in a .cpp file. In those cases, you
+need a way to tell the compiler and linker what kind of linkage the name has. The type of linkage  specifies
+whether the name of the object applies just to the one file, or to all files. The concept of linkage applies
+only to global names. The concept of linkage doesn't apply to names that are declared within a scope.A scope
+is specified by a set of enclosing braces such as in function or class definitions.
+
+
+External vs Internal Linkage :
+
+A free function is a function that is defined at global or namespace scope. Non-const global variables and
+free functions by default have external linkage; they're visible from any translation unit in the program.
+No other global object can have that name. A symbol with  internal linkage  or no linkage  is visible only
+within the translation unit in which it's declared. When a name has  internal linkage , the  same name may
+exist in another translation unit. Variables  declared within class definitions or function bodies have no
+linkage.
+
+NOTE : objects with external linkage must also abide the ODR i.e, they can be declared in any translation
+       unit and  used there , but  they must  be defined  only once at  a single location in whole of the 
+       translation units.
+
+
+You can force a global name to have  internal linkage by explicitly  declaring it as static.  This keyword
+limits its visibility to the same translation unit in which it's declared.  In this context , static means
+something different than when applied to local variables.
+
+The following objects have internal linkage by default:
+    -> const objects
+    -> constexpr objects
+    -> typedef objects
+
+
+Similarly we can force a global name to have external linkage by explicitly declaring it as extern.
+Example :
+                extern int a ;      // this will only declare a variable and tells the linker that
+                                   // definition of this variable can exist in any translation unit
+                                  // (including the local one).
+                                   
+                extern int a = 10 ;  // initializing an extern global variable will override the extern
+                                    // keyword , and it will become a definition rather than just a 
+                                   // declaration.
+
+So that means if I want to use a non-const global variable in multiple files it should be done as follows:
+
+                int global_i = 100;     // defined in file_a.cpp
+                                        // No need of extern keyword , external linkage by default
+
+
+                extern int global_i;    // declared in file_b.cpp
+                                        // MUST use extern keyword , otherwise it will become a definition
+                                        // which will break the One Definition Rule (ODR)
+
+
+                extern int global_i;    // declared in file_c.cpp
+                                        // MUST use extern as explained above 
+
+
+accessing global variable using ::
+----------------------------------
+
+consider the following program ->
+
+#include <iostream>
+
+int age {23};
+
+int main(){
+
+    std::cout << age << std::endl;   // 23
+                                     // This statement is outside the scope of local age , since it hasn't been
+                                     // defined yet , therefore only global age exist in this scope.
+
+    int age = 34;               
+
+    std::cout << age << std::endl;   // 34
+                                     // Since local has been defined already , this statement lies in the scope
+                                     // in the scope of both local and global age. Local age will overshadow
+                                     // the global age.
+
+    std::cout << ::age << std::endl; // 23
+                                     // The global scope has no name. Hence, when the scope operator has an
+                                     // empty left-hand side, it is a request to fetch the name on the 
+                                     // right-hand side from the global scope.
+
+}
+
+
+
+****************************************************************************************************
+                                COMPOUND TYPES : POINTERS AND REFERENCES
+****************************************************************************************************
+
+
+A "compound type" is a type that is defined in terms of another type. Examples are pointers and references.
+
+NOTE : 
+          A declaration consist of a base type followed by a list of declarators , each declarator names a
+    variable and gives the variable a type that is related to the base type.Each declarator can relate its
+    variable to the base type differently from the other declarators in the same definition.  A declarator 
+    may optionally be initialized by an initializer.
+    Example :
+                        int    *pi  ,  i  , &ri = i;
+                       /       ----   ---   ---
+                      /         |      |     |
+        base type <---          |      |     ------> (declarator with initializer)
+        is  int                 |      |             declares 'ri' : a reference to the base type  
+                                |      |
+                                |      -----> (declarator)
+                                V             declares 'i' : a simple variable of base type
+                         (declarator)         
+                         declares 'pi' : a pointer to the base type 
+                    
+
+references
+----------
+
+A reference is not an object , it is just another name (alias) for an already existing object. A reference can
+be bounded to an object by simply initializing the reference with that object.
+Example , 
+
+int ival = 0;
+
+int &refVal = ival;    //   refVal is now a reference to ival.
+
+int &refVal2;         // ERROR : a REFERENCE MUST always be INITIALIZED 
+
+Ordinarily , when we initialize a variable , the value  of the  initializer is copied into the object we are
+creating. When we define a reference , instead of copying the initializer’s value , we bind the reference to
+its initializer . Once initialized , a  reference  remains bound to  its initial object . There is no way to 
+rebind a reference to refer to a different object. Because there is no way to rebind a reference, references
+must be initialized.
+
+
+After a reference has been bounded to an object , all operations on that reference are operations on the object
+to which it's bounded.
+
+Example :
+
+            int ival = 23;
+            int &refVal = ival;  // refVal is now a reference to ival
+
+
+When we fetch the value of a reference , we are fetching the value of object to which it is bounded :
+            int i = refVal ;   // value of ival will be fetched (i.e, 23) and assigned to i
+                            
+When we assign to a reference , we are assigning to the object to which the reference is bounded : 
+            refVal = 34;    // ival will be assigned the value 34
+
+When we use a reference as an initializer , we are actually using the object to which it is bounded as
+initializer :
+            int &refVal2 = refVal ; // refVal2 will become a reference to ival i.e, the object to 
+                                    // which refVal is bounded.
+
+
+NOTE : We can only define reference to an object. Since references themselves are not object , we cannot
+       define reference to a reference.
+
+
+We can define multiple references in the same definition as follows :
+(Each identifier that is a reference must be preceded by "&" symbol)
+            double d1 , d2;
+
+            double &rd1 = d1 , &rd2 = d2 , d3 ;  // rd1 and rd2 are references to d1 and d2 resp. , while 
+                                                 // d3 is just a double object.
+
+
+
+With few exceptions , the type of reference and the type of object it will be bounded to , must match.
+
+            int i;
+            double &rd = i;     // ERROR , a double reference cannot be bounded to an int object
+
+
+NOTE : We can only initialize the reference with an object (to which it will be bounded) :
+
+            int &ri = 10;      // ERROR
+
+
+pointers
+--------
+
+pointer is an object which holds the address of another object , or in other words an object which points
+to another object. 
+
+Unlike references , pointers are objects in their own rights , therefore :
+    ->  they can assigned
+    ->  they can be copied
+    ->  a single pointer can point to several different objects over its lifetime  
+    ->  Unlike a reference, a pointer need not be initialized at the time it is defined
+    ->  And like other built-in types, pointers defined at block scope have undefined value if they are not
+        initialized.
+
+defining a pointer :
+
+    int ival = 34;
+    int *pi ;   //  pi is an int pointer which can point to an object of type int
+
+We can get the address of an object using address-of operator(&) :
+            
+    pi = &ival;    // in this context '&' act as the address-of operator , thus &ival will give the address
+                  // of 'ival' which will then be stored in 'pi'.
+ 
+We can fetch the object whose addresss is stored in our pointer by using the dereference operator(*) :   
+    
+    std::cout << *pi << std::endl;  // 34
+                                    // in this context '*' act as the dereference operator , *pi will 
+                                    // fetch the object whose address is stored in pi i.e, ival
+
+    *pi = 23;       // *pi will fetch the object ival , therefore ival value will be updated to 23.
+
+
+
+
+Except few exceptions , in most cases the type of pointer and the object to which it points must match :
+
+    int i;
+    double  *pd = &i;       // ERROR , pd is a double pointer therefore it should only point to a double
+                            // object.
+
+We can copy value of one pointer to another of the same type (just like we do in case of any other object) :
+
+    int i = 23;
+    int *pi , *pi2 ;    // defining multiple pointers in the same definition
+
+    pi = &i ;       // pi now holds the address of i
+
+    pi2 = pi ;      // the value in pi will be copied to pi2 , therefore now pi2 also holds the 
+                    // address of i .i.e, both pi and pi2 are now pointing to i
+
+    *pi2 = 34;      // Since pi2 holds the address of i , therefore *pi2 will fectch i , and its value will
+                    // be updated from 23 to 34
+
+    std::cout << *pi << std::endl;  // 34
+                                    // Since pi also holds the address of i 
+
+
+
+
+null pointer is a pointer which does not point to any object , several ways to obtain a null pointer :
+
+    int* pi = 0;
+
+    int *pi = NULL;   // NULL is a pre-defined macro from <cstdlib> header file
+                      // value of NULL is 0 , therefore this is equivalent to first method.
+
+    int *pi = nullptr;  // recommended [since c++11]
+
+
+NOTE  :  illegal to assign an int object to a pointer , even if the value of int object is 0.
+
+         int i = 0;
+         int *pi = i;    // ERROR
+
+NOTE :   If a null pointer is used in conditional, then it will evaluate to false. 
+         Any pointer which is not a null pointer (i.e, have a non-zero value) will evaluate to true.
+
+NOTE :   Two pointers of the same type that are also storing a common address , will be equal.
+         Two null pointers of the same type will also be equal.
+
+
+pointer to a pointer
+--------------------
+
+Pointer is itself an object stored at some address in the memory . We can store its address in some
+other pointer. Thus we'll end up with a pointer to a pointer. 
+
+Example :
+
+    int ival = 20 , *pi = &ival;      // pi is a pointer to an int
+
+    int **ppi = &pi ;       // ppi is a double pointer , 
+                           // its a  pointer to a "pointer to an int"
+
+    std::cout << **ppi << std::endl;    // 20
+                                        // dereferencing ppi once ( i.e, *ppi )  will yield pi
+                                        // dereferencing ppi twice ( i.e *(*ppi) or **ppi ) will yield ival 
+      
+                                      ppi
+                                    --------
+                                    |    --|---------
+                                    --------        |
+                                      int**         |
+                                                    V  pi
+                                                    ---------
+                                                    |     --|-----------
+                                                    ---------          |
+                                                       int*            |
+                                                                       V  ival
+                                                                       ----------
+                                                                       |   20   |
+                                                                       ----------
+                                                                           int
+
+
+
+reference to a pointer
+----------------------
+
+A reference is not an object in itself,  hence we cannot have a pointer to a reference. If we try to
+create one , we will just end up creating a pointer to the object being referenced.
+Example :
+
+            int ival;
+            int &ri = ival;     // reference to ri
+
+            int *pi = &ri;      // pi is a pointer to ival , not specifically to ri
+
+
+Pointer is an object in itself , therefore we can have a reference to a pointer. 
+Example :
+
+            int ival = 23;
+
+            int *pi = &ival;   // pi is a pointer to int ival
+
+            int *&rpi = pi;    // rpi is a reference to pointer pi
+
+
+            *rpi = 34;      // equivalent to ->      *pi = 34;
+                            // thus ival value will change from 23 to 34
+
+
+           The easiest way to understand the type of rpi is to read the definition right to left. The symbol
+closest to the  name of the variable  (in this case the & in &rpi)  is the one that  has  the most immediate
+effect on the variable’s type . Thus, we know that rpi is a reference. The rest of the declarator determines
+the type to which rpi refers. The next symbol, * in this case, says that the type rpi refers to is a pointer
+type. Finally, the base type of the declaration says that rpi is a reference to a pointer to an int.                  
+
+
+
+****************************************************************************************************
+****************************************************************************************************
+
+
+****************************************************************************************************
+                                            CONST 
+****************************************************************************************************
+
+
+        "const" keyword guarantees that after an object is initialized with some value , it cannot be
+assigned any other value. The initializer may be computable at compile-time or run-time.
+                          --------------------------------------------------------------
+Example :
+
+        const int c_i = 23;      // computable at compile-time
+                                // c_i cannot be assigned any value after this , directly or indirectly
+
+        const int c_j = get_score();  // computable at run-time
+                                     // c_j cannot be assigned any value after this , directly or indirectly
+
+        const int c_k ;     // ERROR , cannot be left uninitialized
+
+
+NOTE : "constexpr" introduced in c++11 also guarantees that after the object is initialized , it cannot be 
+       assigned any other value. But unlike "const"  , the initializer MUST be computable at compile-time.
+       
+       
+
+global "const" objects have internal linkage by default :
+
+                const char c_ch = 'A';  // internal linkage , can only be used within the local file
+
+We can use the extern keyword to give them external linkage. This way we can define the const object 
+in one file and declare (i.e, use) in multiple files :
+
+    extern const char c_ch = 'A' ; // defined in file_a.cpp
+                                  // extern keyword must be used , because otherwise object will
+                                 // have internal linkage making it invisible to other translation units.
+
+
+    extern const char c_ch ;   // declared in file_b.cpp
+                              // extern keyword must be used , for providing external linkage and making
+                             // this a declaration rather than a definition (that will break ODR).
+                            // Since this is a declaration , we must not initialize
+
+
+    extern const char c_ch ;   // declared in file_c.cpp
+
+
+integral constant expression
+----------------------------
+
+There are some places that requires an "integral constant expression" . These constant expressions
+should be computable at compile-time.
+For example , 
+    
+        The size of array should be an "integral constant expression" :
+            int score[100];         // OK ; 100 is computable at compile-time
+        
+            char grade[2*67+5] ;    // OK ; 2*67+5 is computable at compile-time
+
+            void calculate(int n){
+                ...
+                float sums[n];      // ERROR ; "n" is not computable at compile-time
+                ...
+            }
+
+
+We can use const integral variables in "integral constant expressions" , if and only if they have been
+initialized with a compile-time computable value :
+
+        const int x=10;
+        char grade[x-5];    // OK ; x has been initialized with compile-time computable value
+
+        const int x = get_num();
+        char grade[x-5];    // ERROR ; x has been initialized with run-time computable value
+
+
+
+
+
+****************************************************************************************************
+****************************************************************************************************
+
+
+****************************************************************************************************
+                                    SYNTAX OF DECLARATION
+****************************************************************************************************
+
+Every object declaration has two main parts :
+
+    -> a sequence of one or more "declaration specifiers"
+    -> a "declarator" (or a sequence of thereof , separated by commas)
+
+Example:
+
+        static unsigned long int    *x[N] , (*fp)(int,int);
+        ------------------------    -----   --------------
+                /                      \            \
+               /                        \            \
+    declaration specifiers           declarator     declarator
+
+The name declared in the declarator is called the "declarator-id" (which are "x" and "fp" in above examples).
+
+
+
+declaration specifiers
+----------------------
+
+The order of "declaration specifiers" is arbitrary. For example ,
+
+                                                    -----  const long int unsigned *x;
+                                                   /
+    const unsigned long int *x;  is equivalent to  ------  int unsigned const long *x;
+                                                   \
+                                                    -----  long unsigned int const *x;  
+
+
+
+"declaration specifiers" are of two types :
+
+    1) type specifiers 
+            -> keywords such as  long , int , unsigned , double
+            -> user-defined type such as string , vector<int>
+
+    2) non-type specifiers
+            -> keywords such as static , extern , inline , virtual or typedef
+
+
+
+declarators
+-----------
+
+A declarator is a declaration-id possibly surrounded by operators.
+
+The operators group according to the same precedence as when they appear in expressions :
+
+                    Precedence      Operator        Meaning
+                 ------------------------------------------------
+                 |  Highest          ()             grouping    |
+                 ------------------------------------------------
+                 |                   []             array       |
+                 |                   ()             function    |
+                 ------------------------------------------------
+                 |                unary *           pointer     |
+                 |  Lowest        unary &      lvalue reference |
+                 |                unary &&     rvalue reference |
+                 ------------------------------------------------
+
+Consider    int *x[N] ;  is it ,   1) array of N pointers to integer ? or,
+            -----------            2) pointer to an array of N integers ?
+                |
+                -------------------------------------------------------------
+                                                                            |
+Solution :  Since [] has higher precedence over * , therefore the above declaration will be interpreted as :
+                ->  [] tells us that "x is an array" (array of what?)
+                ->  * tells us "x is an array of N pointers" (pointers pointing to what?)
+                ->  type-specifier "int" tells us that "x is an array of N pointers to integer"
+
+
+
+            We can make x  "a pointer to an array of N integers" by grouping * and x in brackets as follows :
+                int (*x)[N] ;   
+            
+            since grouping has the highest precendence hence * will be read before [] , therefore above
+            declaration will be interpreted as :
+                ->  * tells us that "x is a pointer" (pointing to what?)
+                ->  [] tells us that "x is a pointer to an array" (array of what?)
+                -> type-specifier "int" tells us that "x is a pointer to an array of N integers"
+
+
+
+Parantheses in declarator serves two roles :
+
+
+****************************************************************************************************
+****************************************************************************************************

@@ -1,0 +1,22 @@
+
+-> STAGES OF EXECUTING A C++ PROGRAM
+        ~ STAGE I : PREPROCESSING
+        ~ STAGE II : COMPILATION
+        ~ STAGE III : LINKING
+-> ARITHMETIC TYPES AND IMPLICIT CONVERSIONS
+        ~ IMPLICIT CONVERSION AMONG ARITHMETIC TYPES
+        ~ IMPLICIT CONVERSION IN EXPRESSIONS
+-> LITERALS
+        ~ character literals
+        ~ string literals
+        ~ integer literals
+        ~ floating-point literals
+        ~ boolean and pointer literal
+~ list initialization
+~ translation unit and linkage
+~ accessing global variable using ::
+-> COMPOUND TYPES : POINTERS AND REFERENCES
+        ~ references
+        ~ pointers
+        ~ pointer to a pointer
+        ~ reference to a pointer
