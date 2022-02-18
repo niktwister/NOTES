@@ -191,7 +191,7 @@ NOTE :  "char" type will always be  1 byte on every  m/c  ,  but for other integ
         But the following inequality will always hold true :
                 sizeof(short) <= sizeof(int) <= sizeof(long) <= sizeof(long long)
  
-NOTE : except for "bool" and extended char type ("char16_t" , "char32_t") , the integral types
+NOTE : except for "bool" and extended char types ("char8_t","char16_t","char32_t") , the integral types
        maybe be signed or unsigned.
        The type "short" , "int" , "long" and "long long" are already signed by default .i.e ,
                         "short"      ==equivalent to==>  "signed short"
@@ -202,7 +202,7 @@ NOTE : except for "bool" and extended char type ("char16_t" , "char32_t") , the 
         Also ,          "signed"     ==equivalent to==>  "signed int"
                         "unsigned"   ==equivalent to==>  "unsigned int"
 
-        unlike other integral types "char" is not equivalent to "signed char" by default.
+        unlike other integral types, "char" is not equivalent to "signed char" by default.
         "char" maybe equivalent to "signed char" or "unsigned char" depending on the compiler.
 
 NOTE:   please note that floating-point types are signed by default , and they cannot be unsigned.
@@ -698,7 +698,7 @@ NOTE :  There are no negative integer literals !!!
                 Here the integer literal is 2'147'483'648, which does not fit in the range of int and hence
                 its type will be the next best type in which its value fits i.e, long.  Hence 2'147'483'648
                 is of type long , applying unary minus operator will not change the type of expression  and
-                therefore the epxression is of type long.
+                therefore the expression is of type long.
                 (note:even though the expression is of type long, we can assign it to an int variable, and the
                  expression will implicitly convert to type int w/o any data loss because the expression is in
                  the range of int.)
@@ -875,9 +875,9 @@ int main(){
     int age = 34;               
 
     std::cout << age << std::endl;   // 34
-                                     // Since local has been defined already , this statement lies in the scope
-                                     // in the scope of both local and global age. Local age will overshadow
-                                     // the global age.
+                                     // Since local has been defined already , this statement lies
+                                     // in the scope of both local and global age. Local age will 
+                                     // overshadow the global age.
 
     std::cout << ::age << std::endl; // 23
                                      // The global scope has no name. Hence, when the scope operator has an
