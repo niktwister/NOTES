@@ -9,7 +9,7 @@ searching for  types
 --------------------
 https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javac.html#BHCJJJAJ
     To compile the input <source file> specified on the command line , the compiler often needs information 
-about a type  referenced in the input <source file>, but the type definition may not be in the input <source file>. 
+about a type referenced in the input <source file>, but the type definition may not be in the input <source file>. 
 The compiler needs type information for every class or interface used, extended, or implemented in the input
 <source file>. This includes classes and interfaces not explicitly  mentioned in the input <source file>, but 
 that provide information through inheritance.
