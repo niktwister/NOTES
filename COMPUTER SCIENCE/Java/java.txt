@@ -1,0 +1,66 @@
+
+********************************************************************************************************
+                                            javac
+********************************************************************************************************
+
+javac command will compile the source file (.java) and generate its corresponding class file (.class)(bytecode)
+
+searching for  types
+--------------------
+https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javac.html#BHCJJJAJ
+    To compile the input <source file> specified on the command line , the compiler often needs information 
+about a type  referenced in the input <source file>, but the type definition may not be in the input <source file>. 
+The compiler needs type information for every class or interface used, extended, or implemented in the input
+<source file>. This includes classes and interfaces not explicitly  mentioned in the input <source file>, but 
+that provide information through inheritance.
+
+When the compiler needs type information for the type  referenced (explicitly  or  implicity through inheritance) 
+in the input <source file>, it searches for a source file or class file that defines the type. The compiler 
+searches for class files first in the bootstrap and extension classes, then in the user class path. The user 
+class path is defined by setting the CLASSPATH environment variable or by using the -classpath option.
+
+If ( -classpath option is provided ) then , 
+    class path(s) = argument provided with -classpath option
+Else if ($CLASSPATH env variable is set)  then ,
+    class path(s) = $CLASSPATH
+Else ,
+    class path = current directory
+
+    If the -sourcepath option is provided , then compiler searches the indicated path(s) for the source file 
+of the types  referenced (explicitly  or  implicity through inheritance) in the input <source file>. If not then,
+the compiler searches the  user class path for both class files and source files of the type.
+
+    A successful type search may produce a class file, a source file, or both. If both are found, then you can
+use the -Xprefer option to instruct the compiler which to use. If "newer" is specified, then the compiler uses
+the newer of the two files. If "source" is specified, the compiler uses the source file. The default is "newer".
+
+    If a type search finds a source file for a required type, either by itself, or as a result of the setting
+for the -Xprefer option, then the compiler reads the source file to get the information it needs. By default 
+the compiler also compiles the source file. You can use the -implicit option to specify the behavior. If "none" 
+is specified, then no class files are generated for the source file. If "class" is specified, then class files
+are generated for the source file.
+
+
+javac [options] <source file>
+
+options :
+
+-d <directory> 
+    specifies the location where the generated class file for the input <source file> will be placed.
+
+--class-path <path> ,  -classpath <path>  , -cp <path>  
+    specifies the path(s) where the compiler will look for the class files of the types  referenced (explicitly  
+    or  implicity through inheritance) in the input <source file>.
+    Multiple paths can be provided by separating them with ":" . 
+
+-implicit:{none,class} 
+    specifies whether or not to generate class files for implicitly referenced files.
+
+--source-path <path>, -sourcepath <path>
+    specifies where to look for the source files of the types  referenced (explicitly  or  implicity through 
+    inheritance) in the input <source file>.
+    Multiple paths can be provided by separating them with ":" . 
+
+-Xprefer:{source,newer}
+        Specify which file to read when both a source file and class file are found for a type  referenced 
+        (explicitly  or  implicity through inheritance) in the input <source file>.
