@@ -65,10 +65,10 @@ options :
                                                |
                                                --- Example.class
 
-         while looking for Example class's class file , compiler will look for : 
+          while looking for Example class's class file , compiler will look for : 
                             some/dummy/Example.class , rather than just Example.class
          
-         Immediate parent directory of some/ folder should be one of the classpath(s). 
+          Immediate parent directory of some/ folder should be one of the classpath(s). 
 
 -implicit:{none,class} 
     specifies whether or not to generate class files for implicitly referenced files.
@@ -90,12 +90,12 @@ options :
                                                |
                                                --- Example.java
 
-         while looking for Example class's source file , compiler will look for : 
+          while looking for Example class's source file , compiler will look for : 
                             some/dummy/Example.java , rather than just Example.java
          
-         if -sourcepath is not provided then , immediate parent directory of some/ folder should be one of the
-         classpath(s)  , or if -sourcepath is provided then , immediate parent directory of some/ folder should 
-         be one of the sourcepath(s). 
+          if -sourcepath is not provided then , immediate parent directory of some/ folder should be one of the
+          classpath(s)  , or if -sourcepath is provided then , immediate parent directory of some/ folder should 
+          be one of the sourcepath(s). 
 
 
 -Xprefer:{source,newer}
