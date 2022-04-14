@@ -53,6 +53,23 @@ options :
     or  implicity through inheritance) in the input <source file>.
     Multiple paths can be provided by separating them with ":" . 
 
+    NOTE: Consider a class called "Example" . Suppose that its fully qualified name is :
+                                        "some.dummy.Example"     // i.e., it's part of a package 
+          
+          If we want to reference this class in our <source file> through its class file "Example.class" then, 
+          first of all Example.class should also exist in a similar directory structure as indicated by its 
+          fully qualified name :
+                                        some/
+                                         |
+                                         --- dummy/
+                                               |
+                                               --- Example.class
+
+         while looking for Example class's class file , compiler will look for : 
+                            some/dummy/Example.class , rather than just Example.class
+         
+         Immediate parent directory of some/ folder should be one of the classpath(s). 
+
 -implicit:{none,class} 
     specifies whether or not to generate class files for implicitly referenced files.
 
@@ -61,6 +78,30 @@ options :
     inheritance) in the input <source file>.
     Multiple paths can be provided by separating them with ":" . 
 
+    NOTE: Consider a class called "Example" . Suppose that its fully qualified name is :
+                                        "some.dummy.Example"     // i.e., it is part of a package 
+          
+          If we want to reference this class in our <source file> through its source file "Example.java" then, 
+          first of all Example.java should also exist in a similar directory structure as indicated by its 
+          fully qualified name :
+                                        some/
+                                         |
+                                         --- dummy/
+                                               |
+                                               --- Example.java
+
+         while looking for Example class's source file , compiler will look for : 
+                            some/dummy/Example.java , rather than just Example.java
+         
+         if -sourcepath is not provided then , immediate parent directory of some/ folder should be one of the
+         classpath(s)  , or if -sourcepath is provided then , immediate parent directory of some/ folder should 
+         be one of the sourcepath(s). 
+
+
 -Xprefer:{source,newer}
         Specify which file to read when both a source file and class file are found for a type  referenced 
         (explicitly  or  implicity through inheritance) in the input <source file>.
+
+
+********************************************************************************************************
+********************************************************************************************************
