@@ -115,3 +115,17 @@ NOTE : The JVM ("java" cmd) only looks for class files of the referenced types a
 
 ********************************************************************************************************
 ********************************************************************************************************
+
+A java <source file> can contain multiple classes but only one of them can be public , and the name of
+the <source file> should be same as the name of the public class.
+If a <source file> does not contain a public class then , it can have any name.
+
+This rule eases up the compiler <source code> lookup process for a class. For example , if compiler is 
+looking for the source code of a public class called "Person" , then compiler will know for sure  that
+the source file containing this public class will be called "Person.java".
+Thus compiler fill first check the source file's name, if it doesn't match the class it is looking for 
+then it won't read that source file.  
+This approach work well for a public class but not so much for a default access class which may exist in 
+a source file not named after it. Thus  compiler may  or may not  find a default access class , throwing
+error if it doesn't.
+
