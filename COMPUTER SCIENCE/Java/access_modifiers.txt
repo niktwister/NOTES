@@ -1,0 +1,38 @@
+
+Members of a class can have one of these 4 access modifiers :
+    private
+    public
+    default (no explicit access modifier)
+    protected
+
+
+Accessibility of the members of a class based on their access modifier :
+
+                                    Private         No Modifier         Protected           Public
+----------------------------------------------------------------------------------------------------------
+same class                      |   Yes             Yes                 Yes                 Yes
+                                |
+same package subclass           |   No              Yes                 Yes                 Yes
+                                |   
+same package non-subclass       |   No              Yes                 Yes                 Yes
+                                |
+different package subclass      |   No              No                  Yes                 Yes
+                                |
+different package non-subclass  |   No              No                  No                  Yes
+                                |
+----------------------------------------------------------------------------------------------------------
+
+To sum up the above table :
+
+    private     :=  same class
+    default     :=  same package 
+    protected   :=  same package || subclass
+    public      :=  true  
+
+
+
+NOTE :  The above table only applies to the members of a  class. A top level class (non-nested) itself can have
+        only one of the two possible access modifiers : default and public. When a class  is declared as public, 
+        it is accessible outside its package. If a class  has  default access, then  it can  only be accessed by 
+        other code within its same package.
+
