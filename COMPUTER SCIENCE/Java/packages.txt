@@ -1,2 +1,119 @@
 
+Suppose we want to create a package called "animal.mammal" , and inside this package we want to place a class 
+called "Dog".
+
+The first line of Labrador.java should be a package statement as follows :
+
+
+package animal.mammal;
+                                                //after this we can define the Dog class
+public class Dog{
+
+    public void speak(){
+        System.out.println("bhau bhau");
+    }
+
+}
+
+
+
+compile Dog.java :     >> javac  -d . Dog.java      // assuming Dog.java is in the 
+                                                    // current directory and we want to
+                                                    // generate the package in  current
+                                                    // directory as well.
+
+
+The compiler will generate the Dog class's class file and will place it in a directory structure reflecting 
+its package heirarchy :
+
+                    animal/
+                    |
+                    ----- mammal/
+                          |
+                          ----- Dog.class
+
+
+We will say that the fully qualified name of Dog class is :     animal.mammal.Dog
+
+
+
+We can use this class in our source file using its fully qualified name. For example in order to create 
+an object of Dog class we would have to write something like ,
+    
+    animal.mammal.Dog dog = new animal.mammal.Dog();
+
+When looking for the class file Dog.class , the compiler as well as jvm will look for  animal/mammal/Dog.class
+rather than just Dog.class, therefore the immediate directory of animal/ folder should one of the classpath(s)
+rather than the immediate directory of Dog.class class file.
+
+
+import statement
+----------------
+    Since classes  within packages must  be  fully qualified  with their package name or names , it  could 
+    become tedious to type in the long  dot-separated package path  name for every  class you want to use. 
+    For this reason , Java includes the  import statement  to  bring certain classes , or entire packages, 
+    into visibility. Once imported, a class can be referred to directly, using only its name. For example,
+
+    import animal.mammal.Dog;
+    //...
+    //...
+    //...
+    Dog = new Dog();
+
+    Please note that the import statement is a convenience to the programmer and is not technically needed 
+    to write a complete Java program.
+
+    The import statement must come immediately after package statement (if it exists) and before any class
+    definitions.
+
+
+    Let us suppose that package "animal" was expanded with new classes and sub-packages as follows :
+
+                                    animal/
+                                    |
+                                    ----- mammal/
+                                    |     |
+                                    |     ----- Dog.class                          animal.mammal.Dog
+                                    |     |
+                                    |     ----- Cat.class                          animal.mammal.Cat
+                                    |     |
+                                    |     ----- primate/
+                                    |           |
+                                    |           ----- Monkey.class                 animal.mammal.primate.Monkey
+                                    |
+                                    ----- amphibian/
+                                          |
+                                          ----- Frog.class                         animal.amphibian.Frog
+    
+
+    import animal.mammal.*;
+
+            The above import statement will import all the top level types (class/interface) in  the  
+    animal.mammal package , but the types in sub-packages of animal.mammal will not be imported i.e., 
+    IT DOES NOT WORK RECURSIVELY.  
+    Therefore Dog and Cat classes will be imported since they are the top level types of animal.mammal
+    package , but Monkey class will not be imported since it is in a sub-package.  
+
+
+NOTE :  It must be emphasized that the import statement is optional. Any place you use a class name, you can
+        use its fully qualified name,  which includes its full package hierarchy.  For example, this fragment 
+        uses an import statement:
+
+        import java.util.*;
+        class MyDate extends Date {
+        }
+
+        The same example without the import statement looks like this:
+
+        class MyDate extends java.util.Date {
+        }
+
+
+FACT : All of the standard Java SE classes included with Java begin with the name java. The basic language
+       functions are stored in a package called java.lang. Normally , you have to import every package  or 
+       class that you want to use, but since Java is useless without much of the functionality in java.lang,
+       it is implicitly imported by the compiler for all programs. This is equivalent to the following line
+       being at the top of all of your programs:
+
+       import java.lang.*;
 

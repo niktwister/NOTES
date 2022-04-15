@@ -103,5 +103,15 @@ options :
         (explicitly  or  implicity through inheritance) in the input <source file>.
 
 
+NOTE : The JVM ("java" cmd) only looks for class files of the referenced types and not the source files. It
+       searches for the class files (including the input <class file>) in the classpath(s).
+
+       The java compiler ("javac" cmd) on the other hand looks for both the class files and source files of 
+       the referenced types. But "javac" cmd requires absolute or relative path to the input <source file>  
+       , DO NOT ASSUME that if you have provided the -sourcepath option then javac will also look for the 
+       input <source file> in one of the sourcepath(s)!!!! 
+       
+
+
 ********************************************************************************************************
 ********************************************************************************************************
