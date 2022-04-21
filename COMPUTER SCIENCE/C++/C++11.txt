@@ -643,7 +643,7 @@ The type of integer literal will be the first type in which its value fits ,  fr
 depends on the numeric base and the suffix used : 
 
 
-suffix                          decimal                             binaru,octal,hexadecimal
+suffix                          decimal                             binary,octal,hexadecimal
 ---------------------------------------------------------------------------------------------
 
 no-suffix                       int                                 int
