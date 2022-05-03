@@ -1,0 +1,183 @@
+
+WARNING :   THIS IS DUMBED DOWN AND INCOMPLETE (GENERICS NOT INCLUDED). GO READ DOCS FOR COMPREHENSIVE 
+            UNDERSTANDING :)
+
+                    -----------------------------------------------------------------
+                    | Compile-Time Step 1: Determine Class or Interface to Search   |
+                    -----------------------------------------------------------------
+
+https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.1
+The first step in processing a method invocation at compile time is to figure out the name of the method to be
+invoked and which class or interface to search for definitions of methods of that name.
+
+
+
+                    -----------------------------------------------------------------
+                    | Compile-Time Step 2:  Determine Method Signature              |
+                    -----------------------------------------------------------------
+
+https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2
+
+The second step searches the type determined in the previous step for member methods. This step uses the name 
+of the method and the argument expressions to locate methods that are both accessible and applicable, that is, 
+declarations that can be correctly invoked on the given arguments.
+
+
+https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.1
+The class or interface determined by compile-time step 1 is searched for all member methods that are potentially
+applicable to this method invocation; members inherited from superclasses and superinterfaces are included in 
+this search.
+
+Once we have the list of potentially applicable methods. 
+
+Then remainder of the process is split into 3 phases :
+
+    1) PHASE 1 (Identify Matching Arity Methods Applicable by Strict Invocation)
+        The first phase performs overload resolution without permitting boxing or unboxing conversion, or the use
+        of variable arity method invocation. If no applicable method is found during this phase then processing 
+        continues to the second phase.
+        (in more detail below)
+
+    2) PHASE 2 (Identify Matching Arity Methods Applicable by Loose Invocation)
+        The second phase performs overload resolution while allowing boxing and unboxing, but still precludes 
+        the use of variable arity method invocation. If no applicable method is found during this phase then 
+        processing continues to the third phase.
+        (in more detail below)
+
+    3) PHASE 3 (Identify Methods Applicable by Variable Arity Invocation)
+        The third phase allows overloading to be combined with variable arity methods, boxing, and unboxing.
+        (in more detail below)
+
+
+If several applicable methods have been identified during one of the three phases of applicability testing, 
+then the most specific one is chosen , as explained below.
+
+The descriptor (signature plus return type) of the most specific method is the one used at run time to perform 
+the method dispatch.
+
+
+https://docs.oracle.com/javase/specs/jls/se8/html/jls-5.html#jls-5.3  (invocation contexts)
+
+
+Phase 1: Identify Matching Arity Methods Applicable by Strict Invocation
+------------------------------------------------------------------------
+
+    https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.2
+    Let there be n arguments in the method invocation. Let "m" be n arity method with n parameters. Then "m" 
+    is applicable by strict invocation if the arguments provided are compatible with their corresponding 
+    parameter's type in a "strict invocation context". And by "strict invocation context" we mean that these 
+    are allowed :
+
+        an identity conversion 
+
+        a widening primitive conversion 
+
+        a widening reference conversion 
+
+    If method applicable by strict invocations are found then, 
+        the most specific method is chosen among the methods that are applicable by strict invocation.
+    else if no method applicable by strict invocations are found then,
+        search for methods applicable by loose invocation.
+
+
+Phase 2: Identify Matching Arity Methods Applicable by Loose Invocation
+-----------------------------------------------------------------------
+
+    https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.3
+
+    Let there be n arguments in the method invocation. Let "m" be n arity method with n parameters. Then "m" 
+    is applicable by Loose invocation if the arguments provided are compatible with their corresponding 
+    parameter's type in a "Loose invocation context". And by "Loose invocation context" we mean that these 
+    are allowed :
+
+        an identity conversion
+
+        a widening primitive conversion
+
+        a widening reference conversion
+
+        a boxing conversion optionally followed by widening reference conversion
+
+        an unboxing conversion optionally followed by a widening primitive conversion
+
+    If method applicable by loose invocations are found then, 
+        the most specific method is chosen among the methods that are applicable by loose invocation.
+    else if no method applicable by loose invocations are found then,
+        search for methods applicable by  Variable Arity invocation.
+
+
+Phase 3: Identify Methods Applicable by Variable Arity Invocation
+-----------------------------------------------------------------
+
+    https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.4
+
+    Let there be k arguments in the method invocation. Let "m" be variable arity method. Then "m" 
+    is applicable by variable arity invocation if the "k" arguments provided are compatible with the
+    first "k" parameter types of "m" , by loose invocation.
+
+    If no method applicable by variable arity invocation is found, then a compile-time error occurs.
+
+
+
+Choosing the Most Specific Method
+---------------------------------
+
+    https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.5
+
+If more than one member method is both accessible and applicable to a method invocation, it is necessary to 
+choose one to provide the descriptor for the run-time method dispatch. The Java programming language uses the 
+rule that the most specific method is chosen.
+
+One applicable method m1 is more specific than another applicable method m2, for an invocation with argument 
+expressions e1, ..., ek, if any of the following are true:
+
+    ->  m2 is not generic, and m1 and m2 are applicable by strict or loose invocation, and where m1 has formal 
+        parameter types S1, ..., Sn and m2 has formal parameter types T1, ..., Tn, the type Si is more specific
+        than Ti for argument ei for all i (1 ≤ i ≤ n, n = k).
+
+    ->  m2 is not generic, and m1 and m2 are applicable by variable arity invocation, and where the first k 
+        variable arity parameter types of m1 are S1, ..., Sk and the first k variable arity parameter types of 
+        m2 are T1, ..., Tk, the type Si is more specific than Ti for argument ei for all i (1 ≤ i ≤ k). 
+        Additionally, if m2 has k+1 parameters, then the k+1'th variable arity parameter type of m1 is a 
+        subtype of the k+1'th variable arity parameter type of m2.
+
+A type S is more specific than a type T for any expression if S <: T
+
+X <: Y implies that X is a subtype of Y.
+X >: Y implies that X is a supertype of Y.
+
+X < Y iff X <: Y and X != Y (proper subtype)
+X > Y iff X >: Y and X != Y (proper supertype)
+
+X <1 Y implies that X is a direct subtype of Y.
+X >1 Y implies that X is a direct supertype of Y.
+
+
+subtype relationship among primitive types :
+    
+    double >1 float
+
+    float >1 long
+
+    long >1 int
+
+    int >1 char
+
+    int >1 short
+
+    short >1 byte
+
+
+Given a non-generic type declaration C, the direct supertypes of the type C are all of the following:
+
+    The direct superclass of C.
+
+    The direct superinterfaces of C.
+
+    The type Object, if C is an interface type with no direct superinterfaces.
+
+
+If S and T are both reference types, then S[] >1 T[] iff S >1 T.
+
+
+

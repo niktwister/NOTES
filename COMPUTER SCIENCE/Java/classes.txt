@@ -1,0 +1,261 @@
+class classname  {
+
+    type instance-variable1;
+    type instance-variable2;
+    // ...
+    type instance-variableN;
+
+    type methodname1(parameter-list) {
+      // body of method
+    }   
+    type methodname2(parameter-list) {
+      // body of method
+    }
+    // ...
+    type methodnameN(parameter-list) {
+        // body of method
+    }
+
+}
+
+
+declaring objects
+-----------------
+
+Obtaining objects of a class is a two-step process. First, you must declare a variable of the class type.
+This variable does not define an object. Instead, it is simply a variable that can refer to an object. 
+Second, you must acquire an actual, physical copy of the object and assign it to that variable. You can do 
+this using the "new" operator. The "new" operator dynamically allocates (that is, allocates at run time) memory 
+for an object and returns a reference to it. This reference is, essentially, the address in memory of the 
+object allocated by "new". This reference is then stored in the variable.
+
+Syntax :
+
+classname class-var;
+class-var = new classname( );
+
+OR ,
+
+classname class-var = new classname();
+
+Example , 
+
+    Box mybox = new Box();
+
+    The above statement is these two statements combined : 
+
+        Box mybox;
+                                     ------
+                                    |      |
+                                    |      |
+                                     ------
+                                     mybox 
+
+        mybox = new Box();
+                                     ------
+                                    |   ___|________             -----------
+                                    |      |       |            |Width      |
+                                     ------        |            |-----------|
+                                     mybox         |            |Height     |
+                                                    --------->  |-----------|
+                                                                |Depth      |
+                                                                 -----------
+                                                                 <Box object>
+
+
+
+NOTE : When you assign one object reference variable to another object reference variable, you are not creating
+       a copy of the object, you are only making a copy of the reference.
+
+       Example , 
+
+            Box b1 = new Box();
+                                        ---------                   -------------
+                                        |       |                   |Width      |
+                                        |       |------------       |-----------|
+                                        ---------           |       |Height     |
+                                           b1               |       |-----------|
+                                                            ------->|Depth      |
+                                                                    -------------
+                                                                     <Box object>
+
+            b2 = b1;
+                                        ---------                   -------------
+                                        |       |                   |Width      |
+                                        |       |------------------>|-----------|
+                                        ---------                   |Height     |
+                                           b1                       |-----------|
+                                        ---------           ------->|Depth      |
+                                        |       |           |       -------------
+                                        |       |------------        <Box object>
+                                        ---------
+                                            b2
+
+
+
+constructor
+-----------
+
+A constructor initializes an object immediately upon creation. It has the same name as the class in which it
+resides and is syntactically similar to a method. 
+
+Once defined, the constructor is automatically called when the object is created, before the new operator 
+completes. 
+ 
+We do not explicitly write the return-type for a constructor. The implicit return type of a class’ constructor
+is the class type itself. 
+
+
+class-var = new classname( );       //Here we are calling the constructor of the class that takes no parameter.
+
+
+default constructor for classes
+-------------------------------
+
+https://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.8.9
+
+If we haven't explicitly defined ANY constructor for the class , then java will automatically create 
+a default constructor.
+
+<access-modifier same as class>     classname(){
+    super();
+
+    // initializing all the non-initialized instance variables with their default values.
+    // numeric types -> zero    ,   
+    // reference types -> null  ,   
+    // boolean types -> false
+}
+
+
+this keyword
+------------
+
+Sometimes a method will need to refer to the object that invoked it. To allow this, Java defines the "this" 
+keyword. "this" can be used inside any method to refer to the current object. That is, "this" is always a 
+reference to the object on which the method was invoked. You can use "this" anywhere a reference to an object
+of the current class’ type is permitted.
+
+Example , 
+
+        class Box{
+
+            double width;
+            double height;
+            double depth;
+        
+            public Box(double width , double height , double depth){
+                this.width = width;
+                this.height = height;           // "height" here will refer to the parameter and not the 
+                this.depth = depth;             // instance variable. 
+            }                                   // Thus if a local variable of a method has same name as 
+                                                // an instance variable , the local variable will hide the
+                                                // instance variable. We call this instance variable hiding.
+                                                // We can use "this" to refer to instance variable. 
+        }
+
+
+
+
+method overloading
+------------------
+
+In Java, it is possible to define two or more methods within the same class that share the same name,
+as long as their parameter declarations are different. When this is the case, the methods are said to 
+be overloaded, and the process is referred to as method overloading.
+
+Method overloading supports polymorphism because it is one way that Java implements the “one interface, 
+multiple methods” paradigm.
+
+Also called static polymorphism , because method overloading is resolved at compile time  based on the
+type and/or number of arguments passed to the method as a guide to determine which version of the overloaded 
+method to actually call.
+
+NOTE : Similarly constructors can also be overloaded.
+
+
+
+argument passing
+----------------
+
+call-by-value : This approach copies the value of an argument into the formal parameter of the subroutine. 
+                Therefore, changes made to the parameter of the subroutine have no effect on the argument. 
+
+call-by-reference : In this approach, a reference to an argument (not the value of the argument) is passed to 
+                    the parameter. Inside the subroutine, this reference is used to access the actual argument 
+                    specified in the call. This means that changes made to the parameter will affect the 
+                    argument used to call the subroutine. 
+
+Java uses call-by-value to pass all arguments, the precise effect differs between whether a primitive type or 
+a reference type is passed.
+
+
+When you pass a primitive type to a method, it is passed by value. Thus, a copy of the argument is made, and 
+what occurs to the parameter that receives the argument has no effect outside the method. 
+
+When an object reference is passed to a method, the reference itself is passed by use of call-by-value. 
+However, since the value being passed refers to an object, the copy of that value will still refer to the 
+same object that its corresponding argument does.
+
+
+
+static keyword
+--------------
+
+There will be times when you will want to define a class member that will be used independently of any object 
+of that class. Normally, a class member must be accessed only in conjunction with an object of its class. 
+However, it is possible to create a member that can be used by itself, without reference to a specific instance.
+To create such a member, precede its declaration with the keyword "static". When a member is declared static, 
+it can be accessed before any objects of its class are created, and without reference to any object. You can 
+declare both methods and variables to be static. The most common example of a static member is main( ) , which 
+is declared as static because it must be called before any objects exist.
+
+
+Instance variables declared as static are, essentially, global variables. When objects of its class are declared,
+no copy of a static variable is made. Instead, all instances of the class share the same static variable.
+
+Methods declared as static have several restrictions:
+
+    -> They can only directly call other static methods of their class.
+
+    -> They can only directly access static variables of their class.
+
+    -> They cannot refer to this or super in any way.
+
+
+If we need to do computation in order to initialize our static variables, we can declare a "static block" that 
+gets executed exactly once, when the class is first loaded. Even before the main is called (if it exist).
+Example :
+
+    public class Demo{
+        static int a=4;
+        static int b;
+
+        static {
+            System.out.println("static block initialized");
+            b = a*4;
+        }
+
+        public static void main(String[] args){
+            System.out.println("Main is called.");
+        }
+
+    }
+
+    output :
+        static block initialized
+        Main is called.
+
+
+Inside the class in which they are defined , static methods / variables can be accessed directly.
+
+Outside of the class in which they are defined, static methods and variables can be used independently of any 
+object. To do so, you need only specify the name of their class followed by the dot operator.
+Syntax :
+            classname.staticVariable
+            classname.staticMethod()            // assuming proper access modifiers are set.
+
+            Here, classname is the name of the class in which the static method/variable is declared.
+
+
+final keyword
+-------------
