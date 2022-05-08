@@ -93,6 +93,35 @@ NOTE : When you assign one object reference variable to another object reference
 
 
 
+default values 
+--------------
+https://www.artima.com/articles/object-initialization-in-java (1998)
+At the beginning of an object's life, the Java virtual machine (JVM) allocates enough memory on the heap to 
+accommodate the object's instance variables. When that memory is first allocated, however, the data it contains 
+is unpredictable. If the memory were used as is, the behavior of the object would also be unpredictable. 
+To guard against such a scenario, Java makes certain that memory is initialized, at least to predictable 
+default values, before it is used by any code.
+
+If you provide no explicit initialization to instance variables, they will be awarded predictable default 
+initial values, which are based only on the type of the variable.
+
+                                TYPE                DEFAULT VALUE
+                                ----                -------------
+                                boolean             false
+                                numerical type      0
+                                char                \u0000
+                                object reference    null
+
+These are the default initial values for both instance and class variables. Local variables are not given 
+default initial values. They must be initialized explicitly before they are used.
+
+Note that this means that if we explicitly initialize a field, then when each object is created, that field 
+will, in effect, be initialized twice. First, field will be given its default initial value based on its type. 
+Later, the default initial value will be overwritten with the proper initial value explicitly provided. All of 
+this takes place while the Java virtual machine is creating the new object -- before it returns the reference 
+to the new object -- before the constructors are called.
+
+
 constructor
 -----------
 
@@ -119,12 +148,8 @@ a default constructor.
 
 <access-modifier same as class>     classname(){
     super();
-
-    // initializing all the non-initialized instance variables with their default values.
-    // numeric types -> zero    ,   
-    // reference types -> null  ,   
-    // boolean types -> false
 }
+
 
 
 this keyword
@@ -224,7 +249,7 @@ Methods declared as static have several restrictions:
 
 If we need to do computation in order to initialize our static variables, we can declare a "static block" that 
 gets executed exactly once, when the class is first loaded. Even before the main is called (if it exist).
-Example :
+Also called "static initializer". Example :
 
     public class Demo{
         static int a=4;
@@ -257,5 +282,37 @@ Syntax :
             Here, classname is the name of the class in which the static method/variable is declared.
 
 
-final keyword
--------------
+final variable
+--------------
+https://docs.oracle.com/javase/specs/jls/se11/html/jls-4.html#jls-4.12.4
+
+A class field can be declared as final. Doing so prevents its contents from being modified, making it, 
+essentially, a constant. This means that it must be given some value. We can either :
+    ->  give it a value when it is declared. OR ,
+    ->  give it a value inside the constructor.
+
+and once a value is given , it cannot be modified.
+
+
+A local variable or a method parameter can also be declared as final. We don't necessarily have to provide a 
+value at declaration. Just know that once it is provided ( and it must be provided ) , it cannot be modified 
+again. Example ,
+
+    import java.util.Scanner;
+
+    public class Tester{
+        public static void main(String[] args){
+
+            final int x;
+
+            Scanner sc = new Scanner(System.in);
+
+            x = sc.nextInt();       // providing value once to x. 
+                                    // cannot provide value to x again.
+
+        }
+    }
+
+
+
+

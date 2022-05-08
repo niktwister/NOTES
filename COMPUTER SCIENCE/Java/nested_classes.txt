@@ -1,0 +1,401 @@
+
+constant variable ?
+    A constant variable is a final variable of primitive type or type String that is initialized with a 
+    constant expression.
+
+blank final ?
+    A blank final is a final variable whose declaration lacks an initializer.
+
+effectively final ?             
+    https://docs.oracle.com/javase/specs/jls/se11/html/jls-4.html#jls-4.12.4
+    Certain variables that are not declared final are instead considered effectively final:
+
+    A local variable whose declarator has an initializer is effectively final if all of the following are true:
+        ->  It is not declared final.
+        ->  It never occurs as the left hand side in an assignment expression. (Note that the local variable 
+            declarator containing the initializer is not an assignment expression.)
+        ->  It never occurs as the operand of a prefix or postfix increment or decrement operator.
+
+    A local variable whose declarator lacks an initializer is effectively final if all of the following are true:
+        ->  It is not declared final.
+        ->  Whenever it occurs as the left hand side in an assignment expression, it is definitely unassigned 
+            and not definitely assigned before the assignment; that is, it is definitely unassigned and not 
+            definitely assigned after the right hand side of the assignment expression.
+        ->  It never occurs as the operand of a prefix or postfix increment or decrement operator.
+
+    A method, constructor, lambda, or exception parameter is treated, for the purpose of determining whether it 
+    is effectively final, as a local variable whose declarator has an initializer.
+
+    If a variable is effectively final, adding the final modifier to its declaration will not introduce any 
+    compile-time errors. Conversely, a local variable or parameter that is declared final in a valid program 
+    becomes effectively final if the final modifier is removed.
+
+
+
+-------------------------------------------------------------------------------------------------------------
+|                                               inner classes                                               |
+-------------------------------------------------------------------------------------------------------------
+
+https://docs.oracle.com/javase/specs/jls/se11/html/jls-8.html#jls-8.1.3
+
+An inner class is a nested class that is not explicitly or implicitly declared static.
+
+An inner class may be a non-static member class , a local class , or an anonymous class.  A member class of an 
+interface is implicitly static so is never considered to be an inner class.
+
+It is a compile-time error if an inner class declares a static initializer.
+
+It is a compile-time error if an inner class declares a member that is explicitly or implicitly static, unless 
+the member is a constant variable.
+
+An inner class may inherit static members that are not constant variables even though it cannot declare them.
+A nested class that is not an inner class may declare static members freely, in accordance with the usual rules 
+of the Java programming language. Example :
+
+    class HasStatic {
+        static int j = 100;
+    }
+    class Outer {
+        class Inner extends HasStatic {
+            static final int x = 3;  // OK: constant variable
+            static int y = 4;  // Compile-time error: an inner class
+        }
+        static class NestedButNotInner{
+            static int z = 5;    // OK: not an inner class
+        }
+
+        interface NeverInner {}  // Interfaces are never inner , this will throw compile-time error
+    }
+
+
+An instance of an inner class I whose declaration occurs in a static context has no lexically enclosing 
+instances. However, if I is immediately declared within a static method or static initializer then I does 
+have an enclosing block, which is the innermost block statement lexically enclosing the declaration of I.
+
+When an inner class (whose declaration does not occur in a static context) refers to an instance variable that 
+is a member of a lexically enclosing type declaration, the variable of the corresponding lexically enclosing 
+instance is used.
+
+Any local variable, formal parameter, or exception parameter used but not declared in an inner class must 
+either be declared final or be effectively final , or a compile-time error occurs where the use is attempted.
+
+Any local variable used but not declared in an inner class must be definitely assigned before the body of the 
+inner class, or a compile-time error occurs.
+
+A blank final field of a lexically enclosing type declaration may not be assigned within an inner class, or a 
+compile-time error occurs.
+
+
+
+EXAMPLE 1: (EXAMPLE OF MEMBER INNER CLASS)
+------------------------------------------
+    class Outer{
+
+        int a;
+        static int b = 43;
+
+        Outer(int a){this.a = a;}
+
+        public class Inner{ //member inner classes can have access modifiers like other members. 
+            int x;
+            static int y;   /* COMPILE-TIME ERROR
+                            * inner classes cannot declare static members unless
+                            * they are constant variable like "z". */
+            final static int z = 45;    /* static member allowed since it is a 
+                                        * constant variable i.e., a final primitve
+                                        * or String type initialized with a constant
+                                        * expression. */
+
+            Inner(int x){this.x = x;}
+
+            void printAll(){
+                System.out.println("outer a : " + a); /* "a" will be taken from
+                    * from the instance of Outer class that is associated with the
+                    * instance of Inner class calling printAll() */
+                System.out.println("outer static b : " + b); /* inner classes can
+                    * access both the static and non-static members of enclosing class */
+                System.out.println("inner x : " + x);
+                System.out.println("inner static z (constant variable) : " + z);
+            }
+
+            static void printNothing(){}    /* COMPILE-TIME ERROR
+                            * inner classes cannot declare static members unless
+                            * they are constant variable. */
+
+        }
+
+    }
+
+    public class Tester{
+        public static void main(String[] args){
+
+            Outer outer = new Outer(34);
+            Outer.Inner inner = outer.new Inner(100);   /* member inner class instance will always be 
+                                                        * associated with an enclosing class instance. */
+            inner.printAll();        
+
+        }
+    }
+
+OUTPUT 1 : (AFTER COMMENTING MENTIONED COMPILE-TIME ERROR)
+----------------------------------------------------------
+    outer a : 34
+    outer static b : 43
+    inner x : 100
+    inner static z (constant variable) : 45    
+
+
+
+
+
+
+EXAMPLE 2 : (EXAMPLE OF MEMBER INNER CLASS)
+-------------------------------------------
+    class Outer{
+
+        int a;
+
+        Outer(int a){this.a = a;}
+
+        class Inner{
+
+            void print(String loc){
+                System.out.println("calling Inner class method 'print' from : " + loc);
+                System.out.println("outer a : " + a);
+                System.out.println();
+            }
+        }
+
+        void outerNonStaticMethod(){        
+            Inner inn = new Inner();   /*  we are in a non-static context here. This method will be called 
+                                        *  through an Outer class instance, which will get associated with 
+                                        *  the Inner class instance we are creating here.
+                                        */
+            inn.print("non-static Outer class method");
+        }
+
+        static void outerStaticMethod(){
+            Outer out = new Outer(50);
+            Outer.Inner inn = out.new Inner();  /* we are in a static context here. Therefore this method will
+                                                * be binded to the Outer class itself , rather than an instance 
+                                                * of the Outer class. We will have to explicitly create an 
+                                                * instance of Outer class , in order to create an instance of
+                                                * Inner class.
+                                                */
+
+            inn.print("static Outer class method");
+        }
+
+    }
+
+    public class Tester{
+        public static void main(String[] args){
+
+            Outer out = new Outer(10);
+            out.outerNonStaticMethod();     
+
+            Outer.outerStaticMethod();  
+
+        }
+    }
+
+OUTPUT 2 :
+----------
+    calling Inner class method 'print' from : non-static Outer class method
+    outer a : 10
+
+    calling Inner class method 'print' from : static Outer class method
+    outer a : 50
+
+
+
+
+
+
+EXAMPLE 3 : (EXAMPLE OF LOCAL INNER CLASS)
+------------------------------------------
+
+    class Outer{
+
+        int a;
+
+        Outer(int a){this.a = a;}
+
+        void outerNonStaticMethod(){
+
+            class Local{    /* This is a local inner class.  Since the enclosing method is non-static , the 
+                             * local inner class is in a non-static context and hence can reference the members 
+                             * of the enclosing class. */
+                
+                int x;
+
+                Local(int x){this.x = x;}
+
+                static void doNothing(){}  /* COMPILE-TIME ERROR
+                                            * local classes are inner classes. Hence they cannot declare
+                                            * static members unless they are constant variables. */
+
+                void print(){
+                    System.out.println("local x : " + x);
+                    System.out.println("outer a : " + a);   /* ALLOWED. The enclosing method is non-static and
+                                * hence will be invoked via an instance of Outer class. The instance variable
+                                * "a" of that Outer class instance will be used here. */
+                }
+            
+            }
+
+            Local local = new Local(5);
+
+            local.print();
+
+        }
+
+
+    }
+
+    public class Tester{
+        public static void main(String[] args){
+
+            Outer outer = new Outer(10); 
+
+            outer.outerNonStaticMethod();           
+
+        }
+    }
+
+OUTPUT 3 : (AFTER COMMENTING MENTIONED COMPILE-TIME ERROR)
+----------------------------------------------------------
+    local x : 5
+    outer a : 10
+
+
+
+
+
+EXAMPLE 4 : (EXAMPLE OF LOCAL INNER CLASS)
+------------------------------------------
+    class Outer{
+
+        int a;
+
+        static int b = 34;
+
+        Outer(int a){this.a = a;}
+
+        static void outerStaticMethod(){
+
+            class Local{    /* This is a local inner class.  Since the enclosing method is static , the 
+                             * local inner class is in a static context and hence cannot reference the
+                             * non-static members of the enclosing class.  */
+                
+                int x;
+
+                Local(int x){this.x = x;}
+
+
+                void print(){
+                    System.out.println("local x : " + x);
+                    System.out.println("outer a : " + a);   /* COMPILE-TIME ERROR 
+                                * The enclosing method is static and hence will not have access to non-static
+                                * members of enclosing class. Thus we cannot reference non-static members 
+                                * like "a" , but static members like "b" can be referenced. */
+                    System.out.println("outer static b : " + b);
+                }
+            
+            }
+
+            Local local = new Local(5);
+
+            local.print();
+
+        }
+
+
+    }
+
+    public class Tester{
+        public static void main(String[] args){
+
+            Outer.outerStaticMethod();           
+
+        }
+    }
+
+OUTPUT 4 : (AFTER COMMENTING MENTIONED COMPILE-TIME ERROR)
+----------------------------------------------------------
+    local x : 5
+    outer static b : 34
+
+
+
+
+
+
+EXAMPLE 5 : (LOCAL INNER CLASS EXAMPLE)
+---------------------------------------
+
+    class Outer{
+
+
+        void outerMethod(){
+
+            final int w = 10;
+            int x;
+            final int y;
+            int z = 50;
+
+            x = (int)( Math.random() * 100 );
+
+            class Local{    /* This is a local inner class.  Unlike member inner classes , local inner classes
+                             * cannot have access modifiers like public, private, or protected.
+                             * We also cannot use modifier  static with local inner classes.  */
+                
+
+                void print(){
+                    System.out.println(" w : " + w);    /* w is a final variable  which has been definitely
+                        * assigned before Local class declaration , therefore it can be referenced in the Local
+                        * class. */
+                    System.out.println(" x : " + x);    /* x is an effectively final variable that has been
+                        * definitely assigned before Local class declaration , therefore it can be referenced
+                        * in the Local class. */
+                    System.out.println(" y : " + y);    /* COMPILE-TIME ERROR
+                        * y is a final variable but it has not been definitely assigned before Local class 
+                        * declaration , therefore we will get error. */
+                    System.out.println(" z : " + z);    /* COMPILE-TIME ERROR
+                        * z is neither a final nor an effectively final variable , hence we cannot use it
+                        * here. */
+                }
+            
+            }
+
+            y = 30;
+            z = 100;
+
+            Local local = new Local();
+            local.print();
+
+
+        }
+
+
+    }
+
+    public class Tester{
+        public static void main(String[] args){
+
+            Outer outer = new Outer();
+            outer.outerMethod();           
+
+        }
+    }
+
+
+OUTPUT 5 : (AFTER COMMENTING MENTIONED COMPILE-TIME ERROR)
+----------------------------------------------------------
+    w : 10
+    x : 22
+
+
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
