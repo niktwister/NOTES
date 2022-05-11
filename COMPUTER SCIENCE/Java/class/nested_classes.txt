@@ -1,4 +1,86 @@
 
+
+A nested class is any class whose declaration occurs within the body of another class or interface.
+
+-------------------------------------------------------------------------------------------------------------
+|                                       static nested classes                                               |
+-------------------------------------------------------------------------------------------------------------
+
+These nested classes are static member of their enclosing class.
+
+As with static members, these belong to their enclosing class, and not to an instance of the class.
+
+They can have all types of access modifiers in their declaration.
+
+They only have access to other static members in the enclosing class.
+
+They are static member of their enclosing class , but their own members can be static or non-static.
+
+
+EXAMPLE 1 :
+-----------
+
+
+    class Outer{
+
+        int a;
+        static int b = 34;
+
+        static class Nested{
+            int x;              /* static nested class can have both static and non-static members. */
+            static int y=23;    
+
+            Nested(int x){this.x = x;}
+
+            void print(){
+                System.out.println("nested non-static x : " + x);
+                System.out.println("nested static y : " + y);    
+                System.out.println("outer static b : " + b);  /* being static member of the enclosing class 
+                                        *   themselves , static nested classes have access to the other static 
+                                        *   members of the enclosing class */  
+                System.out.println("outer a : " + a);    /* COMPILE-TIME ERROR
+                                        *   being static member of the enclosing class , static nested classes
+                                        *   DO NOT  have access to the  non-static members of the enclosing
+                                        *   class */                           
+            }
+        }
+
+    }
+
+
+
+    public class Tester{
+        public static void main(String[] args){
+
+            Outer.Nested nested = new Outer.Nested(10);   /* We do not need to create an instance of enclosing
+                                        *   class in order to create an instance of the static nested class */     
+            nested.print();
+
+            System.out.println("static int y of static nested class : " + Outer.Nested.y );  /* accessing a
+                                            * static member of static nested class */
+
+        }
+    }
+
+OUTPUT 1 : (AFTER COMMENTING MENTIONED COMPILE-TIME ERROR)
+----------------------------------------------------------
+    nested non-static x : 10
+    nested static y : 23
+    outer static b : 34
+    static int y of static nested class : 23
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+
+
+
 constant variable ?
     A constant variable is a final variable of primitive type or type String that is initialized with a 
     constant expression.
@@ -209,6 +291,17 @@ OUTPUT 2 :
 
 
 
+local inner classes ?
+
+    A local class is a nested class that is not a member of any class and that has a name .
+
+    All local classes are inner classes , hence same rules apply.
+
+    Every local class declaration statement is immediately contained by a block. Local class declaration 
+    statements may be intermixed freely with other kinds of statements in the block.
+
+    It is a compile-time error if a local class declaration contains any of the access modifiers public, 
+    protected, or private , or the modifier static.
 
 
 
@@ -331,8 +424,8 @@ OUTPUT 4 : (AFTER COMMENTING MENTIONED COMPILE-TIME ERROR)
 
 
 
-EXAMPLE 5 : (LOCAL INNER CLASS EXAMPLE)
----------------------------------------
+EXAMPLE 5 : (EXAMPLE OF LOCAL INNER CLASS)
+------------------------------------------
 
     class Outer{
 

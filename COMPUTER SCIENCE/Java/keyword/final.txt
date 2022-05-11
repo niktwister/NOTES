@@ -1,0 +1,30 @@
+final variable
+--------------
+https://docs.oracle.com/javase/specs/jls/se11/html/jls-4.html#jls-4.12.4
+
+A class field can be declared as final. Doing so prevents its contents from being modified, making it, 
+essentially, a constant. This means that it must be given some value. We can either :
+    ->  give it a value when it is declared. OR ,
+    ->  give it a value inside the constructor.
+
+and once a value is given , it cannot be modified.
+
+
+A local variable or a method parameter can also be declared as final. We don't necessarily have to provide a 
+value at declaration. Just know that once it is provided ( and it must be provided ) , it cannot be modified 
+again. Example ,
+
+    import java.util.Scanner;
+
+    public class Tester{
+        public static void main(String[] args){
+
+            final int x;
+
+            Scanner sc = new Scanner(System.in);
+
+            x = sc.nextInt();       // providing value once to x. 
+                                    // cannot provide value to x again.
+
+        }
+    }

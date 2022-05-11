@@ -1,0 +1,101 @@
+declaring objects
+-----------------
+
+Obtaining objects of a class is a two-step process. First, you must declare a variable of the class type.
+This variable does not define an object. Instead, it is simply a variable that can refer to an object. 
+Second, you must acquire an actual, physical copy of the object and assign it to that variable. You can do 
+this using the "new" operator. The "new" operator dynamically allocates (that is, allocates at run time) memory 
+for an object and returns a reference to it. This reference is, essentially, the address in memory of the 
+object allocated by "new". This reference is then stored in the variable.
+
+Syntax :
+
+classname class-var;
+class-var = new classname( );
+
+OR ,
+
+classname class-var = new classname();
+
+Example , 
+
+    Box mybox = new Box();
+
+    The above statement is these two statements combined : 
+
+        Box mybox;
+                                     ------
+                                    |      |
+                                    |      |
+                                     ------
+                                     mybox 
+
+        mybox = new Box();
+                                     ------
+                                    |   ___|________             -----------
+                                    |      |       |            |Width      |
+                                     ------        |            |-----------|
+                                     mybox         |            |Height     |
+                                                    --------->  |-----------|
+                                                                |Depth      |
+                                                                 -----------
+                                                                 <Box object>
+
+
+
+NOTE : When you assign one object reference variable to another object reference variable, you are not creating
+       a copy of the object, you are only making a copy of the reference.
+
+       Example , 
+
+            Box b1 = new Box();
+                                        ---------                   -------------
+                                        |       |                   |Width      |
+                                        |       |------------       |-----------|
+                                        ---------           |       |Height     |
+                                           b1               |       |-----------|
+                                                            ------->|Depth      |
+                                                                    -------------
+                                                                     <Box object>
+
+            b2 = b1;
+                                        ---------                   -------------
+                                        |       |                   |Width      |
+                                        |       |------------------>|-----------|
+                                        ---------                   |Height     |
+                                           b1                       |-----------|
+                                        ---------           ------->|Depth      |
+                                        |       |           |       -------------
+                                        |       |------------        <Box object>
+                                        ---------
+                                            b2
+
+
+
+default values 
+--------------
+https://www.artima.com/articles/object-initialization-in-java (1998)
+At the beginning of an object's life, the Java virtual machine (JVM) allocates enough memory on the heap to 
+accommodate the object's instance variables. When that memory is first allocated, however, the data it contains 
+is unpredictable. If the memory were used as is, the behavior of the object would also be unpredictable. 
+To guard against such a scenario, Java makes certain that memory is initialized, at least to predictable 
+default values, before it is used by any code.
+
+If you provide no explicit initialization to instance variables, they will be awarded predictable default 
+initial values, which are based only on the type of the variable.
+
+                                TYPE                DEFAULT VALUE
+                                ----                -------------
+                                boolean             false
+                                numerical type      0
+                                char                \u0000
+                                object reference    null
+
+These are the default initial values for both instance and class variables. Local variables are not given 
+default initial values. They must be initialized explicitly before they are used.
+
+Note that this means that if we explicitly initialize a field, then when each object is created, that field 
+will, in effect, be initialized twice. First, field will be given its default initial value based on its type. 
+Later, the default initial value will be overwritten with the proper initial value explicitly provided. All of 
+this takes place while the Java virtual machine is creating the new object -- before it returns the reference 
+to the new object -- before the constructors are called.

@@ -1,0 +1,57 @@
+static keyword
+--------------
+
+There will be times when you will want to define a class member that will be used independently of any object 
+of that class. Normally, a class member must be accessed only in conjunction with an object of its class. 
+However, it is possible to create a member that can be used by itself, without reference to a specific instance.
+To create such a member, precede its declaration with the keyword "static". When a member is declared static, 
+it can be accessed before any objects of its class are created, and without reference to any object. You can 
+declare both methods and variables to be static. The most common example of a static member is main( ) , which 
+is declared as static because it must be called before any objects exist.
+
+
+Instance variables declared as static are, essentially, global variables. When objects of its class are declared,
+no copy of a static variable is made. Instead, all instances of the class share the same static variable.
+
+Methods declared as static have several restrictions:
+
+    -> They can only directly call other static methods of their class.
+
+    -> They can only directly access static variables of their class.
+
+    -> They cannot refer to this or super in any way.
+
+
+If we need to do computation in order to initialize our static variables, we can declare a "static block" that 
+gets executed exactly once, when the class is first loaded. Even before the main is called (if it exist).
+Also called "static initializer". Example :
+
+    public class Demo{
+        static int a=4;
+        static int b;
+
+        static {
+            System.out.println("static block initialized");
+            b = a*4;
+        }
+
+        public static void main(String[] args){
+            System.out.println("Main is called.");
+        }
+
+    }
+
+    output :
+        static block initialized
+        Main is called.
+
+
+Inside the class in which they are defined , static methods / variables can be accessed directly.
+
+Outside of the class in which they are defined, static methods and variables can be used independently of any 
+object. To do so, you need only specify the name of their class followed by the dot operator.
+Syntax :
+            classname.staticVariable
+            classname.staticMethod()            // assuming proper access modifiers are set.
+
+            Here, classname is the name of the class in which the static method/variable is declared.

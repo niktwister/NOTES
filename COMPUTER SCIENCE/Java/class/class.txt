@@ -1,0 +1,100 @@
+class classname  {
+
+    type instance-variable1;
+    type instance-variable2;
+    // ...
+    type instance-variableN;
+
+    type methodname1(parameter-list) {
+      // body of method
+    }   
+    type methodname2(parameter-list) {
+      // body of method
+    }
+    // ...
+    type methodnameN(parameter-list) {
+        // body of method
+    }
+
+}
+
+
+
+this keyword
+------------
+
+Sometimes a method will need to refer to the object that invoked it. To allow this, Java defines the "this" 
+keyword. "this" can be used inside any method to refer to the current object. That is, "this" is always a 
+reference to the object on which the method was invoked. You can use "this" anywhere a reference to an object
+of the current class’ type is permitted.
+
+Example , 
+
+        class Box{
+
+            double width;
+            double height;
+            double depth;
+        
+            public Box(double width , double height , double depth){
+                this.width = width;
+                this.height = height;           // "height" here will refer to the parameter and not the 
+                this.depth = depth;             // instance variable. 
+            }                                   // Thus if a local variable of a method has same name as 
+                                                // an instance variable , the local variable will hide the
+                                                // instance variable. We call this instance variable hiding.
+                                                // We can use "this" to refer to instance variable. 
+        }
+
+
+
+
+method overloading
+------------------
+
+In Java, it is possible to define two or more methods within the same class that share the same name,
+as long as their parameter declarations are different. When this is the case, the methods are said to 
+be overloaded, and the process is referred to as method overloading.
+
+Method overloading supports polymorphism because it is one way that Java implements the “one interface, 
+multiple methods” paradigm.
+
+Also called static polymorphism , because method overloading is resolved at compile time  based on the
+type and/or number of arguments passed to the method as a guide to determine which version of the overloaded 
+method to actually call.
+
+NOTE : Similarly constructors can also be overloaded.
+
+
+
+argument passing
+----------------
+
+call-by-value : This approach copies the value of an argument into the formal parameter of the subroutine. 
+                Therefore, changes made to the parameter of the subroutine have no effect on the argument. 
+
+call-by-reference : In this approach, a reference to an argument (not the value of the argument) is passed to 
+                    the parameter. Inside the subroutine, this reference is used to access the actual argument 
+                    specified in the call. This means that changes made to the parameter will affect the 
+                    argument used to call the subroutine. 
+
+Java uses call-by-value to pass all arguments, the precise effect differs between whether a primitive type or 
+a reference type is passed.
+
+
+When you pass a primitive type to a method, it is passed by value. Thus, a copy of the argument is made, and 
+what occurs to the parameter that receives the argument has no effect outside the method. 
+
+When an object reference is passed to a method, the reference itself is passed by use of call-by-value. 
+However, since the value being passed refers to an object, the copy of that value will still refer to the 
+same object that its corresponding argument does.
+
+
+
+
+
+
+
+
+
+
