@@ -2,28 +2,33 @@
 WARNING :   THIS IS DUMBED DOWN AND INCOMPLETE (GENERICS NOT INCLUDED). GO READ DOCS FOR COMPREHENSIVE 
             UNDERSTANDING :)
 
-                    -----------------------------------------------------------------
-                    | Compile-Time Step 1: Determine Class or Interface to Search   |
-                    -----------------------------------------------------------------
+COMPILE TIME EVALUATION OF METHOD INVOCATION :
 
-https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.1
+--------------------------------------------------------------------------------------------------------------
+|                             Compile-Time Step 1: Determine Type to Search                                  |
+--------------------------------------------------------------------------------------------------------------
+
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.1
 The first step in processing a method invocation at compile time is to figure out the name of the method to be
 invoked and which class or interface to search for definitions of methods of that name.
 
+--------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
 
 
-                    -----------------------------------------------------------------
-                    | Compile-Time Step 2:  Determine Method Signature              |
-                    -----------------------------------------------------------------
 
-https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2
+--------------------------------------------------------------------------------------------------------------
+|                             Compile-Time Step 2: Determine Method Signature                                |
+--------------------------------------------------------------------------------------------------------------
+
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.2
 
 The second step searches the type determined in the previous step for member methods. This step uses the name 
 of the method and the argument expressions to locate methods that are both accessible and applicable, that is, 
 declarations that can be correctly invoked on the given arguments.
 
 
-https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.1
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.2.1
 The class or interface determined by compile-time step 1 is searched for all member methods that are potentially
 applicable to this method invocation; members inherited from superclasses and superinterfaces are included in 
 this search.
@@ -53,16 +58,16 @@ If several applicable methods have been identified during one of the three phase
 then the most specific one is chosen , as explained below.
 
 The descriptor (signature plus return type) of the most specific method is the one used at run time to perform 
-the method dispatch.
+the runtime method dispatch.
 
 
-https://docs.oracle.com/javase/specs/jls/se8/html/jls-5.html#jls-5.3  (invocation contexts)
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-5.html#jls-5.3  (invocation contexts)
 
 
 Phase 1: Identify Matching Arity Methods Applicable by Strict Invocation
 ------------------------------------------------------------------------
 
-    https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.2
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.2.2
     Let there be n arguments in the method invocation. Let "m" be n arity method with n parameters. Then "m" 
     is applicable by strict invocation if the arguments provided are compatible with their corresponding 
     parameter's type in a "strict invocation context". And by "strict invocation context" we mean that these 
@@ -83,7 +88,7 @@ Phase 1: Identify Matching Arity Methods Applicable by Strict Invocation
 Phase 2: Identify Matching Arity Methods Applicable by Loose Invocation
 -----------------------------------------------------------------------
 
-    https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.3
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.2.3
 
     Let there be n arguments in the method invocation. Let "m" be n arity method with n parameters. Then "m" 
     is applicable by Loose invocation if the arguments provided are compatible with their corresponding 
@@ -109,7 +114,7 @@ Phase 2: Identify Matching Arity Methods Applicable by Loose Invocation
 Phase 3: Identify Methods Applicable by Variable Arity Invocation
 -----------------------------------------------------------------
 
-    https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.4
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.2.4
 
     Let there be k arguments in the method invocation. Let "m" be variable arity method. Then "m" 
     is applicable by variable arity invocation if the "k" arguments provided are compatible with the
@@ -122,7 +127,7 @@ Phase 3: Identify Methods Applicable by Variable Arity Invocation
 Choosing the Most Specific Method
 ---------------------------------
 
-    https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.12.2.5
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.2.5
 
 If more than one member method is both accessible and applicable to a method invocation, it is necessary to 
 choose one to provide the descriptor for the run-time method dispatch. The Java programming language uses the 
@@ -180,4 +185,32 @@ Given a non-generic type declaration C, the direct supertypes of the type C are 
 If S and T are both reference types, then S[] >1 T[] iff S >1 T.
 
 
+--------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
 
+
+
+--------------------------------------------------------------------------------------------------------------
+|                             Compile-Time Step 3: Is the Chosen Method Appropriate?                         |
+--------------------------------------------------------------------------------------------------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.3
+
+If there is a most specific method declaration for a method invocation, it is called the compile-time 
+declaration for the method invocation.
+
+This step goes over a bunch of syntax rules that can be cross checked at compile time. For example :
+    
+    If the form is TypeName . [TypeArguments] Identifier, then the compile-time declaration must be static, or 
+    a compile-time error occurs.
+
+and many others like that (refer the docs).
+
+
+
+This is the last compile-time step , and after 
+
+
+
+
+--------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------

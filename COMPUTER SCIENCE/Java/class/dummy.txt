@@ -1,0 +1,10 @@
+The members of a class are all of the following:
+
+    Members inherited from its direct superclass type, except in the class Object, which has no direct superclass type
+
+    Members inherited from any direct superinterface types
+
+    Members declared in the body of the class
+
+
+

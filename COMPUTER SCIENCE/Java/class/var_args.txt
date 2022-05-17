@@ -1,0 +1,187 @@
+A method that takes a variable number of arguments is called a variable-arity method, or simply a varargs 
+method.
+
+
+A variable-length parameter is specified by three periods (...)  :
+
+                                Type...parameter
+
+by above syntax , "parameter" will implicitly be declared as an array of type "Type" i.e., "Type[]"
+
+
+Example 1 : 
+-----------
+    public class VarArgs{
+
+        static void vaTest(int...v){        /* v will implicitly be declared as int[]  */
+
+            System.out.print("Total number of args : " + v.length + " content : ");   /* since v is implicitly
+                                        * an array (int[]) , therefore we can use v.length to determine its
+                                        * size */ 
+            for(int x : v)
+                System.out.print(x + " ");
+
+            System.out.println();
+        }
+        
+        public static void main(String[] args){
+
+            vaTest(5);         
+            vaTest(4,7,8);     /* The arguments are automatically put into an array and passed to v   */
+            vaTest();          /* In case of no arguments , an empty array with size 0 is passed to v */
+        
+        }
+    }
+
+OUTPUT 1 :
+----------
+    Total number of args : 1 content : 5 
+    Total number of args : 3 content : 4 7 8 
+    Total number of args : 0 content : 
+
+
+
+A method can have “normal” parameters along with a variable-length parameter. However, the variable-length 
+parameter must be the last parameter declared by the method. For example, this method declaration is perfectly 
+acceptable:
+                            int doIt(int a, int b, double c, int ... vals) {
+
+In this case, the first three arguments used in a call to doIt( ) are matched to the first three parameters. 
+Then, any remaining arguments are assumed to belong to vals.
+
+
+the varargs parameter must be last. For example, the following declaration is incorrect:
+
+    int doIt(int a, int b, double c, int ... vals, boolean stopFlag) { // COMPILE-TIME ERROR
+
+
+
+There must be only one varargs parameter. For example, this declaration is also invalid:
+
+    int doIt(int a, int b, double c, int ... vals, double ... morevals) { // COMPILE-TIME ERROR
+
+
+
+
+
+
+EXAMPLE 2 : (OVERLOADING)
+-------------------------
+
+    public class VarArgs{
+
+        static void vaTest(int...v){       
+            // do-something
+        }
+
+        static void vaTest(boolean...v){       
+            // do-something
+        }
+
+        static void vaTest(String msg){        
+            // do-something
+        }
+        
+        public static void main(String[] args){
+
+            vaTest(4,7,8); /*
+            *   potentially applicable methods will be : vaTest(int...v)  vaTest(boolean...v)
+            *   strict invocation : neither applicable
+            *   loose invocation : neither applicable
+            *   variable-arity invocation : vaTest(boolean...v) not applicable since boolean not compatible with int by loose invocation
+            *                               vaTest(int...v) is applicable
+            *   appicable method(s) : vaTest(int...v)
+            *   */
+            vaTest(true,false,true,false);/*
+            *   potentially applicable methods will be : vaTest(int...v)  vaTest(boolean...v)
+            *   strict invocation : neither applicable
+            *   loose invocation : neither applicable
+            *   variable-arity invocation : vaTest(int...v) not applicable since int not compatible with boolean by loose invocation
+            *                               vaTest(boolean...v) is applicable
+            *   appicable method(s) : vaTest(boolean...v)
+            *   */
+            vaTest("end is near");/*
+            *   potentially applicable methods will be : vaTest(String msg) vaTest(int...v)  vaTest(boolean...v)
+            *   strict invocation : vaTest(String msg) is applicable
+            *   appicable method(s) : vaTest(String msg)
+            *   */
+        }
+    }
+
+
+
+
+
+
+EXAMPLE 3 : (AMBIGUITY)
+----------------------
+    public class VarArgs{
+
+        static void vaTest(int...v){       
+            //do something
+        }
+
+        static void vaTest(boolean...v){       
+            //do something
+        }
+
+        public static void main(String[] args){
+
+            vaTest(); /* COMPILE-TIME ERROR
+            *   potentially applicable methods will be : vaTest(int...v)  vaTest(boolean...v)
+            *   strict invocation : neither applicable
+            *   loose invocation : neither applicable
+            *   variable-arity invocation : vaTest(boolean...v) is applicable
+            *                               vaTest(int...v) is applicable
+            *   appicable method(s) : vaTest(int...v) vaTest(boolean...v)
+            *   most specific applicable method : none , hence method invocation is ambiguous and we get
+            *                                     compile-time error.
+            *   */
+        }
+    }
+
+
+EXAMPLE 4 : (AMBIGUITY)
+-----------------------
+
+
+    public class VarArgs{
+
+        static void vaTest(int...v){       
+            // do something
+        }
+
+        static void vaTest(int n ,int...v){       
+            // do something
+        }
+
+        public static void main(String[] args){
+
+            vaTest(5,6); /* COMPILE-TIME ERROR
+            *   potentially applicable methods will be : vaTest(int...v)  vaTest(int n ,int...v)
+            *   strict invocation : neither applicable
+            *   loose invocation : neither applicable
+            *   variable-arity invocation : vaTest(int n ,int...v) is applicable
+            *                               vaTest(int...v) is applicable
+            *   appicable method(s) : vaTest(int...v) vaTest(int n ,int...v)
+            *   most specific applicable method : none , hence method invocation is ambiguous and we get
+            *                                     compile-time error.
+            *   */
+
+            vaTest(); /*  OK
+            *   potentially applicable methods will be : vaTest(int...v)
+            *   strict invocation : not applicable
+            *   loose invocation : not applicable
+            *   variable-arity invocation : vaTest(int...v) is applicable
+            *   appicable method(s) : vaTest(int...v)
+            *   */            
+        }
+    }
+
+
+
+
+
+
+
+
