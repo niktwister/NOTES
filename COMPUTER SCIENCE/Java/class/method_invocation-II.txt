@@ -1,0 +1,395 @@
+RUNTIME EVALUATION OF METHOD INVOCATION :
+
+
+
+--------------------------------------------------------------------------------------------------------------
+|                             Run-Time Step 1: Compute Target Reference (If Necessary)                       |
+--------------------------------------------------------------------------------------------------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.4.1
+
+
+There are six cases to consider, depending on the form of the method invocation:
+
+1) If the form is    MethodName    - that is, just an Identifier - then:
+
+        -> If the invocation mode is static, then there is no target reference.
+
+        -> Otherwise, the target reference is the value of "this" there.
+
+
+2) If the form is    TypeName . [TypeArguments] Identifier   , then there is no target reference.
+
+
+3) If form is    ExpressionName . [TypeArguments] Identifier    , then:
+
+        -> If the invocation mode is static, then there is no target reference. The ExpressionName is evaluated, but the result is then discarded.
+
+        -> Otherwise, the target reference is the value denoted by ExpressionName.
+
+
+4) If the form is    Primary . [TypeArguments] Identifier     , then:
+
+        -> If the invocation mode is static, then there is no target reference. The Primary expression is 
+           evaluated, but the result is then discarded.
+
+        -> Otherwise, the Primary expression is evaluated and the result is used as the target reference.
+           For example ,
+                            Animal anml = new Mammal();
+
+                            anml.sleep();  /* For this invocation , the target reference is the reference 
+                                           to the Mammal object , stored in Animal reference type variable
+                                           "anml".
+                                           */  
+
+
+5) If the form is super . [TypeArguments] Identifier, then the target reference is the value of this.
+
+
+6) If the form is TypeName . super . [TypeArguments] Identifier, then if TypeName denotes a class, the target 
+   reference is the value of TypeName.this; otherwise, the target reference is the value of this.
+
+
+--------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
+
+
+
+
+--------------------------------------------------------------------------------------------------------------
+|                             Run-Time Step 2: Evaluate Arguments                                            |
+--------------------------------------------------------------------------------------------------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.4.2
+
+--------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
+
+
+
+What is the qualifying class or interface of the method invocation ?
+   https://docs.oracle.com/javase/specs/jls/se17/html/jls-13.html#jls-13.1
+
+   Given a method invocation expression or a method reference expression in a class or interface C, 
+   referencing a method named m declared (or implicitly declared) in a (possibly distinct) class or 
+   interface D, we define the qualifying class or interface of the method invocation as follows:
+
+   -> If D is Object then the qualifying class or interface of the method invocation is Object.
+
+   -> If the method is referenced by a simple name, then if m is a member of the current class or interface C, 
+      let Q be C; otherwise, let Q be the innermost lexically enclosing class or interface declaration of which
+      m is a member. In either case, Q is the qualifying class or interface of the method invocation.
+
+   -> If the expression is of the form TypeName.m , then the class or interface denoted by TypeName, is the 
+      qualifying class or interface of the method invocation.
+   
+   -> If the expression is of the form ExpressionName.m or Primary.m , then the compile-time type of 
+      ExpressionName or Primary is the qualifying class or interface of the method invocation.
+   
+   -> If the expression is of the form super.m, then the superclass of C is the qualifying class of the 
+      method invocation.
+
+   -> If the expression is of the form TypeName.super.m , then if TypeName denotes a class X, the superclass 
+      of X is the qualifying class or interface of the method invocation; if TypeName denotes an interface X, 
+      X is the qualifying class or interface of the method invocation.
+
+
+
+What does it mean to be a member of a class ?
+   https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.2
+
+   The members of a class are all of the following:
+
+      ->  Members inherited from its direct superclass type, except in the class Object, which has no direct 
+         superclass type.
+
+      ->  Members inherited from any direct superinterface types.
+
+      ->  Members declared in the body of the class.
+
+
+   Members of a class that are declared private are "technically" not inherited by subclasses of that class.
+
+   Constructors, static initializers, and instance initializers are not members and therefore are not inherited.
+
+
+
+What does it mean for a class to inherit a method ?
+   https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.8
+
+   A class C inherits from its direct superclass type D all concrete methods m (both static and instance) for 
+   which all of the following are true:
+
+      ->  m is a member of D.
+
+      ->  m is public, protected, or declared with package access in the same package as C.
+
+      ->  No method declared in C has a signature that is a subsignature of the signature of m as a member of 
+         D.
+
+   A class C inherits from its direct superclass type and direct superinterface types all abstract and default 
+   methods m for which all of the following are true:
+
+      -> m is a member of the direct superclass type or a direct superinterface type of C, known in either case 
+         as D.
+      
+      -> m is public, protected, or declared with package access in the same package as C.
+
+      -> No method declared in C has a signature that is a subsignature of the signature of m as a member of D.
+
+      -> No concrete method inherited by C from its direct superclass type has a signature that is a 
+         subsignature of the signature of m as a member of D.
+
+      -> There exists no method m' that is a member of the direct superclass type or a direct superinterface 
+         type of C, D' (m distinct from m', D distinct from D'), such that m' overrides from the class or 
+         interface of D' the declaration of the method m .
+
+      
+      A class does not inherit private or static methods from its superinterface types.
+
+
+
+What does it mean to override a method ?  Overriding (by Instance Methods)
+   https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.8.1
+
+   An instance method mC declared in or inherited by class C, overrides from C another method mA declared in 
+   class A, iff all of the following are true:
+
+   -> C is a subclass of A.
+
+   -> C does not inherit mA.
+
+   -> The signature of mC is a subsignature of the signature of mA as a member of the supertype of C that 
+      names A.
+   
+   One of the following is true:
+
+      -> mA is public.
+
+      -> mA is protected.
+
+      -> mA is declared with package access in the same package as C, and either C declares mC or mA is a 
+         member of the direct superclass type of C.
+
+      -> mA is declared with package access and mC overrides mA from some superclass of C.
+
+      -> mA is declared with package access and mC overrides a method m' from C (m' distinct from mC and mA), 
+         such that m' overrides mA from some superclass of C.
+
+   If mC is non-abstract and overrides from C an abstract method mA, then mC is said to "implement" mA from C.
+
+   It is a compile-time error if the overridden method, mA, is a static method. (In this respect, overriding of 
+   methods differs from hiding of fields , for it is permissible for an instance variable to hide a static 
+   variable.)
+
+   
+   An instance method mC declared in or inherited by class C, overrides from C another method mI declared in 
+   interface I, iff all of the following are true:
+
+      -> I is a superinterface of C.
+
+      -> mI is not static.
+
+      -> C does not inherit mI.
+
+      -> The signature of mC is a subsignature of the signature of mI as a member of the supertype of C that 
+         names I.
+
+      -> mI is public.
+
+
+
+What does it mean to hide a method ?  Hiding (by Class Methods)
+   https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.8.2
+
+   If a class C declares or inherits a static method m, then m is said to hide any method m' declared in a class
+   or interface A for which all of the following are true:
+
+      -> A is a superclass or superinterface of C.
+
+      -> If A is an interface, m' is an instance method.
+
+      -> m' is accessible to C.
+
+      -> The signature of m is a subsignature of the signature of m' as a member of the supertype of C that 
+         names A.
+
+   It is a compile-time error if a static method hides an instance method.
+
+
+
+--------------------------------------------------------------------------------------------------------------
+|                             Run-Time Step 3: Check Accessibility of Type and Method                        |
+--------------------------------------------------------------------------------------------------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.4.3
+
+In this section:
+
+    ->  Let D be the class containing the method invocation.
+
+    ->  Let Q be the qualifying class or interface of the method invocation .
+
+    ->  Let m be the name of the method as determined at compile time .
+
+
+An implementation of the Java programming language must ensure, as part of linkage, that the class or interface
+Q is accessible from D .
+
+
+The implementation must also ensure, during linkage, that the method m can still be found in Q or a superclass 
+or superinterface of Q (I am assuming that the implementation will search for method m among the members of Q).
+If m cannot be found, then a NoSuchMethodError occurs. If m can be found, then let C be the class or interface 
+that declares m. The implementation must ensure, during linkage, that the declaration of m in C is accessible 
+to D .
+
+
+--------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------
+|                             Run-Time Step 4: Locate Method to Invoke                                       |
+--------------------------------------------------------------------------------------------------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.4.4
+
+
+As in the previous step :
+
+   -> Let Q be the qualifying class or interface of the method invocation .
+
+   -> Let m be the method found in Q or a superclass or superinterface of Q. (Note that m was merely the name of
+      the method in the previous section (compile-time steps); here it is the actual declaration.)
+
+   -> Let C be the class or interface that declares m.
+
+The strategy for locating a method to invoke depends on the invocation mode:
+
+   -> If the invocation mode is "static", no target reference is needed and overriding is not allowed. Method m 
+      of class or interface C is the one to be invoked.
+
+   -> Otherwise, an instance method is to be invoked and there is a target reference. If the target reference is
+      null, a NullPointerException is thrown at this point. Otherwise, the target reference is said to refer to
+      a target object and will be used as the value of the keyword this in the invoked method. The other three 
+      possibilities for the invocation mode are then considered:
+
+         -> If the invocation mode is "super", overriding is not allowed. Method m of class or interface C is 
+            the one to be invoked. If m is abstract, an AbstractMethodError is thrown.
+
+         -> Otherwise, the invocation mode is interface or virtual.
+
+            If the method m of class or interface C is private, then it is the method to be invoked.
+
+            Otherwise, overriding may occur. A dynamic method lookup, specified below, is used to locate the 
+            method to invoke. The lookup procedure starts from class R, the actual run-time class of the target 
+            object.
+
+   
+The procedure for dynamic method lookup is as follows. Let S be the class to search, beginning with R. Then:
+
+   1. If class S contains a declaration for a method that overrides method m of class or interface C from R 
+      , then that overriding method is the method to be invoked, and the procedure terminates.
+   
+   2. Otherwise, if S has a superclass, then steps 1 and 2 of this lookup procedure are performed recursively
+      using the direct superclass of S in place of S; the method to be invoked, if any, is the result of the 
+      recursive invocation of this lookup procedure.
+
+   3. If no method is found by the previous two steps, the superinterfaces of S are searched for a suitable 
+      method.
+
+         A set of candidate methods is considered with the following properties: 
+            
+         (i)   each method is declared in a (direct or indirect) superinterface of R; 
+         (ii)  each method has the name and descriptor required by the method invocation; 
+         (iii) each method is non-static and non-private; 
+         (iv)  for each method, where the method's declaring interface is I, there is no other method 
+               satisfying (i) through (iii) that is declared in a subinterface of I.
+   
+         If this set contains a default method, one such method is the method to be invoked. Otherwise, an 
+         abstract method in the set is selected as the method to be invoked.
+
+
+Dynamic method lookup may cause the following errors to occur:
+
+   -> If the method to be invoked is abstract, an AbstractMethodError is thrown.
+
+   -> If the method to be invoked is default, and more than one default method appears in the set of candidates
+      in step 3 above, an IncompatibleClassChangeError is thrown.
+
+   -> If the invocation mode is interface and the method to be invoked is neither public nor private, an 
+      IllegalAccessError is thrown.
+
+
+
+--------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------
+|                             Run-Time Step 5: Create Frame, Synchronize, Transfer Control                   |
+--------------------------------------------------------------------------------------------------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.4.5
+
+
+--------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+Let's take an example to understand method inheritance and method overriding.
+
+
+Let E be a class that declares non-static public method m. Therefore we can say that m is a member of E.
+
+                                          E
+
+Let F be a class that extends E.
+
+                                          E
+                                          |
+                                          F
+
+Since m is a member of direct superclass of F , also m is neither private nor static , also F doesn't 
+declare any method m' that overrides m. Hence we can say that F inherits m.
+
+And since F inherits m from its direct superclass (E) , we can also say that m is a member of F.
+
+
+Let G be a class that extends F.
+
+
+                                          E
+                                          |
+                                          F
+                                          |
+                                          G
+
+Since m is a member of direct superclass of G  (F) , also m is neither private nor static , also G doesn't 
+declare any method m' that overrides m. Hence we can say that G inherits m.
+
+And since G inherits m from its direct superclass (F) , we can also say that m is a member of G.
+
+
+Let H be a class that extends G , but let H declares m' whose signature is a subsignature of the signature of
+m.
+
+                                          E
+                                          |
+                                          F
+                                          |
+                                          G
+                                          |
+                                          H
+
+
+m is a member of direct superclass of H (G) ,  also m is neither private nor static , BUT H does declare a 
+method m' whose signature is a subsignature of the signature of m. Therefore H does not inherit m. 
+
+
+m is declared in E , and H is a subclass of E . H does not inherit m . m' declared in H has a signature that
+is a subsignature of the signature of m declared in E. Therefore we can say that ,
+                                    m' overrides m from H.
+
+
+

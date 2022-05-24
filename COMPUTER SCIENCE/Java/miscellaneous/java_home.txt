@@ -1,0 +1,18 @@
+JAVA_HOME is a system environment variable that represents the JDK installation directory.
+
+The JAVA_HOME environment variable is not actually used by the locally installed Java runtime. Instead, other 
+programs installed on a desktop computer that require a Java runtime will query the OS for the JAVA_HOME 
+variable to find out where the runtime is installed. After the location of the JDK installation is found, those 
+programs can initiate Java-based processes, start Java virtual machines and use command line utilities such as 
+the Java archive utility or the Java compiler, both of which are packaged inside the Java installation's \bin directory.
+
+
+Programs that require the JAVA_HOME variable to be configured properly include:
+
+Eclipse, NetBeans and Android Studio
+Apache Tomcat
+Maven and ANT
+Gradle and Groovy
+Jenkins
+
+setting the JAVA_HOME variable : https://www.baeldung.com/find-java-home

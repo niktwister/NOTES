@@ -207,8 +207,29 @@ and many others like that (refer the docs).
 
 
 
-This is the last compile-time step , and after 
+This is the last compile-time step , and after this we perform run time evaluation of the method invocation.
 
+The following compile-time information is then associated with the method invocation for use at run time:
+
+    The name of the method.
+
+    The qualifying class or interface of the method invocation.
+
+    The number of parameters and the compile-time parameter types, in order.
+
+    The compile-time result.
+
+    The invocation mode, computed as follows:
+
+        ->  If the compile-time declaration has the static modifier, then the invocation mode is static.
+
+        ->  Otherwise, if the part of the method invocation before the left parenthesis is of the form 
+            "super.Identifier" or of the form "TypeName.super.Identifier", then the invocation mode is super.
+
+        ->  Otherwise, if the qualifying class or interface of the method invocation is in fact an interface, 
+            then the invocation mode is interface.
+
+        ->  Otherwise, the invocation mode is virtual.
 
 
 
