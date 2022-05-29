@@ -1,1 +1,3 @@
--> https://leetcode.com/problems/remove-nth-node-from-end-of-list/   (do it in one pass)
+->  https://leetcode.com/problems/remove-nth-node-from-end-of-list/   (fast - slow pointers)
+
+->  https://leetcode.com/problems/swap-nodes-in-pairs/

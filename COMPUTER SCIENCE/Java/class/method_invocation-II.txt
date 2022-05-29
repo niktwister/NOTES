@@ -64,6 +64,9 @@ https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.4.2
 --------------------------------------------------------------------------------------------------------------
 
 
+What is a method signature and subsignature ? 
+   https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.2
+
 
 What is the qualifying class or interface of the method invocation ?
    https://docs.oracle.com/javase/specs/jls/se17/html/jls-13.html#jls-13.1
@@ -150,7 +153,7 @@ What does it mean for a class to inherit a method ?
 What does it mean to override a method ?  Overriding (by Instance Methods)
    https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.8.1
 
-   An instance method mC declared in or inherited by class C, overrides from C another method mA declared in 
+   An instance method mC declared in or inherited by class C, "overrides from C" another method mA declared in 
    class A, iff all of the following are true:
 
    -> C is a subclass of A.
@@ -235,7 +238,8 @@ Q is accessible from D .
 
 
 The implementation must also ensure, during linkage, that the method m can still be found in Q or a superclass 
-or superinterface of Q (I am assuming that the implementation will search for method m among the members of Q).
+or superinterface of Q (I am assuming that the implementation will search for method m among the members of Q ,
+which will include methods declared in Q and methods inherited from direct superclass or direct superinterface).
 If m cannot be found, then a NoSuchMethodError occurs. If m can be found, then let C be the class or interface 
 that declares m. The implementation must ensure, during linkage, that the declaration of m in C is accessible 
 to D .
@@ -356,9 +360,10 @@ declare any method m' that overrides m. Hence we can say that F inherits m.
 And since F inherits m from its direct superclass (E) , we can also say that m is a member of F.
 
 
+
+
+
 Let G be a class that extends F.
-
-
                                           E
                                           |
                                           F
@@ -371,25 +376,90 @@ declare any method m' that overrides m. Hence we can say that G inherits m.
 And since G inherits m from its direct superclass (F) , we can also say that m is a member of G.
 
 
-Let H be a class that extends G , but let H declares m' whose signature is a subsignature of the signature of
-m.
 
-                                          E
+
+
+Let H be a class that extends G , but let H declare a non-static public method m' whose signature is a 
+subsignature of the signature of m.
+                                          E  <- declares m
                                           |
                                           F
                                           |
                                           G
                                           |
-                                          H
-
+                                          H  <- declares m'
 
 m is a member of direct superclass of H (G) ,  also m is neither private nor static , BUT H does declare a 
 method m' whose signature is a subsignature of the signature of m. Therefore H does not inherit m. 
 
+H does not inherit m , and it is not declared in H , hence m is not a member of H.
 
 m is declared in E , and H is a subclass of E . H does not inherit m . m' declared in H has a signature that
 is a subsignature of the signature of m declared in E. Therefore we can say that ,
                                     m' overrides m from H.
 
 
+
+
+
+Let I be the class that extends H. Since m is not the member of I's direct superclass (H) , therefore I 
+does not inherit m. On the other hand , m' is a member of H , m' is public and I does not declare any 
+method whose signature is subsignature of the signature of m'. Hence I inherits m'. And consequently m'
+is a member of I.
+
+                                          E  <- declares m
+                                          |
+                                          F  <- inherits m
+                                          |
+                                          G  <- inherits m
+                                          |
+                                          H  <- declares m'
+                                          |
+                                          I  <- inherits m'
+
+
+
+
+
+
+Now lets suppose we do a method invocation as follows :
+
+   G g = new I();
+
+   g.m();
+
+The target reference is stored in g , and the object of class I to which it points will be called the 
+target object.
+
+The Qualifying class Q i.e., the compile-time type of target reference "g" is "G" . 
+
+In runtime step-3 , JVM will look for the declaration of m among the members of class "G". "m" is member of
+class G but it is not declared in G. G inherits it from F and F inherits it from E. Since E declares the 
+method m , therefore we will call it class "C". 
+
+In runtime step-4 , the runtime class of the target object is I , therefore we will call it "R".
+
+
+                                          E  <- C ( declares m )
+                                          |
+                                          F 
+                                          |
+                                          G  <- Q ( qualifying class ) 
+                                          |
+                                          H 
+                                          |
+                                          I  <- R ( runtime class of the target object )
+
+Now in runtime step-4 , the dynamic method lookup will be performed. It will look for the class that declares
+a method which will override "from R" the method m declared in C.
+
+We will start from R (i.e., I). I does not declare any such methods , therefore we will now check its direct
+superclass i.e., H.
+H declares a method m'. Does m' override "from R" the method m declared in C ?
+   -> R declares or inherits m' ? yes
+   -> R is a subclass of C ? yes
+   -> R does not inherit m ? yes
+   -> m' has a signature that is subsignature of the signature of m ? yes
+Hence m' overrides "from R" the method m declared in C. Therefore the search will stop and m' will be the one 
+invoked.
 
