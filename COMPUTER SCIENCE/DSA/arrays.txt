@@ -1,16 +1,34 @@
 
 
-->  reverse an array : https://www.geeksforgeeks.org/write-a-program-to-reverse-an-array-or-string/
+problem     :   reverse an array
+link(s)     :   https://www.geeksforgeeks.org/write-a-program-to-reverse-an-array-or-string/  
+tags        :   
 
-->  kadane algo : https://www.youtube.com/watch?v=2MmGzdiKR9Y
-
-    kadane algo proof of correctness : https://quanticdev.com/algorithms/dynamic-programming/kadanes-algorithm
-
-->  sorted pair sum : https://www.geeksforgeeks.org/given-sorted-array-number-x-find-pair-array-whose-sum-closest-x/
-
-->  rotate array k times : https://www.geeksforgeeks.org/program-for-array-rotation-continued-reversal-algorithm/
+problem     :   maximum sum subarray
+links(s)    :   https://www.youtube.com/watch?v=2MmGzdiKR9Y
+                https://quanticdev.com/algorithms/dynamic-programming/kadanes-algorithm
+tags        :   (dynamic programming) (kadane's algo) 
 
 
+problem     :   sorted pair sum 
+links(s)    :   https://www.geeksforgeeks.org/given-sorted-array-number-x-find-pair-array-whose-sum-closest-x/
+tags        :   (two pointers approach)
+
+
+problem     :   rotate array k times
+links(s)    :   https://www.geeksforgeeks.org/program-for-array-rotation-continued-reversal-algorithm/
+tags        :
+
+
+problem     :   two sum 
+links(s)    :   https://leetcode.com/problems/two-sum/
+tags        :   (hash table)
+
+
+
+problem     :      
+links(s)    :
+tags        :
 
 
 

@@ -1,3 +1,16 @@
-->  https://leetcode.com/problems/remove-nth-node-from-end-of-list/   (fast - slow pointers)
+problem     :   remove nth node from end of LL
+links(s)    :   https://leetcode.com/problems/remove-nth-node-from-end-of-list/
+tags        :   (fast slow pointers)
 
-->  https://leetcode.com/problems/swap-nodes-in-pairs/
+
+
+problem     :   swaps nodes in pair 
+links(s)    :   https://leetcode.com/problems/swap-nodes-in-pairs/
+tags        :
+
+
+
+problem     :      
+links(s)    :
+tags        :
+
