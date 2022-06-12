@@ -583,7 +583,7 @@ being invoked.
     -> If the form is "super . [TypeArguments] Identifier", then the target reference is the value of this.
 
 
-Let D be the class containging method invocation. Let m be the name of method as determined at compile
+Let D be the class containing method invocation. Let m be the name of method as determined at compile
 time.
 
 Now we determine the qualifying class or interface Q of the method invocation.
