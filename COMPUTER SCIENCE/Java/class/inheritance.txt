@@ -1,0 +1,633 @@
+
+
+"extends" syntax :
+
+    class subclass-name extends superclass-name{
+        // body of class
+    }
+
+
+
+
+You can only specify one superclass for any subclass that you create. Java does not support the inheritance of 
+multiple superclasses into a single subclass. You can, although, create a hierarchy of inheritance in which a 
+subclass becomes a superclass of another subclass.
+
+
+A subclass "technically" does not inherit private members of its superclass. But ...
+    ->  the private method of superclass can be accessed indirectly through other methods (public, default, or
+        protected) of the superclass that are accessible to the subclass.
+
+    ->  Quoting this statement from Java SE specs :  
+        (https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.3.1.1)
+        "A field that is not declared static is called an instance variable, and sometimes called a non-static 
+        field. Whenever a new instance of a class is created , a new variable associated with that instance is 
+        created for every instance variable declared in that class or any of its superclasses."
+
+        Thus when an instance of a class is created, a new variable will be created (i.e., memory will be 
+        assigned) and associated with that instance , for every instance variable (private or not) declared in 
+        that class or any of its superclasses.
+
+    EXAMPLE : (ACCESSING PRIVATE MEMBERS OF SUPERCLASS)
+
+        
+        class X{
+
+            private int a;
+            public int b;
+
+            public X(int a,int b){
+                this.a = a;
+                this.b = b;
+            }
+
+            public void printAandB(){
+                System.out.println("private a from X : " + a);
+                System.out.println("public  b from X : " + b);
+            }
+
+            private void xPri(){
+                System.out.println("private method of X");
+            }
+
+            public void xPub(){
+                System.out.println("public method of X");
+                xPri();
+            }
+
+        }
+
+        class Y extends X{
+            public int c;
+            
+            public Y(int a,int b,int c){
+                super(a,b); /*  this will call the constructor of X, which in turn will initialize the instance
+                                variables (both public and private) of X. */
+                this.c = c;
+            }
+
+            public void printAll(){
+                printAandB();   /*  printAandB() is a public method of X inherited by Y , through this we will 
+                                    access and display both the public and private instance variable from X.*/
+                System.out.println("public  c from Y : " + c);       
+            }
+
+            public void yPub(){
+                System.out.println("public method of Y");
+                xPub(); /*  public method of X i.e., xPub() is inherited by Y , through which private method of 
+                            X i.e., xPri() will be called. */
+            }
+
+        }
+
+
+        public class Tester{
+            public static void main(String[] args){
+
+                Y y = new Y(1,2,5);
+
+                y.yPub();
+
+                y.printAll();
+                
+            }
+        }
+
+        OUTPUT :
+
+            public method of Y
+            public method of X
+            private method of X
+            private a from X : 1
+            public  b from X : 2
+            public  c from Y : 5
+
+
+
+**Static members are also inherited from superclass.
+
+EXAMPLE : (INHERITANCE OF STATIC MEMBERS)
+    class Parent{
+
+        static int a = 30;
+
+        static void parentStaticMethod(){
+            System.out.println("you have called the static method of Parent");
+        }
+
+    }
+
+    class Child extends Parent{}
+
+
+    public class Tester{
+        public static void main(String[] args){
+
+            Child.a = 20;   /* A subclass will inherit a static variable from a superclass , but a new copy of 
+                that static variable will not be created for the subclass. Subclass will get the access to the
+                same copy of static variable that belongs to the superclass.
+                
+                In this example , Child is accessing the same "a" that belongs to Parent. Thus changing its
+                value through Child will change it value for Parent too. */
+
+            System.out.println("static a of Parent  : " + Parent.a);
+
+            Child.parentStaticMethod(); /*  static method of Parent is inherited by Child and hence
+                    can be called using Child */
+        }
+    }
+
+OUTPUT : 
+    static a of Parent  : 20
+    you have called the static method of Parent
+
+
+
+
+
+hiding of fields 
+----------------
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.3
+
+    If a class declares a field with a certain name, then the declaration of that field is said to hide any 
+    and all accessible declarations of fields with the same name in superclasses, and superinterfaces of the 
+    class.    
+
+    There is no distinction drawn between static and non-static fields in field hiding.
+
+    A hidden field can be accessed by using a qualified name if it is static, or by using a field access 
+    expression that contains the keyword super or a cast to a superclass type.
+
+    If a field declaration hides the declaration of another field, the two fields need not have the same type.
+    It is also permissible for a static variable to hide an instance variable.
+
+    A class inherits from its direct superclass and direct superinterfaces all the non-private fields of the 
+    superclass and superinterfaces that are both accessible to code in the class and not hidden by a declaration
+    in the class.
+
+    It is possible for a class to inherit more than one field with the same name, either from its superclass 
+    and superinterfaces or from its superinterfaces alone. Such a situation does not in itself cause a compile-
+    time error. However, any attempt within the body of the class to refer to any such field by its simple name 
+    will result in a compile-time error, because the reference is ambiguous.
+
+    EXAMPLE : (hiding of fields)
+
+    class A{int a = 20;}
+
+    class B extends A{double a = 30;}  /*  The "a" declared in B will hide the "a" declared in A hence B will
+            "technically" not inherit the "a" declared in A.  Hence we can say that "a" declared in A is not
+            a member of B. */
+
+        /*  Also notice how "a" declared in B is hiding the "a" declared in A even though they have 
+            different types.    
+         */
+
+    class C extends B{void print(){System.out.println(a);}} /*  Since "a" declared in A is not a member of B , 
+            therefore C will only inherit the "a" declared in B itself. Hence we will get the output "30.0" .
+            But note that the object of class C WILL contain both the "a"(s)    */
+
+
+    public class Tester{
+
+        public static void main(String[] args) {
+            
+            C c = new C();
+
+            c.print();
+
+        }
+
+    }
+
+    OUTPUT :
+    30.0
+
+
+
+
+
+
+**A superclass reference variable can store a reference to a subclass object.
+
+In compile time step-1 of resolving the method invocation i.e., "Determine Type to Search", it is mentioned
+that :
+    "If the form is ExpressionName . [TypeArguments] Identifier, then the type to search is the 
+    declared type T of the variable denoted by ExpressionName if T is a class or interface type, 
+    or the upper bound of T if T is a type variable."
+
+    Thus if the ref variable  of a  parent class is storing a ref to the object of a child class. Then  upon 
+some method invocation through the ref variable , it is the type of ref var i.e., the parent class that will 
+be searched for the method invoked.
+Thus the parent class should atleast have a member (declared or inherited) method that matches our invoked 
+method , otherwise we will get a compile time error. ( Note that  whether the matched member method of the 
+parent class is the one to be  invoked , will be decided after  going through the run-time steps of method 
+invocation , which takes into account possible method overriding). For e.g., 
+
+        Object ob = new String("Hello");    /* Every class is a subclass of Object class */
+
+        int len1 = ob.length(); /*  COMPILE-TIME ERROR , since Object class doesn't have any method called 
+                                    length()  */
+
+        int len2 = ((String)ob).length();   /* OK , now the type of "ob" will be String */
+
+
+
+
+now coming to accessing fields ,    (https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.11)
+   
+    The specs says that if the field access expression is "Primary.Identifier" , 
+            let T be the reference type of Primary expression. Then Identifier should name an accessible 
+            member field in type T. 
+
+    The specs also states that if the field is non-static , then at run-time the result is a variable, namely 
+    the named member field in type T found in the object referenced by the value of the Primary.
+
+    If the field is static , then at run-time  the result is a variable, namely, the specified class variable 
+    in the class that is the type of the Primary expression.
+
+Thus if the ref variable of a parent class is storing a ref to an object of a child class. Then if we try
+accessing some non-static field through the ref variable , then the type of ref var i.e., the parent class 
+should have that field as its member (declared or inherited). And the value of the field access expression 
+(evaluated at run-time) will be the value of that parent class's "member field" from the object of child class
+(i.e., the object being referenced by the ref variable ) . 
+
+EXAMPLE : (ACCESSING FIELD THROUGH SUPERCLASS REF VARIABLE)
+
+    class Box{
+        int length;
+        int width;
+        int height;
+
+        Box(int l,int w,int h){
+            length = l;
+            width = w;
+            height = h;
+        }
+    }
+
+    class BoxWeight extends Box{
+        int weight;
+
+        BoxWeight(int l,int w,int h,int wt){
+            super(l,w,h);
+            weight = wt;
+        }
+
+    }
+
+    public class Tester{
+        public static void main(String[] args){
+
+            Box bx = new BoxWeight(10,20,30,500);
+
+            System.out.println("Box length : " + bx.length);    /*  since length field is present in Box , 
+                    hence there will be no error , and bx.length will evaluate to value of length in BoxWeight 
+                    object i.e., 10. */
+            System.out.println("Box width : " + bx.width);  /* OK , will evaluate to 20 */
+            System.out.println("Box height : " + bx.height); /* OK , will evaluate to 30 */
+            System.out.println("Box weight : " + bx.weight); /* COMPILE-TIME ERROR , since the reference 
+                variable type Box doesn't have any field called weight as its member , even though the 
+                object being referenced (i.e., object of BoxWeight) does have one. */
+
+        }
+    }
+
+OUTPUT : (After commenting the error)
+
+    Box length : 10
+    Box width : 20
+    Box height : 30
+
+
+EXAMPLE : (ACCESSING FIELD THROUGH SUPERCLASS REF VARIABLE)
+    class Parent{
+        String name;
+        String address;
+
+        Parent(String name,String address){
+            this.name = name;
+            this.address = address;
+        }
+
+    }
+
+    class Child extends Parent{
+        String name;
+
+        Child(String parentName,String childName,String address){
+            super(parentName,address);
+
+            this.name = childName;  /*  "name" declared in Child will hide the "name" declared in Parent. */
+        }
+        
+    }
+
+
+    public class Tester{
+        public static void main(String[] args){
+
+            Parent p ; Child c;
+
+            p = c = new Child("Mr.Donovan","Denise","California");
+
+            System.out.println(p.name); /*  There are two variables called "name" in the object of Child class.
+                One is declared in Child class , and the other is inherited from Parent. When a Parent class 
+                ref variable tries to access "name" from Child class object , it will fetch the value of the 
+                one that is member of the Parent class. Hence we will get the output "Mr.Donovan". */
+            
+            System.out.println(c.name); /*  The "name" declared in Child class will hide the "name" declared 
+                in Parent class. Hence technically Child class will not inherit the "name" declared in Parent.
+                In other words "name" declared in Parent will not be a member field of Child class. Now when we 
+                access the "name" through a Child class ref type , we should get the value "name" (from the obj) 
+                which is the member field of Child class. Hence the o/p will be "Denise" */
+            
+            System.out.println(p.address); /*   "California"    */
+            
+            System.out.println(c.address); /* Child class will inherit the "address" declared in Parent class,
+                since it doesn't declare any field named "address" itself. Hence "address" declared in Parent
+                will be a member field of Child class , whose value will be returned when we try to access the
+                "address" (in obj) through Child class ref type. */
+        }
+    }
+
+OUTPUT : 
+    Mr.Donovan
+    Denise
+    California
+    California
+
+
+
+super keyword
+-------------
+
+    There are two ways in which "super" can be used :
+
+    1)  calling the constructor of the immediate superclass
+
+        A subclass can call a constructor defined by its immediate superclass by use of the following form of 
+        super:
+                                                super(arg-list);
+        Here, arg-list specifies any arguments needed by the constructor in the immediate superclass. super( ) 
+        must always be the first statement executed inside a subclass’ constructor.
+
+        Since constructors can be overloaded, super( ) can be called using any form defined by the immediate
+        superclass. The constructor executed will be the one that matches the arguments.
+
+    2)  access a member of the immediate superclass , usually that has been hidden by a member of a subclass. 
+
+        This usage has the following general form:
+                                                super.member
+        
+        Here, member can be either a method (static / non-static) or an instance variable. 
+
+        Where can "super" be used in a class ? The forms using the keyword "super" may be used in the locations 
+        within a class declaration that allow the keyword "this" as an expression. Thus "super" cannot be used
+        in a static context.
+        https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.11.2
+
+        why can't we use "super.member" from a static context ? Lets assume for a moment that it is allowed.
+        Now what if somebody tries to access superclass's instance variable from a static method of the
+        subclass using "super". Wouldn't make sense , right ? 
+
+
+EXAMPLE : (USING SUPER.MEMBER and SUPER())
+
+    class X{
+        int a;
+
+        X(int aX){
+            a = aX;
+        }
+
+        static void staticMeth(){
+            System.out.println("This is the static method of X");
+        }
+    }
+
+    class Y extends X{
+
+        double a;   /*  This declaration of "a" will hide the "a" declared in X. Thus Y "technically" won't
+                        inherit the "a" declared in X. In other words "a" declared in X is not a member of Y. */
+
+        Y(int aX,double aY){
+            super(aX);          /*  Using super to call the constructor of immediate superclass. This
+                                    should always be on the first line of subclass's constructor. */
+            a = aY;
+        }
+
+        static void staticMeth(){   /*  This will hide the staticMeth() declaration in the superclass X. */
+            System.out.println("This is the static method of Y");
+        }
+
+        void print(){
+            System.out.println("a of Y : " + a);    /* Since "a" is an instance variable therefore this is 
+                    equivalent to "this.a" , where this is a reference variable of type Y and pointing to 
+                    the object on which this method was invoked. Thus it should fetch the value of "a" (from 
+                    current object) which is member field of class Y. The "a" declared in superclass X is not 
+                    a member field of Y . But the "a" declared in Y is a member field of Y , hence its value 
+                    will be fetched. */
+
+            System.out.println("a of X : " + super.a);  /*  Even though the "a" declared in X is not a member
+                    of Y , the object of Y will contain both the "a"(s). We can access the "a" member field
+                    of immediate superclass using super. */
+            
+            staticMeth();   /*  The staticMeth() declared in Y will hide the staticMeth() declared
+                    in superclass X , hence staticMeth() declared in Y will be called. */
+
+            super.staticMeth(); /*  We can invoke the staticMeth() declared in superclass X using super. */
+        }
+    }
+
+    public class Tester{
+        public static void main(String[] args) {
+            Y y = new Y(10,20);
+
+            y.print();
+        }
+    }
+
+
+OUTPUT:
+    a of Y : 20.0
+    a of X : 10
+    This is the static method of Y
+    This is the static method of X
+    
+
+
+
+The order of execution of constructors in a multilevel hierarchy
+----------------------------------------------------------------
+
+       In a class hierarchy, constructors complete their execution from superclass to subclass. This is the
+    reason why the superclass's constructor is called using super(...) on the very first line of subclass's
+    constructor. Because this way , superclass's constructor will be executed before subclass’s constructor.
+
+       If the subclass's constructor explicitly doesn't call the superclass's constructor using super(...) , 
+    even then superclass's parameter-less constructor (or in case no constructor is explicitly defined for 
+    superclass then "default constructor") will be called by JVM before executing any line of code in 
+    subclass’s constructor.  
+
+    EXAMPLE 1 : (ORDER OF EXECUTION OF CONSTRUCTOR)
+
+        class A{
+            A(){System.out.println("constructor of A");}
+        }
+
+        class B extends A{
+            B(){System.out.println("constructor of B");}    /* This will call the parameter-less constructor of
+                    A i.e., A() before executing any statements. */
+        }
+
+        class C extends B{
+            C(){System.out.println("constructor of C");}   /* This will call the parameter-less constructor of
+                    B i.e., B() before executing any statements. */ 
+        }
+
+        public class Tester{
+            public static void main(String[] args) {
+                C c = new C();
+            }
+        }
+
+    OUTPUT :
+        constructor of A
+        constructor of B
+        constructor of C
+
+
+    
+    EXAMPLE 2 : 
+
+        class A{
+            int a;
+            A(int a){this.a = a;}
+        }
+
+        class B extends A{
+            B(){}               /*  COMIPLE-TIME ERROR . Constructor of B is not explicitly calling constructor
+                    of A using super(...) , therefore JVM will try to call the parameter-less constructor of A,
+                    but that isn't defined explicitly. So next JVM will try to create a default constructor for
+                    A , but JVM can't do that since A has explicitly defined its own constructor. Hence the 
+                    compile-time error. */
+        }
+
+
+method overriding and dynamic-method dispatch
+---------------------------------------------
+
+    In a class hierarchy, when an instance method in a subclass has the same name and type signature as an
+    instance method in its superclass, then the method in the subclass is said to override the method in 
+    the superclass.
+
+    It is a compile-time error if an instance method tries to override a class method.
+
+    If a method m' in subclass override a method m in superclass , then "technically" subclass will not 
+    inherit m from its superclass . m will not be a member of subclass.
+
+
+
+    (dynamic method dispatch)
+    Call to overridden methods are resolved at run-time. 
+
+    We know that a superclass ref variable can refer to a subclass object. When an overridden method is called 
+    through a superclass reference, Java determines which version of that method to execute based upon the type 
+    of the object being referred to at the time the call occurs. 
+    In other words, it is the type of the object being referred to (not the type of the reference variable) 
+    that determines which version of an overridden method will be executed.
+    
+    Consider an example below :
+
+                                              Animal
+                                              / | \
+                                             /  |  \
+                                          Dog  Cat  Rat
+
+    class Animal has three subclasses Dog , Cat , and Rat. Lets assume Animal declares an instance method 
+    called eat() , which all three of its subclasses overrides.
+
+    If eat() is called through a reference variable of type Animal :
+                                 <ref variable of type Animal>.eat();        
+
+    If ref variable of Animal refers to Dog object at run-time, then eat() declared in Dog class will be called.
+    If ref variable of Animal refers to Cat object at run-time, then eat() declared in Cat class will be called.
+    If ref variable of Animal refers to Rat object at run-time, then eat() declared in Rat class will be called.
+
+    And of course if ref variable of Animal refers to Animal object at run-time, then eat() declared in Animal 
+    class will be called. (no overriding in this case)
+
+
+SIMPLIFIED AND DUMBED-DOWN VERSION OF HOW METHOD INVOCATION IS RESOLVED AT RUN-TIME
+-----------------------------------------------------------------------------------
+full version :-  https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.4
+
+We first compute the target reference. It is basically the reference to the object on which method is 
+being invoked.
+
+    -> If the invocation form is just "MethodName" then ,
+            
+            If invocation mode is static , no target reference.
+            
+            Otherwise, target reference is the value of "this".
+    
+    -> If invocation form is "TypeName . [TypeArguments] Identifier" , then no target reference.
+
+    -> If form is "ExpressionName . [TypeArguments] Identifier", then:
+
+            If the invocation mode is static, then there is no target reference. The ExpressionName is 
+            evaluated, but the result is then discarded.
+
+            Otherwise, the target reference is the value denoted by ExpressionName.
+
+    -> If the form is "super . [TypeArguments] Identifier", then the target reference is the value of this.
+
+
+Let D be the class containging method invocation. Let m be the name of method as determined at compile
+time.
+
+Now we determine the qualifying class or interface Q of the method invocation.
+
+    -> If the method is referenced by a simple name, then if m is a member of the current class or interface D,
+       then qualifying class or interface is D.
+    
+    -> If the expression is of the form TypeName.m  , qualifying class is TypeName.
+
+    -> If the expression is of the form ExpressionName.m or Primary.m , the qualifying class is the compile
+       time type of ExpressionName or Primary.
+
+    -> If the expression is of the form super.m , the superclass of D is the qualifying class.
+
+
+
+JVM will look among the members (declared or inherited) of  Q , for the invoked method m. If no such method 
+is found we will get run-time error , otherwise if it is found then let C be the class or interface that 
+"declares" m. Note that C will either be D or some superclass or superinterface of D.
+
+
+Now we locate the method as follows :
+
+    -> if invocation mode is static , overriding is not allowed and method m of C is the one to be invoked.
+
+    Otherwise ,  an instance method is to be invoked and there is a target reference. If target reference
+    is null , then we get run-time error else the target reference is said to refer to a target object.
+
+        ->  If the invocation mode is super, overriding is not allowed. Method m of class or interface C is 
+            the one to be invoked.
+        
+        -> Otherwise, the invocation mode is interface or virtual.
+
+            If the method m of class or interface C is private, then it is the method to be invoked.
+
+            Otherwise, overriding may occur. A dynamic method lookup, is used to locate the method to invoke
+            as follows : 
+                Let R be the run-time class of target object.   
+                1. S = R.
+                2. Look for a method m' declared in S , that matches the method m declared in C.
+                3. If found then , m' is the method to be invoked.
+                   else , let S = (direct superclass of S) and goto step 2.
+
+                If no such method is found in superclasses of R , its superinterfaces are searched.  
+
+
+
