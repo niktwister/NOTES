@@ -1,0 +1,123 @@
+
+
+abstract methods
+----------------
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.3.1
+
+    An abstract method declaration introduces the method as a member, providing its signature, result, and 
+    throws clause if any, but does not provide an implementation. A method that is not abstract may be referred 
+    to as a concrete method.
+
+    Syntax :
+                abstract type name(parameter-list);
+
+    The declaration of an abstract method m must appear directly within an abstract class (lets call it X) 
+    ; otherwise, a compile-time error occurs.
+
+    A subclass of X that is not abstract must provide an implementation for m (i.e., override), or a 
+    compile-time error occurs.
+
+    An abstract class can override an abstract method by providing another abstract method declaration.
+
+    An instance method that is not abstract can be overridden by an abstract method.
+
+
+    NOTE : you cannot declare abstract constructors, or abstract static methods.
+
+
+
+abstract classes
+----------------
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.1.1.1
+
+    It is a compile-time error if an attempt is made to create an instance of an abstract class using a class
+    instance creation expression.
+
+    A class that contains abstract method(s) (declared or inherited) must itself be declared abstract ; 
+    otherwise, compile-time error occurs. 
+    
+    On the other hand an abstract class may or may not contain any abstract method(s). They may or may not
+    contains any concrete method(s).  
+
+    Let X be an abstract class. Any subclass of X must override (or in other words "provide an implementation")
+    for any abstract method that is a member of X ; otherwise the subclass will inherit those abstract methods
+    and hence must be declared abstract itself.
+
+
+
+
+Although abstract classes cannot be used to instantiate objects, they can be used to create object references, 
+because Java’s approach to run-time polymorphism is implemented through the use of superclass references. 
+Thus, it must be possible to create a reference to an abstract class so that it can be used to point to a 
+non-abstract subclass's object. 
+
+EXAMPLE :
+
+    abstract class Figure{
+
+        double dim1;
+        double dim2;
+
+        Figure(double dim1,double dim2){
+            this.dim1 = dim1;
+            this.dim2 = dim2;
+        }
+
+        abstract double area();
+    }
+
+
+    class Rectangle extends Figure{
+
+        Rectangle(double length,double width){
+            super(length,width);
+        }
+
+        double area(){      /*  Overriding the abstract method "area()" of abstract superclass "Figure" */
+            return this.dim1 * this.dim2;
+        }
+
+    }
+
+
+    class Triangle extends Figure{
+
+        Triangle(double base,double height){
+            super(base,height);
+        }
+
+        double area(){      /*  Overriding the abstract method "area()" of abstract superclass "Figure" */
+            return this.dim1 * this.dim2 * 0.5;
+        }
+
+    }
+
+
+    public class Tester{
+
+        public static void main(String[] args) {
+            
+            Figure figref;      /*  We cannot instantiate an abstract class , but we can create its reference 
+                                    variable. */
+
+            figref = new Rectangle(20, 20);
+            System.out.println("area of Rectangle : " + figref.area()); /*  Since Figure ref variable is
+                    pointing to an object of class Rectangle , therefore area() declared in Rectangle will
+                    be called. This is run-time polymorphism.*/
+
+
+            figref = new Triangle(20, 20);
+            System.out.println("area of Triangle : " + figref.area()); /*  Since Figure ref variable is
+                    pointing to an object of class Triangle , therefore area() declared in Triangle will
+                    be called. This is run-time polymorphism. */
+        }
+    }
+
+
+OUTPUT : 
+
+    area of Rectangle : 400.0
+    area of Triangle : 200.0
+
+
+

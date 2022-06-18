@@ -28,3 +28,28 @@ again. Example ,
 
         }
     }
+
+
+
+final methods 
+-------------
+
+    A method can be declared final to prevent subclasses from overriding or hiding it.
+
+    It is a compile-time error to attempt to override or hide a final method.
+
+
+final classes
+-------------
+
+    A class can be declared final if its definition is complete and no subclasses are desired or required , 
+    which means that a final class cannot be inherited.
+
+    Declaring a class as final implicitly declares all of its methods as final, too.
+
+    It is a compile-time error if a class is declared both final and abstract. 
+    REASON: An abstract only serves a meaningful purpose if it has subclasses that overrides its abstract
+            methods. But a final class can never have a subclass , the methods of a final class can never be
+            overriden. Hence it wouldn't make sense to declare a class as both abstract and final.
+
+

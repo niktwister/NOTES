@@ -588,8 +588,10 @@ time.
 
 Now we determine the qualifying class or interface Q of the method invocation.
 
-    -> If the method is referenced by a simple name, then if m is a member of the current class or interface D,
-       then qualifying class or interface is D.
+    -> If the method is referenced by a simple name, then if m is a member of the current class or interface D, 
+       let Q be D; otherwise, let Q be the innermost lexically enclosing class or interface declaration 
+       (enclosing the method invocation expression) "of which m is a member". In either case, Q is the 
+       qualifying class or interface of the method invocation.
     
     -> If the expression is of the form TypeName.m  , qualifying class is TypeName.
 
@@ -629,5 +631,127 @@ Now we locate the method as follows :
 
                 If no such method is found in superclasses of R , its superinterfaces are searched.  
 
+
+
+
+
+Object class
+------------
+
+    A class that doesn't explicitly extends any other class , will implicitly extend the Object class.
+
+    For example :
+
+            consider class A and B such that B and C extends A.
+
+            class A{...}
+
+            class B extends A{...}
+
+            class C extends A{...}
+
+            The class hierarchy looks something like :
+
+                                                A
+                                               / \
+                                              B   C
+            
+            Since class A is not explicitly extending any other class , it will implicitly extend the Object
+            class. So in reality , the class hierarchy will look something like :
+
+                                                Object
+                                                |
+                                                A
+                                               / \
+                                              B   C
+
+    Since Object will always be at the top of every class hierarchy , therefore we can say that Object class
+    is a superclass to every other class , either directly or indirectly.  
+
+    Since Object is a superclass to every other class , a reference variable of type Object can be used to 
+    hold a reference to the object of any class. 
+
+    The Object class declares many methods that will be inherited by every class (unless some other class 
+    overrides that method along the class hierarchy!!).
+
+        1.  public String toString()
+
+            The toString( ) method returns a string that contains a description of the object on which it is 
+            called. Also, this method is automatically called when an object is output using println( ). 
+
+            We can override this method to tailor the string description of our class's instances. 
+
+        2.  public boolean equals(Object object)
+
+            The equals( ) method compares two objects. It returns true if the objects are equal, and false 
+            otherwise.
+    
+            We can override this method to specifically define the conditions of equality for the instances
+            of our class.
+
+    
+    
+    EXAMPLE :  TOSTRING AND EQUALS
+
+        class Student{  /* Student class will directly extends the Object class. */
+
+            private String studentID;
+            private String name;
+            private int age;
+
+            public Student(String studentID,String name,int age){
+                this.studentID = studentID;
+                this.name = name;
+                this.age = age;
+            }
+            
+            public String toString(){   /* overriding the toString() method of the Object class , to tailor
+                    the string description of Student class's objects. */
+                return "Student("+"studentID : "+this.studentID+", name : "+this.name+", age : "+this.age+")";
+            }
+
+            public boolean equals(Object ob){   /* overriding the equals(Object) method of the Object class. */
+
+                if(ob instanceof Student){  /* Let "R" be the run-time type of the object to which "ob" is
+                        pointing. Then "instanceof" operator will return "true" if R is "Student" or any of
+                        its subclasses; otherwise it will return false. This way we're making sure that the
+                        object will have the Student class fields , before we try to access them. */
+
+                    if( this.studentID == ((Student)ob).studentID ) /* we have to typecast "ob" to Student type,
+                        since compile-time type of ref variable "ob" i.e., Object , will not have a member field
+                        called "studentID". */
+                        return true;
+                    else
+                        return false;
+                }else
+                    return false;
+
+            }
+
+        }
+
+
+        public class Tester{
+            public static void main(String[] args) {
+                
+                Student s1 = new Student("CS2003", "nikunj", 12);
+                Student s2 = new Student("CS3004", "nikunj", 14);
+
+                System.out.println(s1); /*  s1 will be converted to string by calling toString() method
+                                            declared in class Student. */
+                                            
+                System.out.println(s2); /*  s2 will be converted to string by calling toString() method
+                declared in class Student. */
+
+                System.out.println("Are they same ? " + s1.equals(s2));
+
+            }
+        }
+
+    OUTPUT :
+
+        Student(studentID : CS2003, name : nikunj, age : 12)
+        Student(studentID : CS3004, name : nikunj, age : 14)
+        Are they same ? false
 
 
