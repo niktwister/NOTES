@@ -3,14 +3,53 @@ links(s)    :   https://leetcode.com/problems/remove-nth-node-from-end-of-list/
 tags        :   (fast slow pointers)
 
 
+problem     :   cycle detection and finding the node where cycle begins.      
+links(s)    :   https://leetcode.com/problems/linked-list-cycle-ii/
+                https://leetcode.com/problems/linked-list-cycle/
+tags        :   (fast slow pointers)(Floyd cycle detection algo)
 
-problem     :   swaps nodes in pair 
-links(s)    :   https://leetcode.com/problems/swap-nodes-in-pairs/
+
+problem     :   merge two sorted linked lists
+links(s)    :   https://leetcode.com/problems/merge-two-sorted-lists/
 tags        :
 
 
+problem     :   reverse singly linked list
+links(s)    :   https://leetcode.com/problems/reverse-linked-list/
+tags        :
 
-problem     :      
+
+problem     :   reverse linked list from node A to B
+links(s)    :   https://leetcode.com/problems/reverse-linked-list-ii/
+solution    :   best solution in "ELEMENTS OF PROGRAMMING INTERVIEW JAVA" SECTION 8.2
+tags        :
+
+
+problem     :   reverse doubly linked list
+links(s)    :   https://www.geeksforgeeks.org/reverse-a-doubly-linked-list/
+tags        :
+
+
+problem     :   
 links(s)    :
 tags        :
 
+
+problem     :   
+links(s)    :
+tags        :
+
+
+problem     :   
+links(s)    :
+tags        :
+
+
+problem     :   
+links(s)    :
+tags        :
+
+
+problem     :   
+links(s)    :
+tags        :

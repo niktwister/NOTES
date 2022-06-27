@@ -1,0 +1,321 @@
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html
+
+An interface declaration introduces a new reference type whose members are classes, interfaces, constants, 
+and methods. 
+
+This type has no instance variables, and typically declares one or more abstract methods; otherwise 
+unrelated classes can implement the interface by providing implementations for its abstract methods. 
+**Interfaces may not be directly instantiated.
+
+
+An interface may be declared to be a direct extension of one or more other interfaces (multiple inheritance), 
+meaning that it inherits all the member classes and interfaces, instance methods, and static fields of the 
+interfaces it extends, except for any members that it may override or hide.
+
+A class may be declared to directly implement one or more interfaces, meaning that any instance of the class 
+implements all the abstract methods specified by the interface or interfaces. A class necessarily implements 
+all the interfaces that its direct superclasses and direct superinterfaces do. This (multiple) interface 
+inheritance allows objects to support (multiple) common behaviors without sharing a superclass.
+
+
+Unlike a class, an interface cannot be declared "final". However, an interface may be declared "sealed" to 
+limit its subclasses and subinterfaces.
+
+
+A variable whose declared type is an interface type may have as its value a reference to any instance of a 
+class which implements the specified interface. It is not sufficient that the class happen to implement all 
+the abstract methods of the interface; the class or one of its superclasses must actually be declared to 
+implement the interface, or else the class is not considered to implement the interface.
+
+
+NOTE :  If a class includes an interface but does not fully implement the methods required by that interface, 
+        then that class must be declared as "abstract". Its subclasses must implement the remaining methods
+        or be declared "abstract" themselves.
+
+A simplified general form of an interface :
+
+    access interface name{
+        type varname1 = value1;
+        type varname2 = value2;
+        ...
+        type varnameN = valueN;
+
+        return-type method-name1(parameter-list);
+        return-type method-name2(parameter-list);
+        ...
+        return-type method-nameN(parameter-list);
+    }
+
+syntax for implementing interface(s) :
+
+    class classname [extends superclass] [implements interface [,interface...]] {
+        // class-body
+    }
+
+
+superinterfaces and subinterfaces
+---------------------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.1.3
+
+    If an extends clause is provided, then the interface being declared extends each of the specified interface 
+    types and therefore inherits the member classes, member interfaces, instance methods, and static fields of 
+    each of those interface types.
+
+    The specified interface types are the direct superinterface types of the interface being declared.
+
+    Any class that implements the declared interface is also considered to implement all the interfaces that 
+    this interface extends.
+
+    An interface I is a superinterface of interface K if either of the following is true:
+
+        ->  I is a direct superinterface of K.
+
+        ->  Where J is a direct superinterface of K, I is a superinterface of J, applying this definition 
+            recursively.
+
+    An interface is said to be a direct subinterface of its direct superinterface, and a subinterface of each 
+    of its superinterfaces.
+
+    While every class is an extension of class Object, there is no single interface of which all interfaces 
+    are extensions.
+
+
+Interface members
+-----------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.2
+
+    The members of an interface type are:
+
+        ->  Members declared in the body of the interface.
+
+        ->  Members inherited from any direct superinterfaces.
+
+    
+    The interface inherits, from the interfaces it extends, all members of those interfaces, except for 
+    (i) fields, classes, and interfaces that it hides, 
+    (ii) abstract methods and default methods that it overrides, 
+    (iii) private methods, and 
+    (iv) static methods.
+
+
+
+fields (constants) declaration
+------------------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.3
+
+    Every field declaration in the body of an interface is implicitly public, static, and final. It is permitted
+    to redundantly specify any or all of these modifiers for such fields.
+
+    Every declarator in a field declaration of an interface must have a variable initializer, or a compile-time
+    error occurs.
+
+    The initializer need not be a constant expression. At run time, the initializer is evaluated and the field 
+    assignment performed exactly once, when the interface is initialized .
+
+    If the interface declares a field with a certain name, then the declaration of that field is said to hide 
+    any and all accessible declarations of fields with the same name in superinterfaces of the interface.
+
+    NOTE : 
+        It is possible for an interface to inherit more than one field with the same name. Such a situation 
+        does not in itself cause a compile-time error. However, any attempt within the body of the interface to 
+        refer to any such field by its simple name will result in a compile-time error, because such a reference 
+        is ambiguous. (CHECK EXAMPLE BELOW)
+
+    NOTE :
+        There might be several paths by which the same field declaration might be inherited from an interface. 
+        In such a situation, the field is considered to be inherited only once, and it may be referred to by 
+        its simple name without ambiguity. (CHECK EXAMPLE BELOW)
+
+    
+    EXAMPLE : (AMBIGUOUS INHERITED FIELDS)
+    --------------------------------------
+
+        interface BaseColors {
+            int RED = 1, GREEN = 2, BLUE = 4;
+        }
+
+        interface RainbowColors extends BaseColors {
+            int YELLOW = 3, ORANGE = 5, INDIGO = 6, VIOLET = 7;
+        }
+
+        interface PrintColors extends BaseColors {
+            int YELLOW = 8, CYAN = 16, MAGENTA = 32;
+        }
+
+        interface LotsOfColors extends RainbowColors, PrintColors {
+            int FUCHSIA = 17, VERMILION = 43, CHARTREUSE = RED+90;
+        }
+
+        /*  the interface LotsOfColors inherits two fields named YELLOW. This is all right as long as the 
+            interface does not contain any reference by simple name to the field YELLOW.
+
+            Even if interface PrintColors were to give the value 3 to YELLOW rather than the value 8, a 
+            reference to field YELLOW within interface LotsOfColors would still be considered ambiguous.
+        */
+
+        /*  If a single field is inherited multiple times from the same interface because, for example, both 
+            this interface and one of this interface's direct superinterfaces extend the interface that 
+            declares the field, then only a single member results. This situation does not in itself cause a 
+            compile-time error.
+
+            In the previous example, the fields RED, GREEN, and BLUE are inherited by interface LotsOfColors in
+            more than one way, through interface RainbowColors and also through interface PrintColors, but the 
+            reference to field RED in interface LotsOfColors is not considered ambiguous because only one actual
+            declaration of the field RED is involved.
+        */
+
+
+method declaration
+------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.4
+
+    A method in the body of an interface declaration may be declared public or private. If no access modifier 
+    is given, the method is implicitly public. It is permitted, but discouraged as a matter of style, to 
+    redundantly specify the public modifier for a method declaration in an interface declaration.
+
+    A default method is a method that is declared in an interface with the "default" modifier; its body is 
+    always represented by a block. It provides a default implementation for any class that implements the 
+    interface without overriding the method. Default methods are distinct from concrete methods, which are 
+    declared in classes, and from private interface methods, which are neither inherited nor overridden.
+
+    An interface can declare static methods, which are invoked without reference to a particular object.
+    static interface methods are distinct from default methods, abstract interface methods, and non-static 
+    private interface methods, all of which are instance methods.
+
+    An interface method lacking a private, default, or static modifier is implicitly abstract. Its body is 
+    represented by a semicolon, not a block. It is permitted, but discouraged as a matter of style, to 
+    redundantly specify the abstract modifier for such a method declaration.
+
+    NOTE :  It is a compile-time error if a method is declared with more than one of the modifiers "abstract", 
+            "default", or "static".
+
+    NOTE :  It is a compile-time error if an interface method declaration that contains the keyword private 
+            also contains the keyword abstract or default. It is permitted for an interface method declaration 
+            to contain both private and static.
+    
+    A method in an interface may be generic.
+
+
+Inheritance and overriding
+--------------------------
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.4.1
+
+    An interface I inherits from its direct superinterfaces all abstract and default methods m for which 
+    all of the following are true:
+
+        ->  m is a member of a direct superinterface, J, of I.
+
+        ->  No method declared in I has a signature that is a subsignature of the signature 
+            of m.
+
+        ->  There exists no method m' that is a member of a direct superinterface, J', of I 
+            ( m distinct from m', J distinct from J' ),  such that m' overrides from J' the 
+            declaration of the method m. (CHECK EXAMPLE BELOW)
+
+
+    The third clause above basically prevents a subinterface from re-inheriting a method that has already 
+    been overridden by another of its superinterfaces. For example, in this program:
+
+        interface Top {
+            default String name() { return "unnamed"; }
+        }
+        interface Left extends Top {
+            default String name() { return getClass().getName(); }
+        }
+        interface Right extends Top {}
+
+        interface Bottom extends Left, Right {}
+
+        /*  Right inherits name() from Top, but Bottom inherits name() from Left, not Right. This is 
+            because name() from Left overrides the declaration of name() in Top.
+        */
+
+    An interface does not inherit private or static methods from its superinterfaces.
+
+    NOTE :  If an interface I declares a private or static method m, and the signature of m is a subsignature 
+            of a public instance method m' in a superinterface type of I, and m' would otherwise be accessible 
+            to code in I, then a compile-time error occurs.
+
+    
+    Overriding (by Instance Methods)
+    --------------------------------
+
+        An instance method mI, declared in or inherited by an interface I, overrides from I another instance 
+        method, mJ, declared in interface J, iff all of the following are true:
+
+            ->  I is a subinterface of J.
+
+            ->  I does not inherit mJ.
+
+            ->  The signature of mI is a subsignature of the signature of mJ as a member of the supertype of I 
+                that names J.
+
+            ->  mJ is public.
+
+    Requirements in overriding
+    --------------------------
+        https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.4.1.2
+
+        https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.8.3
+
+        There are some requirements that must be fulfilled when overriding a method. For example consider 
+        "access modifier" of the overriding method. We cannot give any "access modifier" to the overriding
+        method , it will depend upon the "access modifier" of the overriden method as follows :
+
+            ->  If the overridden or hidden method is public, then the overriding or hiding method must be 
+                public; otherwise, a compile-time error occurs.
+
+            ->  If the overridden or hidden method is protected, then the overriding or hiding method must be 
+                protected or public; otherwise, a compile-time error occurs.
+
+            ->  If the overridden or hidden method has package access, then the overriding or hiding method 
+                must not be private; otherwise, a compile-time error occurs.
+
+
+Interface Method Body
+---------------------
+
+    A default method has a block body. This block of code provides an implementation of the method in the event 
+    that a class implements the interface but does not provide its own implementation of the method.
+
+    A private or static interface method also has a block body, which provides the implementation of the method.
+
+    It is a compile-time error if an interface method declaration is abstract (explicitly or implicitly) and has
+    a block for its body.
+
+    It is a compile-time error if an interface method declaration is default, private, or static, and has a 
+    semicolon for its body.
+
+
+
+Member Class and Interface Declarations
+---------------------------------------
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.5
+
+    An interface body may contain declarations of member classes and member interfaces.
+    
+    Every member class or interface declaration in the body of an interface declaration is implicitly public 
+    and static. It is permitted to redundantly specify either or both of these modifiers.
+
+    It is a compile-time error if a member class or interface declaration in an interface has the modifier 
+    protected or private.
+
+    If an interface declares a member class or interface with a certain name, then the declaration of the 
+    member class or interface is said to hide any and all accessible declarations of member classes and 
+    interface with the same name in superinterfaces of the interface.
+
+    An interface inherits from its direct superinterfaces all the member classes and interfaces of the direct 
+    superinterfaces that are not hidden by a declaration in the interface.
+
+    It is possible for an interface to inherit more than one member class or interface with the same name. 
+    Such a situation does not in itself cause a compile-time error. However, any attempt within the body of 
+    the interface to refer to any such member class or interface by its simple name will result in a compile-
+    time error, because the reference is ambiguous.
+
+    There might be several paths by which the same member class or interface declaration is inherited from an 
+    interface. In such a situation, the member class or interface is considered to be inherited only once, and 
+    it may be referred to by its simple name without ambiguity.
+
+
+
+

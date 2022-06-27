@@ -558,6 +558,25 @@ method overriding and dynamic-method dispatch
     class will be called. (no overriding in this case)
 
 
+    Requirements in overriding
+    --------------------------
+        https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.8.3
+
+        There are some requirements that must be fulfilled when overriding a method. For example consider 
+        "access modifier" of the overriding method. We cannot give any "access modifier" to the overriding
+        method , it will depend upon the "access modifier" of the overriden method as follows :
+
+            ->  If the overridden or hidden method is public, then the overriding or hiding method must be 
+                public; otherwise, a compile-time error occurs.
+
+            ->  If the overridden or hidden method is protected, then the overriding or hiding method must be 
+                protected or public; otherwise, a compile-time error occurs.
+
+            ->  If the overridden or hidden method has package access, then the overriding or hiding method 
+                must not be private; otherwise, a compile-time error occurs.
+
+
+
 SIMPLIFIED AND DUMBED-DOWN VERSION OF HOW METHOD INVOCATION IS RESOLVED AT RUN-TIME
 -----------------------------------------------------------------------------------
 full version :-  https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.4
