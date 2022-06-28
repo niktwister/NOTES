@@ -78,8 +78,8 @@ A simplified general form of an interface :
 
 
 
-superinterfaces and subinterfaces
----------------------------------
+superinterfaces and subinterfaces (of an interface)
+---------------------------------------------------
 https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.1.3
 
     If an extends clause is provided, then the interface being declared extends each of the specified interface 
@@ -124,8 +124,8 @@ https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.2
 
 
 
-fields (constants) declaration
-------------------------------
+fields (constants) declaration (in an interface)
+------------------------------------------------
 https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.3
 
     Every field declaration in the body of an interface is implicitly public, static, and final. It is permitted
@@ -190,8 +190,8 @@ https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.3
         */
 
 
-method declaration
-------------------
+method declaration (in an interface)
+------------------------------------
 https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.4
 
     A method in the body of an interface declaration may be declared public or private. If no access modifier 
@@ -221,8 +221,8 @@ https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.4
     A method in an interface may be generic.
 
 
-Inheritance and overriding
---------------------------
+Inheritance and overriding (in an interface)
+--------------------------------------------
 https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.4.1
 
     An interface I inherits from its direct superinterfaces all abstract and default methods m for which 
@@ -313,14 +313,17 @@ Interface Method Body
 
 
 
-Member Class and Interface Declarations
----------------------------------------
+Member Class and Interface Declarations (of an interface)
+---------------------------------------------------------
     https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.5
 
     An interface body may contain declarations of member classes and member interfaces.
     
     Every member class or interface declaration in the body of an interface declaration is implicitly public 
     and static. It is permitted to redundantly specify either or both of these modifiers.
+
+    NOTE :  A nested interface is implicitly static. That is, every member interface and local interface is 
+            static , irrespective of whether the enclosing type is a class or an interface.
 
     It is a compile-time error if a member class or interface declaration in an interface has the modifier 
     protected or private.
