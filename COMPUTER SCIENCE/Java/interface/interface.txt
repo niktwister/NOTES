@@ -7,19 +7,53 @@ This type has no instance variables, and typically declares one or more abstract
 unrelated classes can implement the interface by providing implementations for its abstract methods. 
 **Interfaces may not be directly instantiated.
 
-
 An interface may be declared to be a direct extension of one or more other interfaces (multiple inheritance), 
 meaning that it inherits all the member classes and interfaces, instance methods, and static fields of the 
 interfaces it extends, except for any members that it may override or hide.
 
-A class may be declared to directly implement one or more interfaces, meaning that any instance of the class 
-implements all the abstract methods specified by the interface or interfaces. A class necessarily implements 
-all the interfaces that its direct superclasses and direct superinterfaces do. This (multiple) interface 
-inheritance allows objects to support (multiple) common behaviors without sharing a superclass.
-
-
 Unlike a class, an interface cannot be declared "final". However, an interface may be declared "sealed" to 
 limit its subclasses and subinterfaces.
+
+superinterfaces of a class
+--------------------------
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.1.5
+
+    A class may be declared to directly implement one or more interfaces. Such interfaces will be called
+    the direct superinterfaces of the class.
+
+    An interface I is a superinterface of class C if any of the following is true:
+
+        ->  I is a direct superinterface of C.
+
+        ->  C has some direct superinterface J for which I is a superinterface.
+
+        ->  I is a superinterface of the direct superclass of C.
+
+    A class is said to directly implement its direct superinterfaces, and to implement all of its 
+    superinterfaces.
+
+    A class is said to be a direct subclass of its direct superinterfaces, and a subclass of all of its 
+    superinterfaces.
+
+    The optional "implements" clause in a class declaration specifies the direct superinterface types of the 
+    class being declared. syntax for implementing interface(s) :
+
+        class classname [extends superclass] [implements interface [,interface...]] {
+            // class-body
+        }
+
+
+    Unless the class being declared is abstract, all the abstract member methods of each direct superinterface 
+    must be implemented either by a declaration in this class or by an existing method declaration inherited 
+    from the direct superclass or a direct superinterface, because a class that is not abstract is not 
+    permitted to have abstract methods.
+
+    Each default method of a superinterface of the class may optionally be overridden by a method in the class; 
+    if not, the default method is typically inherited and its behavior is as specified by its default body.
+
+    It is permitted for a single method declaration in a class to implement methods of more than one 
+    superinterface.
+
 
 
 A variable whose declared type is an interface type may have as its value a reference to any instance of a 
@@ -27,10 +61,6 @@ class which implements the specified interface. It is not sufficient that the cl
 the abstract methods of the interface; the class or one of its superclasses must actually be declared to 
 implement the interface, or else the class is not considered to implement the interface.
 
-
-NOTE :  If a class includes an interface but does not fully implement the methods required by that interface, 
-        then that class must be declared as "abstract". Its subclasses must implement the remaining methods
-        or be declared "abstract" themselves.
 
 A simplified general form of an interface :
 
@@ -46,11 +76,6 @@ A simplified general form of an interface :
         return-type method-nameN(parameter-list);
     }
 
-syntax for implementing interface(s) :
-
-    class classname [extends superclass] [implements interface [,interface...]] {
-        // class-body
-    }
 
 
 superinterfaces and subinterfaces
