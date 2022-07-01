@@ -14,8 +14,8 @@ interfaces it extends, except for any members that it may override or hide.
 Unlike a class, an interface cannot be declared "final". However, an interface may be declared "sealed" to 
 limit its subclasses and subinterfaces.
 
-superinterfaces of a class
---------------------------
+superinterfaces (of a class)
+----------------------------
     https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.1.5
 
     A class may be declared to directly implement one or more interfaces. Such interfaces will be called
@@ -76,6 +76,9 @@ A simplified general form of an interface :
         return-type method-nameN(parameter-list);
     }
 
+
+NOTE :  A nested interface can be declared as public, private, or protected. This differs from a top-level 
+        interface, which must either be declared as public or use the default access level.
 
 
 superinterfaces and subinterfaces (of an interface)
@@ -297,6 +300,20 @@ https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.4.1
                 must not be private; otherwise, a compile-time error occurs.
 
 
+    Inheriting Methods with Override-Equivalent Signatures
+    ------------------------------------------------------
+
+        If an interface I inherits a default method whose signature is override-equivalent with another method 
+        inherited by I, then a compile-time error occurs. (This is the case whether the other method is 
+        abstract or default.)
+        Otherwise , if both the inherited methods are abstract then there is no problem and interface is
+        considered to inherit both the methods. 
+
+        Naturally, when two different default methods with matching signatures are inherited by a subinterface, 
+        there is a behavioral conflict. The error can be avoided by declaring a new method that overrides, and 
+        thus prevents the inheritance of, all conflicting methods.
+
+
 Interface Method Body
 ---------------------
 
@@ -346,4 +363,66 @@ Member Class and Interface Declarations (of an interface)
 
 
 
+
+
+ambiguities of multiple inheritance (in a class)
+------------------------------------------------
+
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.8
+
+    https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.8.4
+
+
+    Let C be a class. Let's assume that C implements two interfaces I & J.
+
+
+    case i  :   I is a superinterface of J , such that method m' in J overrides a method m in I.
+
+                Both I and J have a common method , therefore based on the rule of inheritance for a 
+                class, C will only inherit the overriding method from J i.e., m' , and will not inherit 
+                the overriden method from I i.e., m'. (irrespective of whether m and m' are abstract or
+                default)
+
+                If C inherit an equivalent concrete method m'' (signature of m'' is a subsignature of the signature
+                of m') from its superclass , then according to the rules of inheritance for a class , C will not 
+                inherit m' from J either. (irrespective of whether m' is abstract or default)
+
+                If C declares a method m'' (concrete or abstract) (signature of m'' is a subsignature of the 
+                signature of m') , then also according to the rules of inheritance , C will not inherit m' 
+                from J. (irrespective of whether m' is abstract or default)
+
+                If C inherited an equivalent abstract method m'' from its superclass , then technically C will
+                inherit both m' and m'' w/o any issue. But C must be declared an abstract class. Any subclass
+                of C must override m'' if they doesn't want to be declared abstract themselves , and in that
+                process they will end up overriding m' too :) 
+
+
+
+    case ii :   I and J are unrelated. Both declare equivalent method m & m' (overridde-equivalent signature).
+
+                If C inherit an equivalent concrete method m'' from its superclass , then m'' will override both 
+                m and m' irrespective of whether they are default or abstract. m and m' will not be inherited
+                by C.
+
+                Similarly , if C declares an equivalent method m'' (concrete or abstract) , then also m'' will
+                override both m & m' irrespective of whether they are default or abstract. m & m' will not
+                be inherited by C.
+
+                If C inherits an equivalent abstract method m'' from its superclass , then technically m''
+                will not hinder the inheritance of m & m'. Thus technically C will inherit all of them :
+                m, m', & m'' (irrespective of whether m & m' are default or abstract) . But class C must 
+                be declared abstract. Any subclass of C must override all 3 of them if it doesn't want to
+                be declared abstract itself.
+
+
+                If C is not declaring or inheriting (from its superclass) any method equivalent to m & m'. 
+                Then if either of m or m' is a default method , we will get compile-time error. Else if 
+                both of them are abstract , then the class C must be declared as abstract.
+
+
+
+
+
+
+    
 
