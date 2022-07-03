@@ -411,18 +411,20 @@ ambiguities of multiple inheritance (in a class)
                 If C inherits an equivalent abstract method m'' from its superclass , then technically m''
                 will not hinder the inheritance of m & m'. Thus technically C will inherit all of them :
                 m, m', & m'' (irrespective of whether m & m' are default or abstract) . But class C must 
-                be declared abstract. Any subclass of C must override all 3 of them if it doesn't want to
-                be declared abstract itself.
+                be declared abstract. Any subclass of C must override all 3 of them with a single concrete
+                equivalent method  if it doesn't want to be declared abstract itself.
 
 
                 If C is not declaring or inheriting (from its superclass) any method equivalent to m & m'. 
-                Then if either of m or m' is a default method , we will get compile-time error. Else if 
-                both of them are abstract , then the class C must be declared as abstract.
+                Then if either of m or m' is a default method , then technically C will inherit both m &
+                m' but we will get a compile-time error. 
+                Else if both m & m' are abstract , then also C will inherit both of them w/o any issue but 
+                the class C must be declared as abstract.
 
 
 
 
 
 
-    
+
 
