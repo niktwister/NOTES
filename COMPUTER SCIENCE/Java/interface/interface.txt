@@ -426,5 +426,366 @@ ambiguities of multiple inheritance (in a class)
 
 
 
+EXAMPLE 1: (RUN-TIME POLYMORPHISM WITH INHERITANCE)
+---------------------------------------------------
 
+    import java.lang.Math;
+
+    interface Polygon{
+        double area();  /*  area() is implicitly public and abstract. */
+    }
+
+    class Rectangle implements Polygon{
+        double length;
+        double width;
+
+        Rectangle(double l,double w){
+            length = l;
+            width = w;
+        }
+
+        public double area(){           /*  The access modifier of the overriden method is public , therefore
+                according to one of the requirements of overriding , the overriding method should also have 
+                public access modifier. */
+            return length * width;
+        }
+    }
+
+    class Circle implements Polygon{
+        double radius;
+
+        Circle(double r){radius = r;}
+
+        public double area(){
+            return Math.PI * radius * radius;
+        }
+
+    }
+
+
+    public class Tester{
+
+        public static void main(String[] args) {
+            
+            Polygon polygon;    /*  interface reference type can store a reference to any class that
+                                    implements it. */
+            Rectangle rectangle = new Rectangle(10, 20);
+            Circle  circle = new Circle(20);
+
+            /* (case I)  */ 
+            polygon = rectangle;    
+            System.out.println("area of rectangle : " + polygon.area());     
+
+            /* (case II)  */ 
+            polygon = circle;
+            System.out.println("area of rectangle : " + polygon.area());
+
+
+
+            /* 
+            * According to the method invocation compile-time step 1, the type to search for the method
+            * area() would be the compile-time type of reference var polygon i.e., interface "Polygon". 
+            * Hence area() should be a member of "Polygon" , otherwise we would get compile-time error.
+            * 
+            * When an interface reference variable is used to refer to the object of a class implementing
+            * the interface , then using that interface reference variable we can access only those methods 
+            * of the class that are known to the interface. 
+            *   
+            */
+
+
+            /* Dynamic method dispatch will work here exactly as one would expect i.e., the method called
+            * would depend upon the "type" of object being referenced and not the "type" of the reference
+            * variable.
+            * Thus when reference var of type "Polygon" is referring to an object of type "Rectangle" , 
+            * the area() of class Rectangle will be called. And when reference var of type "Polygon" is
+            * referring to an object of type "Circle" , the area() of class Circle will be called.
+            */
+            
+            
+            /* 
+            * Resolving  the method invocation "polygon.area()" at run-time :
+            *  method (m) => area
+            *  invocation mode => interface
+            *  Qualifying class or interface (Q) =>  Polygon
+            *  class or interface declaring the method (C) => Polygon
+            *  run-time type of the target object (R) => (case I) Rectangle  
+            *                                            (case II) Circle
+            *  
+            *  Now a method declaration of "m" will be searched "up the class heirarchy" of R , starting
+            *  from R. If not found , then superinterfaces of R will be searched.
+            *  
+            *  (case I) R (i.e., Rectangle) contains a declaration of "m" , therefore the method declared
+            *           in R is invoked.  
+            *  
+            *  (case II) R (i.e., Circle) contains a declaration of "m" , therefore the method declared
+            *            in R is invoked.   
+            */
+        }
+
+    }
+
+OUTPUT 1 :
+----------
+    area of rectangle : 200.0
+    area of rectangle : 1256.6370614359173
+
+
+
+
+EXAMPLE 2 : (NESTED INTERFACE)
+------------------------------
+
+    class OuterClassA{
+
+        interface nestedInterface{  /* nested interface are implicitly static */
+
+            int field = 30; /* fields are implicitly public, static and final. MUST be initialized
+                *   during declaration. */
+            void method();
+        }
+
+    }
+
+    class OuterClassB implements OuterClassA.nestedInterface{   /* fully qualified name of the nested
+            *   interface must be used outside its enclosing class */
+
+        public void method(){   /* overriding the method() */
+            System.out.println("implementation of method in OuterClassB.");
+        }
+
+    }
+
+
+    public class Tester2 {
+        public static void main(String[] args) {
+            
+            OuterClassA.nestedInterface in = new OuterClassB(); /* using interface's reference variable to 
+                *   refer to an object of a class implementing the interface. */
+
+            in.method();
+
+            System.out.println(OuterClassA.nestedInterface.field);  /*  accessing the static "field" of the 
+                *   nested interface */
+
+        }
+    }
+
+OUTPUT 2 :
+----------
+    implementation of method in OuterClassB.
+    30
+
+
+
+
+EXAMPLE 3 : (DEFAULT METHODS)
+-----------------------------
+
+    interface I{
+
+        default void meth1(){
+            System.out.println("meth1() of interface I");
+        }
+
+        default void meth2(){
+            System.out.println("meth2() of interface I");
+        }
+
+    }
+
+
+    class A implements I{
+
+        public void meth1(){    /* this will override the default method meth1() of I */
+            System.out.println("meth1() of class A");        
+        }
+
+    }
+
+
+    class B extends A{}
+
+
+    public class Tester3 {
+        public static void main(String[] args) {
+            
+            B b = new B();
+
+            b.meth1();
+            /* method (m) -> meth1
+            * qualifying class or interface (Q) -> B
+            * class or interface declaring m (C) -> A
+            * runtime class of the target object (R) -> B
+            * 
+            * The superclasses of R will be searched for a declaration of the method m , if not found ,
+            * then superinterfaces of R will searched. Since A (direct superclass of R) contains a declaration 
+            * of method m therefore the declaration in class A will be invoked.  
+            */
+
+            b.meth2();
+            /* method (m) -> meth2
+            * qualifying class or interface (Q) -> B
+            * class or interface declaring m (C) -> A
+            * runtime class of the target object (R) -> B
+            * 
+            * The superclasses of R will be searched for a declaration of the method m , if not found ,
+            * then superinterfaces of R will searched.
+            * 
+            * No superclass of R contains a declaration for method m. Therefore we will search the
+            * superinterfaces of R. I is a superinterface of R ( because I is a superinterface of 
+            * the direct superclass of R ) , and it is the only one. I does contain an implementation
+            * of method m (as a default method) , therefore the declaration in interface I will be 
+            * invoked.
+            */
+
+        }
+    }
+
+OUTPUT 3:
+---------
+    meth1() of class A
+    meth2() of interface I
+
+
+
+
+EXAMPLE 4 : (IMPLEMENTING INTERFACES THAT ARE RELATED TO EACH OTHER)
+--------------------------------------------------------------------
+
+    interface I{
+        default void meth(){
+            System.out.println("meth() of interface I");
+        }
+    }
+
+    interface J extends I{
+        default void meth(){
+            System.out.println("meth() of interface J");
+        }
+    }
+
+
+    class A implements I,J{}
+
+    public class Tester4 {
+        public static void main(String[] args) {
+            
+            A a = new A();
+
+            a.meth();
+            /* https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.4.8
+            *  
+            * method (m) -> meth
+            * 
+            * One of the condition that must be true for a class to inherit an abstract or default method m 
+            * from its direct superclass / superinterface : 
+            *       There exists no method m' that is a member of the direct superclass type or a direct 
+            *       superinterface type of C, D' (m distinct from m', D distinct from D'), such that m' 
+            *       overrides from the class or interface of D' the declaration of the method m.
+            * 
+            *  This condition will not hold good for method meth() declared in I (direct superinterface of A).
+            *  Because method meth() declared in J (another direct superinterface of A) will override the meth()
+            *  declared in I , since J extends I.
+            * 
+            *  Hence A will not inherit the meth() declared in I , and only inherit the meth() declared in J.
+            *  
+            * 
+            * https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.12.4.4
+            * 
+            * Now at run-time , 
+            * method (m) -> meth
+            * run-time class of the target object (R) -> A
+            * 
+            * since superclasses of R doesn't declare method m , therefore superinterfaces I & J will be 
+            * searched for declaration of method m. 
+            * 
+            * A set of candidate methods is considered with the following properties: 
+            *      (i)   each method is declared in a (direct or indirect) superinterface of R; 
+            *      (ii)  each method has the name and descriptor required by the method invocation; 
+            *      (iii) each method is non-static and non-private; 
+            *      (iv)  for each method, where the method's declaring interface is X, there is no other method 
+            *            satisfying (i) through (iii) that is declared in a subinterface of X.
+            * 
+            * The method m declared in I will not satisfy (iv), therefore it will not even be considered as a
+            * candidate. Method m declared in J will be the only candidate , and since it is a default method
+            * therefore it will be the one that gets invoked.
+            * 
+            */
+
+        }
+    }
+
+OUTPUT 4 :
+----------
+    meth() of interface J
+
+
+
+
+EXAMPLE 5 : (CALLING A METHOD IN DEFAULT METHOD)
+------------------------------------------------
+
+    interface I{
+
+        default void defMeth(){
+            meth(); 
+            /* Consider the scenario when this method is being invoked in main() at run-time :
+            *  meth() is equivalent to "this.meth()". Reference type of "this" will be I and it will be
+            *  pointing to an object of class A. Thus ,
+            *  Qualifying class or interface (Q) -> I
+            *  class or interface declaring the method (C) -> I
+            *  run-time class of the target object (R) -> A
+            * 
+            *  At first R and its superclasses will be searched for a declaration of meth() , if no 
+            *  declaration is found , then superinterfaces of R will be searched.
+            * 
+            *  Since R contains a declaration of meth() , therefore the meth() declared in R i.e., A 
+            *  will be invoked.
+            */
+        }
+
+        void meth();
+
+    }
+
+
+    class A implements I{
+
+        public void meth(){
+            System.out.println("meth() of class A");
+        }
+
+    }
+
+
+    public class Tester5 {
+
+        public static void main(String[] args) {
+            
+            I i = new A();
+
+            i.defMeth();
+            /*
+            * method (m) -> defMeth
+            * Qualifying class or interface (Q) -> I
+            * class or interface declaring the method (C) -> I
+            * run-time class of the target object (R) -> A
+            * 
+            * At first R and its superclasses will be searched for a declaration of defMeth() , but since
+            * they don't contain any declaration of defMeth() , therefore superinterfaces of R will be searched
+            * for a declaration of defMeth().
+            * 
+            * I is the only superinterface of R. I does contain a declaration of defMeth() , which satisfies
+            * all of the conditions required to be considered a candidate. And since defMeth() declared in I
+            * is the only candidate , hence it is the one that gets invoked.
+            */
+
+        }
+        
+    }
+
+OUTPUT 5 :
+----------
+    meth() of class A
 
