@@ -15,13 +15,8 @@ tags        :
 
 
 problem     :   reverse singly linked list
-links(s)    :   https://leetcode.com/problems/reverse-linked-list/
-tags        :
-
-
-problem     :   reverse linked list from node A to B
-links(s)    :   https://leetcode.com/problems/reverse-linked-list-ii/
-solution    :   best solution in "ELEMENTS OF PROGRAMMING INTERVIEW JAVA" SECTION 8.2
+links(s)    :   best solution in "ELEMENTS OF PROGRAMMING INTERVIEW JAVA" SECTION 8.2
+                https://www.geeksforgeeks.org/reverse-a-linked-list/  (check out recursive approach)
 tags        :
 
 
