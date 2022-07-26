@@ -25,26 +25,40 @@ links(s)    :   https://www.geeksforgeeks.org/reverse-a-doubly-linked-list/
 tags        :
 
 
-problem     :   
-links(s)    :
+problem     :   remove duplicates from a linked list
+links(s)    :   https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
 tags        :
 
 
-problem     :   
-links(s)    :
+problem     :   reverse nodes in groups of k
+links(s)    :   https://leetcode.com/problems/reverse-nodes-in-k-group/
 tags        :
 
 
-problem     :   
-links(s)    :
+problem     :   segregate even and odd elements in a linked list
+links(s)    :   https://www.geeksforgeeks.org/segregate-even-and-odd-elements-in-a-linked-list/ (method 2)
 tags        :
 
 
-problem     :   
-links(s)    :
-tags        :
+problem     :   intersection of two linked lists
+links(s)    :   https://leetcode.com/problems/intersection-of-two-linked-lists/
+tags        :   (two-pointers) 
+
+
+problem     :   check if linked list is palindrome
+links(s)    :   https://leetcode.com/problems/palindrome-linked-list/
+tags        :   
+
+problem     :   LRU cache design
+links(s)    :   https://leetcode.com/problems/lru-cache/
+tags        :   
 
 
 problem     :   
-links(s)    :
-tags        :
+links(s)    :   
+tags        :   
+
+
+problem     :   
+links(s)    :   
+tags        :   

@@ -1,0 +1,705 @@
+Two types of comments in JS :
+
+    //  this is  a single line comment
+
+    /*  this is a multiline
+        comment     */
+
+
+Identifiers can begin with either an ‘_’ , ‘$’ , or a letter. The subsequent characters can be letters , 
+digits , ‘$’ , ‘_’ .
+
+Many reserved words can’t be used as names for variables , constants , function or classes. But can be used 
+as a property within an object. (like : if / else / while / do / for / function / switch / class / …)
+    >> let obj = {};
+    >> obj.if = 23;     // OK
+
+Reserved words scenario is a little complicated in JS . For eg: "let" is allowed to be used as an identifier 
+when declared with "var" , but not allowed when declared with "const" or inside a class. 
+
+    >> var let = 23 ;  // OK   // it is allowed because of backward compatibility issue
+
+
+AUTOMATIC SEMICOLON INSERTION
+-----------------------------
+    https://www.bradoncode.com/blog/2015/08/26/javascript-semi-colon-insertion/
+
+
+    We have an option in JS to not put a (;) at the end of a statement even if its grammar rule requires 
+    you to do so. For example ,
+            var a			same as , 	    var a;
+            b = 23						    b = 23;
+
+    The compiler will automatically insert a semicolon there (not literally though!). Compiler not gonna change 
+    your source code , it will just pretend as if that location contains a (;).
+
+    This whole drama is just so that JS can distinguish one statement from another , and it sometimes leads to 
+    unexpected behaviour.
+
+    There are 3 rules and 2 overriding exceptions that governs its working.
+
+    NOTE :  A Token is the smallest element of a program that is meaningful to the compiler( keywords , 
+            identifiers , constants , special symbols , operators ).
+
+            Example of a grammar rule :
+            Grammar rule for return statement looks like:  return [no LineTerminator] <exp>;
+
+
+    RULE 1
+    ------
+        When reading tokens of a program from left to right , a token that doesn’t match a grammar rule 
+        has a semicolon inserted before it if either of the following conditions are met :
+            1. The error token is separated from the previous token , by at least one line terminator.
+            2. The error token is }.
+
+    
+        (1) basically means that if the first token on the next line appears to be in continuation of the 
+        grammar rule from the current line , then (;) will not be inserted .If not , then it will be 
+        inserted. 
+
+        Example , 		var a 			becomes,			var a;
+                        var b						    	var b
+        (;) is inserted on line 1 because "var a var" wouldn’t be in continuation of the grammar rule for 
+        variable declaration of line 1. 
+
+
+        Example,		var a 			same as ,			var a = 3 ;
+                        =
+                        3
+        No (;) was inserted on line 1 or line 2 because they all seem to be in continuation of the grammar 
+        rule for variable declaration of line 1.
+
+
+
+        Example for (2) condition ,
+                {return 3}			will become ,		{return 3;}
+        The grammar rule for the return statement was expecting a (;) after 3 , but instead it got }.  Hence 
+        } becomes the error token and a (;) was inserted before it.
+
+
+    RULE 2
+    ------
+        If the program is parsed until the end of the input (meaning that we have reached the end of file) 
+        and it is not yet a complete program , then a (;) is inserted at the end of file.
+
+        Example , suppose test.js consist of following two lines only :
+            var a = 3;
+            a++
+
+        Then a (;) will automatically be inserted at the EOF if required , in order to complete the program :
+            var a = 3;
+            a++;
+
+        NOTE :  Please note that only the statement whose grammar rule requires a (;) for termination is 
+                affected by ASI :-
+                empty	    	variable declaration	expression		do-while
+                continue		break					return			throw
+
+        Statements like if , while , for , do not require termination by (;) in their grammar rule , and 
+        hence are unaffected by ASI.
+
+
+    RULE 3
+    ------
+        For the following grammar rules that do not allow line terminators where indicated , if a line 
+        terminator is encountered , parser will try to save you by adding a semicolon before the first 
+        encountered line terminator.
+
+            Postfix expression:
+	            LHSExpression [no LineTerminator] ++
+	            LHSExpression [no LineTerminator] --
+
+            Continue statement :
+	            continue [no LineTerminator] identifier;
+
+            Break statement :
+                break [no LineTerminator] identifier;
+
+            Return statement :
+                return [no LineTerminator] <exp>;
+
+            Arrow functions :
+                arrowParameters [no LineTerminator] =>  conciseBody
+
+        Example , 
+
+            return 			will become , 			return ;
+            {									{
+                a: 23									a: 23
+            }									}
+
+
+
+        Example ,
+
+            a				will become , 			a ;
+            ++			    						++c ;
+            c
+
+
+    TWO EXCEPTIONS THAT OVERRIDE THE ABOVE RULES
+    --------------------------------------------
+
+        1)  A (;) is never inserted automatically inside the header of a for statement.
+
+                for(expression   ;   expression   ;   expression)
+            
+                        These two semicolons have to be inserted manually and are
+                        also compulsory . ASI won’t work inside the header of for.
+
+        2) A (;) is never automatically inserted if doing so results in an empty statement.
+
+                Example , 
+
+                suppose last line of our program is this ,
+                        for(var i=0 ; i < 10 ; ++i)
+
+                Then according to rule #2 , a (;) should have been inserted after it , in order to 
+                complete the program. But since doing so would result in an empty statement ,
+                hence JS won’t do it , thus resulting in an error.
+
+
+
+There are 6 primitive types in Javascript :
+    number
+    string
+    boolean
+    null
+    undefined
+    symbol
+
+
+Everything else is an object. (Even functions are objects) (Even classes are special functions which in turn 
+make them objects!!)
+
+JS primitive types are immutable and all the objects are mutable.
+
+NOTE : ES2020 introduced a new primitive type called "bigint".
+
+
+IN JS all numbers (integer or floating point) are represented using IEEE 754 64 BIT STANDARD.
+
+    Number.MAX_VALUE = 1.7976.. x 10^(+308)
+    Number.MIN_VALUE = 5 x 10^(-324)
+
+    Number.MAX_SAFE_INTEGER = 2^(53) - 1
+    Number.MIN_SAFE_INTEGER = - (2^(53) - 1)
+
+
+Please note that certain operations such as "array indexing" and "bitwise operations" are performed using
+32 bit integers.
+
+Some example of integer literals :
+
+    35                  // base 10
+    0xA1F               // base 16
+    0b1011              // base 2
+    0o1073 or 01073     // base 8
+
+Floating point literals may also be represented by exponential notation ,
+	[digits][.digits][(E|e)[(+|-)]digits]		example ,  55.35e-5
+
+
+
+SPECIAL VALUES IN JAVASCRIPT
+----------------------------
+
+    Interestingly JS does not raise an error in case of overflow or underflow or even division by 0.
+
+    1)  Infinity , - Infinity
+        ---------------------
+
+        When result of an operation > Number.MAX_VALUE , JS returns a predefined global constant called 
+        Infinity.
+
+        Similarly , when result of an operation  <  - Number.MAX_VALUE   ,  JS returns   - Infinity.
+
+        1 / 0								// Infinity
+        Number.MAX_VALUE * 2				// Infinity
+        Number.POSITIVE_INFINITY			// same as Infinity
+        - 1 / 0							    // - Infinity
+        - Number.MAX_VALUE * 2			    // - Infinity
+        Number.NEGATIVE_INFINITY			// same as - Infinity
+
+
+    2)  + 0  ,  - 0
+        -----------
+
+        Let [result] be the result of an operation.
+
+        If   0  <  [result]  <  Number.MIN_VALUE   ,   then JS will return  + 0.
+
+        If   - Number.MIN_VALUE  <  [result]  <  0   ,  then JS will return - 0.
+
+
+        Number.MIN_VALUE / 2			// + 0
+        - Number.MIN_VALUE / 2		    // - 0
+        1 / Infinity					// + 0
+        -1 / Infinity					// - 0
+
+
+
+    3)  NaN
+        ---
+
+        NaN is a predefined global constant which is returned as a result of an operation in two cases :
+
+            1.	When the outcome is indeterminate.	∞ / ∞  ,  0 / 0 , √-1 
+
+            2.  When at least one of the operands cannot be converted into a number in an arithmetic operation.
+		            >>  undefined + 3
+		                NaN
+
+        0 / 0					// NaN
+        Infinity / Infinity		// NaN
+        Math.sqrt(-1) 			// NaN
+
+
+        There is an interesting fact about NaN , it does not compare equal to any other value , including 
+        itself.
+        i.e., 		NaN === NaN		// false
+		        	NaN !=  NaN		// true
+
+        Thus to check if a variable x is NaN or not , we can do two things :
+            x != x
+            isNaN(x)
+
+
+
+        + 0 and - 0 are equal i.e., +0 === -0  returns true.
+        1/0  ===  -1/0    returns false  ,  since  1/0 evaluates to Infinity and  -1/0  evaluates to -Infinity.
+
+
+
+BigInt
+------
+
+    ES2020 introduced a new primitive type "bigint" that can be used for integers of ANY size.
+
+    bigint literals can be formed by appending integer literals with "n".
+    Example , 	9007199254740993n
+                -35789000085764994321n
+                0x23af51aan				// hexadecimal bigint
+                0b10110001101000011n	// binary
+                0o45n   or,  045n		// octal
+                
+    >> typeof 3581n
+    “bigint”
+
+    There is no limit to the size of integers that can be stored using bigint.
+
+    Just as the "number" primitive type has a corresponding wrapper class "Number" , "bigint" also has a 
+    corresponding wrapper class called "BigInt".
+
+    BigInt can be used as a function to convert integer and string literals into bigint literals. 
+    (class is just a special type of function in Javascript).
+    >>  BigInt(1245)			>>  BigInt(“987654321”)
+        1245n						987654321n
+
+
+    Please note that unlike Number , we cannot use the new operator to create a BigInt object.
+						new BigInt()		// ERROR
+
+    We can instead do this  :	
+        >>  let ob = new Object(347n)	// OK
+        >>  ob.constructor.name
+            'BigInt'
+
+    bigint literals can also use the following operators :	+  ,   -   ,   *   ,   /   ,   **   ,   %
+    >>  50n + 60n
+        110n
+
+    >>  2n ** 45n
+        35184372088832n
+
+    >>  5n / 2n			// ‘/’ operator will round off towards 0 in case of bigint
+        2n
+
+    >>  -3n / 2n
+        -1n
+
+
+    bigint literals cannot be mixed with number literals in all the above operations.
+    >> 5n + 5
+    TypeError : cannot mix BigInt and other types , use explicit conversions.
+
+
+
+    bigint literals cannot be passed to the Math object methods :
+    >> Math.sqrt(25n)
+    TypeError
+
+
+    Unlike arithmetic operators , bigint literals and number literals CAN BE compared using comparison 
+    operators :
+    >>  10n > 5
+        true
+
+    >>  2n > 2
+        false
+
+    bigint literal and number literal with the same value are loosely equal but strictly unequal.
+    >>  5n == 5		// only checks value
+        true
+
+    >>  5n === 5		// checks value and type
+        false
+
+
+"string" primitive type
+-----------------------
+
+    Javascript uses UTF-16 encoding of unicode. i.e., strings in JS are sequence of 16-bit values.
+
+    Eg :                                "Hello"
+                                           |
+                   H           e           l           l           o        
+                .......     .......     .......     .......     .......
+                |00 48|     |00 65|     |00 6C|     |00 6C|     |00 6F|         [BIG ENDIAN]
+                ```````     ```````     ```````     ```````     ```````
+                U+0048      U+0065      U+006C      U+006C      U+006F
+
+    But as we know , if a string contains a char from astral planes , then that char will be stores as a
+    pair of two 16-bit values (4 bytes).
+
+                                        "I💙U"
+                                        /  |  \
+                                       /   |   \
+                           |```````````    |    ```````````|
+                        .......     ....... .......     .......        
+                        |00 49|     |D8 3D| |DC 99|     |00 55|     [BIG ENDIAN]
+                        ```````     ``````` ```````     ```````
+                        U+0049          U+1F499         U+0055
+
+    
+
+    -> "\uWWXX" :   A char in BMP that will be stored in memory as ,
+                    .......
+                    |WW XX|     [BIG ENDIAN] 
+                    ```````
+                    .......
+                    |XX WW|     [LITTLE ENDIAN]
+                    ```````
+                    but will always be read as  WW XX
+
+        "\uWWXX\uYYZZ"  :   A char in astral planes that will be stores in memory as ,
+                            ....... .......
+                            |WW XX| |YY ZZ|     [BIG ENDIAN]
+                            ``````` ```````
+                            ....... .......
+                            |XX WW| |ZZ YY|     [LITTLE ENDIAN]
+                            ``````` ```````
+                            but will always be read as ,  WW XX  YY ZZ 
+
+        Hence "Hello" is same as : "\u0048\u0065\u006C\u006C\u006F"
+
+        and "I💙U" is same as : "\u0049\uD83D\uDC99\u0055"
+
+        Clearly , remembering a char's bit representation is a little too much especially for
+        characters from astral planes where there is no visible correlation b/w character's 
+        codepoint and character's bit representation.
+
+        So JS ES6(2015) introduced another escape sequence "\u{codepoint}" where we can just 
+        use the character's codepoint(in hex) to get the character.
+        Eg :
+               we can print "💙" as "\u{1F499}" , which will be same as "\uD83D\uDC99".
+
+
+    ->  strings can be enclosed in "double quotes" or 'single quotes' or `back ticks`   
+
+    ->  It is not allowed to break a string across multiple lines when using ".." or '..' ,
+        but allowed when using `..` . For example :
+
+        let str = " my name is 
+                    Nikunj Pathak and           // This will throw syntax error
+                    I would love to talk "       
+
+        let str = ` my name is 
+                    Nikunj Pathak and           // This is OK , but will preserve the EOL in the string
+                    I would love to talk ` 
+
+        We can (\) operator to break string across multiple lines such that neither (\) or EOL will
+        be included in the string. It can be used with ".." or '..' or `..`
+
+        let str = " my name is \
+                    Nikunj Pathak and  \         
+                    I would love to talk "  // Every line should end with (\) except the last one.
+
+    ->  str.length will calculate the number of 16-bit values in str.
+        Example ,       "I💙U".length === 4     // true
+
+        strings can be compared using === and !== , two strings will be equal if and only id they
+        consist of exactly the same sequence of 16-bit values.
+
+        strings can also be compared with (<) , (<=) , (>) , (>=) . Comparision is done simply by 
+        comparing the 16-bit values.
+
+        str[i] : character corresponding to the ith 16-bit value in str
+
+
+    methods of the "String" wrapper class
+    -------------------------------------
+
+        let str be an object of String class.
+        If str is a primitve string then it will be wrapped inside a String object before these methods
+        are called.
+
+        str.substring(i,j)  :   substring from ith 16-bit value to jth 16-bit value
+
+        str.split(delimiter)    :   split the str using the delimiter provided and returns an array.
+
+        str.indexOf(substr) :   position of 1st occurence of substr in str. 
+                                returns -1 if substr not found in str.
+        
+        str.replace(s1,s2)  :   returns a new string by replacing 1st occurence of s1 in str , by s2.
+
+        str.replaceAll(s1,s2)   :   returns a new string by replacing all occurrences of s1 in str by s2.
+
+        str.toLowerCase()   // will return a new string 
+        str.toUpperCase()   // will return a new string
+
+        str.charAt(i)   :   returns the char corresponding to ith 16-bit value in str , same as str[i]
+
+        str.codePointAt(i)  :   returns the decimal value of the codepoint of the actual ith character
+                                of the string str , rather than the character corresponding to the ith 
+                                16-bit value.
+                                Example,        >>  "I💙U".codePointAt(1)
+                                                    128153                  // 0x1F499
+
+        String.fromCodePoint(codepoint) :   A static method
+                                            Takes the codepoint(dec) of a unicode char , and returns the
+                                            character.
+                                            Example ,   >>  String.fromCodePoint(128153)
+                                                            "💙"
+
+    
+    ->  If the string contains non-BMP characters , then there is no point in iterating through the string
+        using str.charAt(i) / str[i] inside a "for" loop. Because they will iterate through the 16-bit
+        values.
+
+        We should rather use "for/of" loop which will iterate through the actual characters of the string
+        and not the 16-bit values.
+            for(let ch of str){
+                console.log(ch)
+            }
+
+    TEMPLATE LITERAL
+    ----------------
+
+        we can evaluate expressions within a string quoted with `..`
+
+                `I am evaulating an ${expression} inside this string`
+        
+        Example,
+            let name = "nikunj";
+            let age = 23;
+
+            console.log(`My name is ${name} and I am ${age} yrs old.`);
+
+    
+    NORMALIZATION
+    -------------
+
+        >>  let e1 = "\u00E9"           // é
+        >>  let e2 = "\u0065\u0301"     // é
+
+        >>  e1
+            é
+        >>  e2
+            é
+        >>  e1 === e2
+            false
+
+        As we see , both e1 and e2 print same accented "e" (é) , but still they are not equal , since
+        they are formed with diff sequences of 16-bit values.
+        
+        Thus sometimes the same char can be formed in multiple ways , which is problematic , since on
+        surface two texts might appear same but turn out to be different internally.
+
+        The process of removing such ambiguities is called normalization of text , in which all the 
+        equivalent sequences of 16-bit values are replaced by some default sequence of 16-bit values.
+        For example , in above case if we normalize e2 , then  \u0065\u0301   will be replace with 
+        \u00E9  .
+
+        JS doesn't perform normalization on its own , but ES6 provide a string class method normalize() :
+            >>  e1 === e2.normalize()
+                true
+
+
+
+SYMBOL
+------
+
+    "symbol" is a primitve type introduced in ES6.
+
+    symbol primitive type has a corresponding wrapper class called "Symbol" , which we can be used as a 
+    function to get a primitive symbol value. Indeed it is the only way to create a symbol.
+
+        let sym = Symbol();
+
+    We can pass a string to Symbol() , which will act as a descriptor for the primitive symbol value 
+    created. (This is useful for debugging and doesn’t serve any other purpose and definitely has no 
+    say whatsoever in how the symbol value will be generated internally)
+
+        >>  let sym = Symbol("id")
+        >>  sym
+            Symbol(id)
+        >>  sym.description
+            "id"
+        
+    ->  The special fact about symbol is that whenever it is generated by calling the Symbol() function ,
+        a unique primitive symbol value will be returned each time.
+
+            >>  let sym1 = Symbol()
+            >>  let sym2 = Symbol()
+            >>  sym1 === sym2
+                false
+
+        Even when thet have same descriptor :
+
+            >>  let sym1 = Symbol("id")
+            >>  let sym2 = Symbol("id")
+            >>  sym1 === sym2
+                false
+
+    
+
+    ->  Just like "BigInt" wrapper class , we cannot use "new" to create a Symbol class object. 
+
+        We can instead do this  :
+            >>  let sym = Symbol()	
+            >>  let ob = new Object(sym)	// OK
+            >>  ob.constructor.name
+                'Symbol'
+
+
+
+    ->  objects in JS are basically collection of (key,value) pairs. Before symbol(s) were introduced in ES6 ,
+        keys were only allowed to be of type string. But now (along with string) we can also use symbol(s) as
+        keys.
+        Example :
+            >>  let id = Symbol("EMPID")
+            >>  let obj = {
+                name : "nik" ,
+                age : 23 ,
+                gender : "m"
+            }
+
+            >> obj[id] = 6080602    //  using symbol as a key
+                                    //  please note that we cannot use dot notation (obj.key) if key is a symbol
+                                    //  always use bracket notation (obj[key])
+
+            >>  obj
+                age : 23
+                name : "nik"
+                gender : "m"
+                Symbol(EMPID) : 6080602
+            
+        We can do the same thing while creating object literal :
+
+            >>  let id = Symbol("EMPID")
+            >>  let obj = {
+                name : "nik" ,
+                age : 23 ,
+                gender : "m" ,
+                [id] : 6080602
+            }
+            >>  obj
+                age : 23
+                name : "nik"
+                gender : "m"
+                Symbol(EMPID) : 6080602
+
+
+    ->  Using symbols as keys in objects is their primary purpose infact.
+
+        Suppose we are using a 3rd party library in our code which provide us an object called "user".
+        Now let us suppose we want to add an "id" property in "user". Should we use a "string as the key"
+        or "a symbol as the key" for this property ??
+
+        If we use the string "id" as the key for this property , then how do we know that there isn't already
+        a property with string key "id" ?? In which case we will just be overriding an existing property and
+        eventually causing the library to malfunction.
+
+        But instead if we use a symbol as the key , there won't be any conflict with any existing property
+        because :
+            (1) It won't conflict with any string keys (since its of type symbol)
+            (2) It won't conflict with other symbol keys , since every symbol is unique at runtime.
+
+        Hence while creating a property for an object from some 3rd party library , we should use symbol(s)
+        as the keys to avoid conflict with any existing property.
+
+    
+    ->  symbolic properties of an object are somewhat "hidden" in many ways.
+
+        >>  let user = {
+                name :"nikunj",
+                age : 27,
+                sex : "m",
+                [Symbol("id")] : 6080602
+        }
+
+        >>  Object.getOwnPropertyNames(user)    // symbol properties won't appear in the o/p of this method
+            ["name","age","sex"]
+        
+        >>  Object.keys(user)   //  symbol properties won't appear in the o/p of this method
+            ["name","age","sex"]
+        
+        >>  for(let key in user)    // symbolic properties are skipped in for...in loop
+                console.log(key);
+            name
+            age
+            sex
+        
+        >>  JSON.stringify(user)    // symbolic porperties are skipped here also
+            "{"name":"nikunj","age":23,"sex":"m"}"
+        
+        But they aren't completely hidden. We can use Object.getOwnPropertySymbols(..) to get an array
+        of all the symbolic keys for the passed object.
+
+            >>  Object.getOwnPropertySymbols(user)
+                [Symbol(id)]
+
+
+    global symbol registry
+    ----------------------
+
+        lets suppose we store a symbol in some variable. If  the  symbol exist only in  that particular
+        variable then as  soon as that  variable is overwritten ,  the  unique symbol inside it will be
+        gone forever.
+            Thats why there exist a "global symbol registry" , where we can store a symbol by associating
+        it  with  some descriptive string (called its key) and then later fetch it anywhere we want using
+        that key.
+
+        Symbol.for(key)     :   static method
+                                Searches for existing symbol in the global registry with given key and 
+                                returns it if found. Otherwise a new gets created in the registry with
+                                the provided key.
+        
+        Symbol.keyFor(sym)  :   static method
+                                If sym exist in global symbol registry then returns its key , otherwise
+                                return undefined.
+        
+        >>  let sym = Symbol.for("fun")     //  will create a new symbol in global symbol registry 
+                                            //  with key "fun"
+        >>  Symbol.keyFor(sym)
+            "fun"
+        
+        >>  let ob = {
+                name : "nik",
+                [sym] : Symbol("garbage")
+        }
+
+        >>  sym = null
+
+        >>  ob[Symbol.for("fun")]   //  fetching existing symbol from registry with key "fun"
+            Symbol(garbage)
+
+
+
+
+
+
+
+
+
