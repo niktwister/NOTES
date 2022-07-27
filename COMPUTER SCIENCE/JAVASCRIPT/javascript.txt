@@ -697,9 +697,483 @@ SYMBOL
 
 
 
+->  Any javascript value can be converted to a boolean value.
+
+    Only these 6 converts to false (they are called falsy values) :
+        undefined
+        null
+        0
+        -0
+        ""
+        NaN
+
+    All other values (including any object reference) converts to true. They are called truthy values.
 
 
 
+LOGICAL OPERATORS
+-----------------
+
+    1)  a || b
+
+        If 'a' is a truthy value , then returns 'a'.
+            >>  5 || 0      >>  10 || 15
+                5               10
+
+        Otherwise if 'a' is falsy value , then it returns 'b'.
+            >>  undefined || null       >>  null || 5
+                null                        5                
+
+
+    2)  a && b
+
+        If 'a' is a truthy value , then returns 'b'.
+            >>  5 && 0      >>  10 && 15
+                0               15
+
+        Otherwise if 'a' is falsy value , then it returns 'a'.
+            >>  undefined && null       >>  null && 5
+                undefined                   null                
+
+
+    3)  !(a)
+
+        If 'a' is truthy value =>   return false
+        If 'a' is falsy value   =>  return true
 
 
 
+->  "undefined" is the return value of the function that does not return anything.
+->  "undefined" is the value of function parameter for which no argument is passed.
+
+
+TYPE CONVERSION IN JAVASCRIPT
+-----------------------------
+
+    PRIMITIVE-TO-PRIMITIVE CONVERSION
+    ---------------------------------
+        .....................................................................        
+        |   value           |   to string   |   to number   |   to boolean  |
+        .....................................................................        
+        `````````````````````````````````````````````````````````````````````
+        |   undefined       |   "undefined" |   NaN         |   false       |
+        ---------------------------------------------------------------------
+        |   null            |   "null"      |   0           |   false       |   
+        ---------------------------------------------------------------------
+        |   true            |   "true"      |   1           |               |
+        ---------------------------------------------------------------------
+        |   false           |   "false"     |   0           |               |
+        ---------------------------------------------------------------------
+        |   ""              |               |   0           |   false       |
+        ---------------------------------------------------------------------
+        |   "1.2"           |               |   1.2         |   true        |
+        ---------------------------------------------------------------------
+        |   "one"           |               |   NaN         |   true        |
+        ---------------------------------------------------------------------
+        |   0               |   "0"         |               |   false       |
+        ---------------------------------------------------------------------
+        |   -0              |   "0"         |               |   false       |
+        ---------------------------------------------------------------------
+        |   1               |   "1"         |               |   true        |
+        ---------------------------------------------------------------------
+        |   Infinity        |   "Infinity"  |               |   true        |
+        ---------------------------------------------------------------------
+        |   -Infinity       |   "-Infinity" |               |   true        |
+        ---------------------------------------------------------------------
+        |   NaN             |   "NaN"       |               |   false       |
+        `````````````````````````````````````````````````````````````````````
+
+
+    Functions in JS expects the values that they are receiving to be of certain type, and if they
+    are not, then the function will convert those values to the required type before performing 
+    any further operation. For exmaples :
+
+        ->  alert()
+
+            alert() function always expect value of type "string". Thus we pass it undefined , then
+            it will first convert it to string i.e., "undefined".
+
+        ->  * (multiplication operator)
+
+            (*) expects both of its operands to be of type number. Thus we try to do (true*5) , then
+            true will be first converted to 1 and thus 1*5 i.e., 5 will be returned.
+
+            Similarly null*5 will return 0.
+
+        ->  +   (plus operator) (binary operator)
+
+            binary (+) is a little complicated , because it is used with strings for concatenation and
+            also with numbers for addition.
+
+            If even one of the operand is a string , then it will convert the other to string and 
+            concatenates them. Otherwise , if none of the operands are string , then (+) will act
+            like an arithmetic operator and will try to convert its operands into type number (if
+            they are not already) and then add them.
+
+            >>  "abc" + 50          >>  null + 10
+                "abc50"                 10
+
+            >>  null + true         >>  undefined + null
+                1                       NaN
+
+    If function receives primitive values then primitive to primitive conversion is done , but what
+    will happen if we pass an object to the function ? This is where object-to-primitive conversion
+    will come into play.
+
+    But before looking into object-to-primitive conversion , we must familiarize ourself with two
+    special methods toString() and valueOf().
+
+    toString()
+    ----------
+        Apparently this is the method you're supposed to call if you want to convert an object to string.
+        Every object will inherit this method from "Object" class. But we can override the inherited 
+        implementation by our own implementation. (which is done by most of the built-in classes)
+
+        consider the "Array" and "Date" built-in classes :
+            >>  [1,2,3].toString()
+                "1,2,3"
+            
+            >>  (new Date()).toString()
+                'Wed Jul 27 2022 15:44:31 GMT+0530 (India Standard Time)'
+
+        The toString() method inherited from "Object" class simply returns the string "[object Object]".
+            >>  let ob = {}
+            >>  ob.toString()
+                '[object Object]'
+
+        Implementing the toString() method :
+            >>  let user = {
+                    name : "nik",
+                    age : 23,
+                    toString : function(){
+                        return `Hi!! I am ${this.name}. I am ${this.age} years old.`;
+                    }
+                }
+            >>  user.toString()
+                'Hi!! I am nik. I am 23 years old.'
+
+    
+    valueOf()
+    ---------
+
+        Just like toString() , valueOf() method is by default inherited from "Object" class but
+        can be overriden by own implementation.
+
+        Unlike toString() , its purpose is not very clear.
+
+        The default valueOf() method (inherited from Object class) simply returns back the reference
+        of the object on which it was called.
+            >>  let ob = {a:23,b:34}
+            >>  ob.valueOf() === ob
+                true
+        
+        Array class also uses the inherited method :
+            >>  let arr = [1,2,3]
+            >>  arr.valueOf() === arr
+                true
+        
+        Wrapper classes Number,String,Boolean implements valueOf() method to just return the value of
+        the wrapped primitive :
+            >>  let n = new Number(50)          >>  let s = new String("Hi")
+            >>  n.valueOf()                     >>  s.valueOf()
+                50                                  'Hi'
+
+        Date class implements the valueOf() method to return the timestamp of the datetime represented
+        by the Date object invoking the method :
+            >>  let d = new Date()
+            >>  d.valueOf()
+                1658922390984
+
+    
+    OBJECT-TO-PRIMITIVE CONVERSION
+    ------------------------------
+        https://javascript.info/object-toprimitive
+
+        When an object is to be converted to a primitive type , one of JS internal method known as 
+        ToPrimitive(..) is called. This method is called automatically by many built-in functions 
+        and operators that expect a primitive as a value. This method takes two arguments :
+            1)  object to be converted
+            2)  preferredType
+        
+        The second argument preferredType is suppose to be a string with one of these 3 possible values :
+            
+            1)  preferredType === "string"   (prefer-string)
+                This means that it will be preferred if the object is converted to a string.
+                alert() function uses this preferredType if it receives an object.
+
+            2)  preferredType === "number" (prefer-number)
+                This means that it will be preferred if the object is converted to a number.
+                Most of the arithmetic operators such as (*)(-)(**) will use this preferredType when
+                one of their operand is an object. Binary (+) is an exception.
+
+            3)  preferredType is not passed (no preference)
+                This means that there is no preference. The object is not expected to be of
+                a particular primitive type after conversion.
+                Binary operator (+) will do this if one of the operand is object , because
+                (+) works with both string and number type.
+
+        Please note that the type of primitive that the object will get converted to may or may
+        not be what was preferred. For example a number primitive might be returned even if 
+        ToPrimitive(..) was called with preferredType==="string". 
+        Thus the internal function or operator calling the ToPrimitive(..) method may have to
+        perfrom an additional primitive-to-primitive conversion , in order to get the correct
+        type of primitive value before performing the operation.
+
+        NOTE :  https://tc39.es/ecma262/#sec-type-conversion
+                ToPrimitive(..) is implemented natively.
+                primitive-to-primitive conversion is also performed by calling natively implemented
+                internal methods :
+                    ToBoolean(..)
+                    ToNumber(..)
+                    ToBigInt(..)
+                    ToString(..)
+                    ...
+
+        implementation of ToPrimitive(..) method
+        ````````````````````````````````````````
+            def ToPrimitive(input,[preferredType]) :
+                
+                1.  ->  If preferredType is not passed  , set hint = "default".
+                    ->  Else if preferredType is String , set hint = "string".
+                    ->  Else if preferredType is Number , set hint = "Number".
+                
+                2.  ->  If there is a method on the input object with the key Symbol.toPrimitive , then :
+                            a)  Call the method and pass the hint as first parameter.
+                            b)  If the return value of this method is of primitive type , then 
+                                return that value else throw TypeError.
+                    
+                    ->  Else if no such method with the key Symbol.toPrimitive exist on input object , then :
+                            a)  If hint is "default" , set hint to "number".
+                            b)  return OrdinaryToPrimitive(input,hint)
+
+            
+            def OrdinaryToPrimitive(input,hint) :
+
+                1.  If hint === "string" , then let methods be a list ["toString","valueOf"].
+
+                2.  If hint === "number" , then let methods be a list ["valueOf","toString"].
+
+                3.  For each method in the list methods do :
+                        a)  Call the method on the object if it exists.
+                        b)  If the return value is primitive , then return that value.
+
+                4.  Throw TypeError.    // implying neither toString nor valueOf returned a primitive value.
+
+        
+        Symbol.toPrimitive
+        ``````````````````
+
+            This is one of the many special symbols in JS which exist as the static property of the
+            Symbol class.
+
+            Using this Symbol , we can define a method [Symbol.toPrimitive](hint) in our object , 
+            through which we can control the object-to-primitive conversion of our object.
+
+            How? If we examine the ToPrimitive(..) method above , we will realize that before trying
+            anything else , it checks if the object has a [Symbol.toPrimitive](hint) method or not.
+            If yes then [Symbol.toPrimitive](hint) is called on the object for a primitive value ,
+            else if not then ultimately other methods (toString,valueOf) are tried.
+
+            Also note that if the method [Symbol.toPrimitive](hint) exist but returns a non-primitive
+            value then TypeError is thrown.
+
+            The parameter hint passed to the [Symbol.toPrimitive](..) method has 3 possible values :
+                1)  hint === "number"
+                    When preferredType passed to ToPrimitive is "number".
+                
+                2)  hint === "string"
+                    When preferredType passed to ToPrimitive is "string".
+                
+                3)  hint === "default"
+                    When no preferredType is passed to ToPrimitive.  
+
+        
+        examples of object-to-primitive conversion
+        ``````````````````````````````````````````
+
+        1)  >>  let user = {
+                    name : "nik",
+                    age : 23,
+                    [Symbol.toPrimitive] : function(hint){
+                        if(hint==="string")
+                            return "my name is nik and i am 23 yrs old.";
+                        else if(hint==="number")
+                            return 23;
+                        else if(hint==="default")
+                            return "100";    
+                    }
+                }
+
+            >>  alert(user)                             // alert() will call ToPrimitive(..) with 
+                'my name is nik and i am 23 yrs old.'   // object = user and preferredType = "string".
+                                                        // Which in turn will call 
+                                                        // user[Symbol.toPrimitive](hint) with hint = "string".
+
+            >>  user * 3    // (*) will call ToPrimitive(..) with object = user and preferredType = "number".
+                69          // Which in turn will call user[Symbol.toPrimitive](hint) with hint = "number".
+            
+            >>  user + 5   // (+) will call ToPrimitive(..) with object = user and no preferredType is passed.
+                           // Which in turn will call user[Symbol.toPrimitive](hint) with hint = "default".
+                           // user[Symbol.toPrimitive](hint) will therefore return "100" which in turn will
+                           // be returned by ToPrimitive(..) 
+                           // "100" + 5 will then evaluate to "1005" , because as we know that if even one
+                           // of the operand is a string , (+) will convert the other to string as well and
+                           // concatenate them.
+
+
+        2)  >>  let user = {
+                    name : "nik",
+                    age : 23,
+                    [Symbol.toPrimitive] : function(hint){
+                        if(hint==="string")
+                            return "my name is nik and i am 23 yrs old.";
+                        else if(hint==="number")
+                            return 23;
+                        else if(hint==="default")
+                            return {};              // returning an object. 
+                    }
+                }
+
+            >>  user + 10
+                TypeError       //  Because [Symbol.toPrimitive](hint) will fail to provide a primitive 
+                                //  value , since it will be called with hint === "default".
+
+        
+        3)  >>  let user = {
+                    name : "nik",
+                    age : 23,
+                    toString : function(){
+                        return {};
+                    } ,
+                    valueOf : function(){
+                        return 23;
+                    }
+            }
+
+            >>  alert(user) //  [Symbol.toPrimitive](..) doesn't exist for user and its toString fails
+                "23"        // to provide a primitive vlue so valueOf(..) will be asked for primitive
+                            // value. ToPrimitive(..) will return 23 to alert(..) , which will then 
+                            // convert 23 to string i.e., "23".
+
+            >>  user + 10     
+                33          // Since ToPrimitive(..) wasn't passed a preferredType , hint was set to 
+                            // "default". Since [Symbol.toPrimitive](..) doesn't exist , ToPrimitive(..)
+                            // will call OrdinaryToPrimitive(..) with hint==="number". 
+                            // OrdinaryToPrimitive(..) will first try to call valueOf() on user , which
+                            // will return 23. Hence ToPrimitive(..) will in turn also return 23.
+                            // 23 + 10 will evaluate to 33.
+
+        
+        4)  >>  [] * 67     //  ToPrimitive(..) will be called by (*) on [] with preferredType === "number".
+                0           //  Array class does not define [Symbol.toPrimitive](..) , therefore ,
+                            //  OrdinaryToPrimitive(..) will be called in turn with hint === "number."
+                            //  OrdinaryToPrimitive(..) will call valueOf() on [] , which will return an
+                            //  object reference i.e., not a primitive value. Therefore toString() will be 
+                            //  called on [] next , which will return "" (empty string) i.e., a primitive.
+                            //  Therefore OrdinaryToPrimitive(..) will return "" which in turn be returned
+                            //  by ToPrimitive(..). 
+                            //  Since "" is not a number , (*) will perform primitive-to-primitive conversion
+                            //  by passing "" to ToNumber() , which will convert it to 0.
+                            //  Hence 0*67 will be performed , which evaluates to 0.
+        
+        Array class or other wrapper classes like Number , String , Boolean ... do not define the 
+        method [Symbol.toPrimitive](..) , but unlike them Date class does define it.
+
+        5)  >>  let d = new Date()
+
+            >>  d[Symbol.toPrimitive]("number")     // hint === "number"
+                1658943131090                       // timestamp
+            
+            >>  d[Symbol.toPrimitive]("string")     // hint === "string"
+                'Wed Jul 27 2022 23:02:11 GMT+0530 (India Standard Time)'
+
+            >>  d[Symbol.toPrimitive]("default")    // hint === "default", treated same as hint === "string".
+                'Wed Jul 27 2022 23:02:11 GMT+0530 (India Standard Time)'
+            
+        
+    EXPLICIT CONVERSION
+    -------------------
+
+        We can use Number() , String() , Boolean() for explicit type conversion.
+
+        >>  Number(null)        >>  Number("137")       >>  Number(true)
+            0                       137                     1
+
+        >>  Number("")          >>  Number(undefined)   >>  Number("$72.3")
+            0                       NaN                     NaN
+
+        >>  Number("54ABX")     >>  Number("-0.45")     >>  Number("  37  ")  // trailing spaces are ignored
+            NaN                     -0.45                   37
+
+
+
+        >>  String(54)          >>  String(undefined)   >>  String(false)   >>  String("already a string")
+            "54"                    "undefined"             "false"             "already a string"    
+
+
+
+        >>  Boolean(null)       >>  Boolean(-35.6)      >>  Boolean({})     >>  Boolean("")
+            false                   true                    true                false
+
+
+        
+        >>  Number([])      //  ToPrimitive() will be called by Number() on [] with preferredType as "number".
+            0               //  Array class does not define [Symbol.toPrimitive](..) , therefore ,
+                            //  OrdinaryToPrimitive(..) will be called in turn with hint === "number."
+                            //  OrdinaryToPrimitive(..) will call valueOf() on [] , which will return an
+                            //  object reference i.e., not a primitive value. Therefore toString() will be 
+                            //  called on [] next , which will return "" (empty string) i.e., a primitive.
+                            //  Therefore OrdinaryToPrimitive(..) will return "" which in turn be returned
+                            //  by ToPrimitive(..). 
+                            //  Since "" is not a number , Number(..) will perform primitive-to-primitive 
+                            //  conversion by passing "" to ToNumber() , which will convert it to 0.
+                            //  Hence 0 will be returned.
+
+        parseInt() and parseFloat()
+        ```````````````````````````                    
+            parseInt() and paseFloat() methods can also be used to parse string as a number. If a number
+            is passed , it will be returned back. Parsing from left to right both of these methods will 
+            skip any leading whitsepaces , parse as big valid numerical literal as they can and then 
+            ignore anything that follows. 
+
+                >>  pareseInt("35")         >>  parseFloat("-3.6")
+                    35                      -3.6
+
+                >>  parseInt("  34xbcd")    >>  parseFloat("35.6ff7xx")
+                    34                          35.6
+
+            If the leading non-space characters cannot be a part of a valid numerical literal , then they
+            return NaN.
+
+                >>  parseInt(" $73.6")          >>  parseInt("  --34")
+                    NaN                             NaN
+
+            parseInt(..) accepts an optional 2nd argument i.e., base (radix) of the number to be parsed.
+            2 <= base <= 36.
+
+                >>  parseInt("FF0A",16)     
+                    65290
+
+            When passed an object both will pass it to ToPrimitive(..) with preferredType === "string".
+
+                >>  let ob = {
+                        [Symbol.toPrimitive] : function(hint){
+                            if(hint==="string")         return "30";
+                            else if(hint==="number")    return 40;
+                            else if(hint==="default")   return 50;
+                        }
+                    }
+
+                >>  parseInt(ob)
+                    30
+            
+
+    
+    Number class also provide toString() method for converting wrapped numbers to string.
+        >>  (56.78).toString()
+            "56.78"
+
+    toString() also takes an optional argument i.e., base (2<=base<=36) , using which we can get the 
+    representation of our base-10 number in other bases.
+        >>  (1025).toString(36)
+            "sh"
