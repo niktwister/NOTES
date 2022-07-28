@@ -174,6 +174,16 @@ make them objects!!)
 
 JS primitive types are immutable and all the objects are mutable.
 
+JS primitive types are compared by values.
+
+In case of objects, variables are not storing the object itself but rather a reference to the object.
+Hence while comparing variables that are holding reference to objects , we're not comparing the 
+object themselves , but rather their references.
+    >>  let arr1 = [1,2,3]
+    >>  let arr2 = [1,2,3]
+    >>  arr1 === arr2
+        false
+
 NOTE : ES2020 introduced a new primitive type called "bigint".
 
 
@@ -1177,3 +1187,396 @@ TYPE CONVERSION IN JAVASCRIPT
     representation of our base-10 number in other bases.
         >>  (1025).toString(36)
             "sh"
+
+
+GLOBAL OBJECT
+-------------
+
+    A global object is provided in the global scope. That global object is given an initial set of
+    properties that includes :
+        ->  global constants such as Infinity, NaN ...
+        ->  global functions such as isNaN(), parseInt() ...
+        ->  constructor functions such as Date(), String(), Array() ...
+        ->  objects like Math, JSON ...
+
+    As evident till now, we don't need dot notation (object.property) or bracket notation (object[property])
+    to access the properties of the global oject. We can access them directly :
+        >>  parseInt("37",8)    // directly access a property of the global object
+            31
+
+    The global object will have self-referential property that provides us a reference to the global
+    object itself. That property is called 'window' in browser and 'global' in nodejs.
+        >>  window.Math ==== Math
+            true
+
+    ES2020 introduced a common self-referential property of the global object for all the runtime
+    environments , which is called 'globalThis'.
+
+    NOTE : 'globalThis' is available for versions >= 12.0.0.0
+
+
+
+VARIABLE DECLARATION
+--------------------
+
+    Prior to ES6 "var" was used for variable declaration , but beginning from ES6 "let" and "const" 
+    were introduced.
+
+    var declaration
+    ---------------
+
+            The variables declared with var do not have block scope , but rather functional scope.
+        The scope of a variable declared with var is the body of the innermost lexically enclosing
+        function that contains their declaration, the variable can be used anywhere in that function.
+
+        Example :
+
+            function outer(){
+
+                function inner(){
+
+                    if(true){var x = 20;}       //  innermost lexically enclosing function of x is inner()
+                                                //  , therefore x can be used anywhere within the body of
+                    console.log("x="+x);        //  inner(). 
+                }
+
+            }
+
+        Variables declared with var outside all the functions will be in global scope. They will also
+        become property of the global object. They can be used anywhere in the program unless a similar
+        declaration in a nested scope hides them.
+            >>  var i = 50
+            >>  window.i
+                50
+
+        We can declare the same variable multiple times within a scope using var :
+
+            var i = 3;
+            var i = 4;   // OK
+
+
+            for(var i=0;i<10;++i)       //  Variables declared with var do not have block scope.
+                console.log(2*i);       
+
+            for(var i=10;i>0;--i)       //  Hence these two loops are re-declaring the same variable ,
+                console.log(3*i);       //  and it will work.
+
+
+    let and const declaration
+    -------------------------
+
+        variables declared with let and const are block scoped. They can be used anywhere (after the
+        declaration statement) in the innermost lexically enclosing block that contains their 
+        declaration.
+
+        Variables declared with let and const outside all the blocks will be in global scope. But unlike
+        'var' declarations , they will not become properties of the global object.
+
+        Variables declared with const must be intializied during declaration otherwise we will get 
+        SyntaxError. And once initialized with a value , they are not allowed to change the value
+        they are holding.
+
+            >>  const a = 3
+            >>  a = 4
+                TypeError : Assignment to constant variable
+
+        NOTE :  When a const declared variable is holding a reference to an object , we can still make
+                changes to the object. Since value of the const declared variable is not being changed
+                by making changes to the object , the const declared variable would still be holding the
+                reference to the same object. We will only get error when we try to assign a new value 
+                to the const declared variable.
+
+        Unlike var declared variables, in case of let and const declared variables we cannot declare the
+        same variable twice in the same scope.
+
+            let i = 3;  
+            let i = 4;  // ERROR
+
+        Its fine if the one of them is in a nested scope:
+
+            let i = 3;
+            if(true){let i= 4;}     // This declaration will hide the outer declaration inside the block.
+
+
+
+DESTRUCTURING ASSIGNMENT
+------------------------
+
+    It is a compound declaration and assignment syntax.
+
+    In a destructuring assignment , the expression on the RHS of '=' is an array of an object or some
+    complex combination of both , and on LHS we specify one or more variables in an expression that 
+    mimics the RHS.
+    When destructuring assignment occurs , one or more values are extracted ('destructured') from RHS
+    and stored into the variables in LHS.
+
+    Example :
+        >>  let [x,y] = [1,2]                   >>  let [x,y] = [1,2]
+        >>  x                                   >>  [x,y] = [y,x]       // swapping
+            1                                   >>  x
+        >>  y                                       2
+            2                                   >>  y
+                                                    1
+    
+        >>  let ob = {x:1,y:2}
+        >>  Object.entries(ob)
+            [['x',1],['y',2]]
+        >>  for(let [name,value] of Object.entries(ob))
+                console.log(name,value);
+            x 1
+            y 2
+
+    
+    Extra variables in LHS are set to undefined :
+
+        >>  let [x,y,z] = [1,2]
+        >>  x
+            1
+        >>  y
+            2
+        >>  z
+            undefined
+    
+    Extra expressions on RHS are ignored :
+
+        >>  let [a,b] = [11,12,13]
+        >>  a
+            11
+        >>  b
+            12
+
+    When destructuring an array , we can capture all the extra expressions on RHS into the last 
+    variable on LHS using ... operator :
+
+        >>  let x,y;
+        >>  [x,...y] = [1,"Hi",[23,34]]
+        >>  x
+            1
+        >>  y
+            ["Hi",[23,34]]
+
+    
+    Destructuring objects :
+
+        >>  let {x : var1 , y : var2} = {x : 23, y : 43} 
+        >>  var1            //  variable var1 corresponding to key 'x' on LHS is given value 23 
+            23              //  corresponding to key 'x' on RHS.
+        >>  var2            //  variable var2 corresponding to key 'y' on LHS is given value 43
+            43              //  corresponding to key 'y' on RHS.
+
+
+        >>  let {x:var1,y:var2,z:var3} = {w:0,x:1,y:2}  //  Extra expression in RHS will be ignored.
+        >>  var1
+            1
+        >>  var2
+            2
+        >>  var3            //  Extra variable on LHS given undefined value.
+            undefined
+
+        
+        >>  let {r,g,b} = {r:145,g:50,b:255}            //  Another syntax
+        >>  r       >>  g       >>  b                   //  {r,g,b} is equivalent to {r:r, g:g, b:b}
+            145         50          255
+
+
+    Destructuring complex structures :
+
+        >>  let [ {x:x1,y:y1} , {x:x2,y:y2} ] = [ {x:1,y:2} , {x:3,y:4} ]
+        >>  x1      >>  y1
+            1           2
+        >>  x2      >>  y2
+            3           4
+
+
+        >>  let { p1:[x1,y1] , p2:[x2,y2] } = { p1:[1,2] , p2:[3,4] }
+        >>  x1      >>  y1
+            1           2
+        >>  x2      >>  y2
+            3           4
+
+
+PROPERTY ACCESS EXPRESSIONS
+---------------------------
+
+    Two syntax for property access :
+        1)  Expression.identifier
+        2)  Expression[identifier]
+
+    1)  Expression.identifier
+        Here Expression is evaluated first , and it should specify an object, identifier specifies the
+        name of the desired property.
+        The value of the property named by the identifier is looked up in the object, and becomes the
+        overall value of the expression.
+
+    2)  Expression[Expression]
+        The Expression before "[" is evaluated first, and it specifies an object or an array. Then
+        the Expression inside "[]" is evaluated and converted to a string. This 2nd expression specifies
+        the name of the desired property or the index of the desired array element.
+
+    EXAMPLES :
+
+        >>  let b = {x:1 , y:{z:3}}
+        >>  let a = [b,4,[5,6]]
+
+        >>  b.x             >>  b.y.z
+            1                   3
+
+        >>  b['y']['z']     >>  a[1]        >>  a[2]['1']       >>  a[0]['x']
+            3                   4               6                   1
+
+        >>  b['y'].z        >>  b.y['z']
+            3                   3
+
+    When the expression before "." or "[" evaluates to either null or undefined, TypeError will be
+    thrown. Because these are the only two values in JS that can't have properties, other primitive
+    types such as number, string, boolean... will get wrapped around in their respective wrapper
+    class objects before we try to access their property.
+
+    Assuming that the expression before "." or "[" is neither null or undefined. Then if the property
+    (of an object) or the index (of an array) we are trying to access doesn't exist, then the whole
+    property access expression will evaluate to undefined.
+
+    >>  null.abc            >>  'hi'.xyz    // String class has no property named 'xyz'
+        TypeError               undefined
+
+    >>  let arr = [1,5,7]
+    >>  a[3]
+        undefined
+
+    >>  let ob = {name:"nik" , age:23}
+    >>  ob["gender"]    //  non existent property
+        undefined
+    >>  ob.name.xyz     //  "nik".xyz is undefined
+        undefined
+    >>  ob.gender.xyz   //  ob.gender evaluates to undefined, undefined.xyz will will throw TypeError
+        TypeError
+
+
+    Drawbacks of Expression.identifier syntax are :
+        1)  name of the property we are trying to access should be a legal identifier.
+        2)  we should know the name while writing the program.
+
+    
+
+CONDITIONAL PROPERTY ACCESS (ES2020)
+------------------------------------
+
+    syntax :
+        1)  expression?.identifier
+        2)  epxression?.[expression]
+
+    "?." -> optional chaining operator
+
+    When sub-expression to the left of "?." is either null or undefined, then the evaulation of the
+    whole expression is short circuited and the whole expression just evaluate to undefined, rather
+    than throwing TypeError.
+
+    NOTE :      .................................
+                |   member access (.)           |
+                |   computed member access ([]) |------>    All these operators have same precedence
+                |   function call (())          |           and associativity (left to right).
+                |   optional chaining (?.)      |
+                `````````````````````````````````
+
+    EXAMPLE :
+
+        >>  let a = {b:null}
+        >>  a.b?.c.d            //  a.b evaluates to null
+            undefined           //  null?.c will short circuit the evaulation of whole expression
+                                //  and the whole expression will just evaluate to undefined.
+                                //  We would have got TypeError if null.c was evaluated instead.
+
+        >>  let a = {b:{e:2}}
+        >>  a.b?.c.d            //  a.b evaluates to {e:2}
+            TypeError           //  {e:2}?.c will evaluate to undefined since there is no 'c' named 
+                                //  property in {e:2}
+                                //  undefined.d will evaluate to TypeError.
+                                //
+        >>  a?.['b']['c']       //  a?.['b'] evaluates to {e:2}
+            undefined           //  {e:2}['c'] evaluates to undefined.
+
+
+    Invocation expression and conditional invocation expression
+    -----------------------------------------------------------
+
+        <function-expression>(<comma separated list of 0 or more argument expressions>)
+
+        <function-expression> is evaluated first and then the multiple <argument-expression>(s) (if any)
+        are evaluated. If the called function doesn't return anything, the value of invocation expression
+        evaluates to undefined.
+
+        In case the <function-expression> evaluates to null, undefined, or any other non-function, a
+        TypeError is thrown.
+
+        So to avoid such TypeError to some degree, instead of using () for function invocation 
+        we can use ?.() :
+            <function-expression>?.(<comma separated list of 0 or more argument expressions>)
+        If the expression to the left of ?. is null or undefined, the invocation will be short 
+        circuited and the whole invocation expression will evaluate to undefined rather than a
+        TypeError.
+
+        >>  null()              >>  null?.()
+            TypeError               undefined
+
+        >>  undefined()         >> undefined?.()
+            TypeError              undefined
+
+
+        >>  let x = 5
+        >>  x()             //  non-function
+            TypeError
+
+        >>  x?.()           //  ?.  will only short-circuit the whole expression, if and only if
+            TypeError       //  the sub-expression to its left is either null or undefined.
+
+
+
+OPERATOR PRECEDENCE IN JAVASCRIPT
+---------------------------------
+
+    precedence table : 
+    https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#table
+
+    lvalue :    lvalue is a historical term that means "an expression that can legally appear on the left
+                side of an assignment expression" . In JS , variables , properties of object and elements
+                of array are lvalues.
+
+
+    Associativity : When two operations with same precedence shares an operand, then their associativity 
+                    will decide which of the two will be performed first :
+                        ->  If associativity is left-to-right , then operator to the left of operand will
+                            be performed first and then the operator to the right of operand.
+                        ->  If associativity is right-to-left, then operator to the right of operand will
+                            be performed first and then the operator to the left of operand.
+
+                    Example,  (+) and (-) have same precedence and associativity L->R i.e., left to right.
+                    therefore the expression  10-5+5 will be equivalent to (10-5)+5 and not 10-(5+5).
+
+    Expressions are always parsed  from left to right. Precedence only takes over when two operators
+    with different precedence shares a common operand (conflict) , and associativity takes over when
+    two operators with same precedence shares a common operand (conflict).
+
+    EXAMPLE :
+        consider the expression,   x = 4 + 5 - 3 * 2
+
+        Since the expressions are parsed from left to right , we first encounter the operator (=) with
+        operands (x) and (4). (=) shares a common operand with (+) operator i.e., (4). And since (+)
+        has higher precendence than (=) , therefore (+) will be performed before (=). Now (+) also shares
+        a common operand with (-) i.e., (5). Both (+) and (-) have same precedence and since their 
+        associativity is left-to-right , therefore (+) will be performed before (-). After performing 
+        (+) operation , the expression has now become:   x = 9 - 3 * 2
+        Now once again parsing from left to right , (=) and (-) shares a common operand but precedence
+        of (-) is > that of (=) hence (-) will be performed before (=). (-) also shares a common 
+        operand with (*) which has higher precedence. Therefore (*) will be performed before (-).
+        After performing (*) operation , the expression has now become: x = 9 - 6
+        Again , since precedence of (-) is > precedence of (=) therefore (-) will be performed first.
+        After performing (-) operation , the expression becomes: x = 3
+        Now finally the assignment operation (=) will be performed , assigning the value (3) to (x).
+
+
+        NOTE :  notice how (+) is performed before (*) , even though precedence of (*) > precedence of (+).
+                This is because expression is being parsed from left to right , and they don't share a 
+                common operand to create a conflict.
+
+
+
