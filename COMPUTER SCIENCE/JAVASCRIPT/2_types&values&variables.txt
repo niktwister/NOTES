@@ -1,165 +1,3 @@
-Two types of comments in JS :
-
-    //  this is  a single line comment
-
-    /*  this is a multiline
-        comment     */
-
-
-Identifiers can begin with either an ‘_’ , ‘$’ , or a letter. The subsequent characters can be letters , 
-digits , ‘$’ , ‘_’ .
-
-Many reserved words can’t be used as names for variables , constants , function or classes. But can be used 
-as a property within an object. (like : if / else / while / do / for / function / switch / class / …)
-    >> let obj = {};
-    >> obj.if = 23;     // OK
-
-Reserved words scenario is a little complicated in JS . For eg: "let" is allowed to be used as an identifier 
-when declared with "var" , but not allowed when declared with "const" or inside a class. 
-
-    >> var let = 23 ;  // OK   // it is allowed because of backward compatibility issue
-
-
-AUTOMATIC SEMICOLON INSERTION
------------------------------
-    https://www.bradoncode.com/blog/2015/08/26/javascript-semi-colon-insertion/
-
-
-    We have an option in JS to not put a (;) at the end of a statement even if its grammar rule requires 
-    you to do so. For example ,
-            var a			same as , 	    var a;
-            b = 23						    b = 23;
-
-    The compiler will automatically insert a semicolon there (not literally though!). Compiler not gonna change 
-    your source code , it will just pretend as if that location contains a (;).
-
-    This whole drama is just so that JS can distinguish one statement from another , and it sometimes leads to 
-    unexpected behaviour.
-
-    There are 3 rules and 2 overriding exceptions that governs its working.
-
-    NOTE :  A Token is the smallest element of a program that is meaningful to the compiler( keywords , 
-            identifiers , constants , special symbols , operators ).
-
-            Example of a grammar rule :
-            Grammar rule for return statement looks like:  return [no LineTerminator] <exp>;
-
-
-    RULE 1
-    ------
-        When reading tokens of a program from left to right , a token that doesn’t match a grammar rule 
-        has a semicolon inserted before it if either of the following conditions are met :
-            1. The error token is separated from the previous token , by at least one line terminator.
-            2. The error token is }.
-
-    
-        (1) basically means that if the first token on the next line appears to be in continuation of the 
-        grammar rule from the current line , then (;) will not be inserted .If not , then it will be 
-        inserted. 
-
-        Example , 		var a 			becomes,			var a;
-                        var b						    	var b
-        (;) is inserted on line 1 because "var a var" wouldn’t be in continuation of the grammar rule for 
-        variable declaration of line 1. 
-
-
-        Example,		var a 			same as ,			var a = 3 ;
-                        =
-                        3
-        No (;) was inserted on line 1 or line 2 because they all seem to be in continuation of the grammar 
-        rule for variable declaration of line 1.
-
-
-
-        Example for (2) condition ,
-                {return 3}			will become ,		{return 3;}
-        The grammar rule for the return statement was expecting a (;) after 3 , but instead it got }.  Hence 
-        } becomes the error token and a (;) was inserted before it.
-
-
-    RULE 2
-    ------
-        If the program is parsed until the end of the input (meaning that we have reached the end of file) 
-        and it is not yet a complete program , then a (;) is inserted at the end of file.
-
-        Example , suppose test.js consist of following two lines only :
-            var a = 3;
-            a++
-
-        Then a (;) will automatically be inserted at the EOF if required , in order to complete the program :
-            var a = 3;
-            a++;
-
-        NOTE :  Please note that only the statement whose grammar rule requires a (;) for termination is 
-                affected by ASI :-
-                empty	    	variable declaration	expression		do-while
-                continue		break					return			throw
-
-        Statements like if , while , for , do not require termination by (;) in their grammar rule , and 
-        hence are unaffected by ASI.
-
-
-    RULE 3
-    ------
-        For the following grammar rules that do not allow line terminators where indicated , if a line 
-        terminator is encountered , parser will try to save you by adding a semicolon before the first 
-        encountered line terminator.
-
-            Postfix expression:
-	            LHSExpression [no LineTerminator] ++
-	            LHSExpression [no LineTerminator] --
-
-            Continue statement :
-	            continue [no LineTerminator] identifier;
-
-            Break statement :
-                break [no LineTerminator] identifier;
-
-            Return statement :
-                return [no LineTerminator] <exp>;
-
-            Arrow functions :
-                arrowParameters [no LineTerminator] =>  conciseBody
-
-        Example , 
-
-            return 			will become , 			return ;
-            {									{
-                a: 23									a: 23
-            }									}
-
-
-
-        Example ,
-
-            a				will become , 			a ;
-            ++			    						++c ;
-            c
-
-
-    TWO EXCEPTIONS THAT OVERRIDE THE ABOVE RULES
-    --------------------------------------------
-
-        1)  A (;) is never inserted automatically inside the header of a for statement.
-
-                for(expression   ;   expression   ;   expression)
-            
-                        These two semicolons have to be inserted manually and are
-                        also compulsory . ASI won’t work inside the header of for.
-
-        2) A (;) is never automatically inserted if doing so results in an empty statement.
-
-                Example , 
-
-                suppose last line of our program is this ,
-                        for(var i=0 ; i < 10 ; ++i)
-
-                Then according to rule #2 , a (;) should have been inserted after it , in order to 
-                complete the program. But since doing so would result in an empty statement ,
-                hence JS won’t do it , thus resulting in an error.
-
-
-
 There are 6 primitive types in Javascript :
     number
     string
@@ -707,6 +545,10 @@ SYMBOL
 
 
 
+->  "undefined" is the return value of the function that does not return anything.
+
+->  "undefined" is the value of function parameter for which no argument is passed.
+
 ->  Any javascript value can be converted to a boolean value.
 
     Only these 6 converts to false (they are called falsy values) :
@@ -720,41 +562,31 @@ SYMBOL
     All other values (including any object reference) converts to true. They are called truthy values.
 
 
+GLOBAL OBJECT
+-------------
 
-LOGICAL OPERATORS
------------------
+    A global object is provided in the global scope. That global object is given an initial set of
+    properties that includes :
+        ->  global constants such as Infinity, NaN ...
+        ->  global functions such as isNaN(), parseInt() ...
+        ->  constructor functions such as Date(), String(), Array() ...
+        ->  objects like Math, JSON ...
 
-    1)  a || b
+    As evident till now, we don't need dot notation (object.property) or bracket notation (object[property])
+    to access the properties of the global oject. We can access them directly :
+        >>  parseInt("37",8)    // directly access a property of the global object
+            31
 
-        If 'a' is a truthy value , then returns 'a'.
-            >>  5 || 0      >>  10 || 15
-                5               10
+    The global object will have self-referential property that provides us a reference to the global
+    object itself. That property is called 'window' in browser and 'global' in nodejs.
+        >>  window.Math ==== Math
+            true
 
-        Otherwise if 'a' is falsy value , then it returns 'b'.
-            >>  undefined || null       >>  null || 5
-                null                        5                
+    ES2020 introduced a common self-referential property of the global object for all the runtime
+    environments , which is called 'globalThis'.
 
+    NOTE : 'globalThis' is available for versions >= 12.0.0.0
 
-    2)  a && b
-
-        If 'a' is a truthy value , then returns 'b'.
-            >>  5 && 0      >>  10 && 15
-                0               15
-
-        Otherwise if 'a' is falsy value , then it returns 'a'.
-            >>  undefined && null       >>  null && 5
-                undefined                   null                
-
-
-    3)  !(a)
-
-        If 'a' is truthy value =>   return false
-        If 'a' is falsy value   =>  return true
-
-
-
-->  "undefined" is the return value of the function that does not return anything.
-->  "undefined" is the value of function parameter for which no argument is passed.
 
 
 TYPE CONVERSION IN JAVASCRIPT
@@ -1189,32 +1021,6 @@ TYPE CONVERSION IN JAVASCRIPT
             "sh"
 
 
-GLOBAL OBJECT
--------------
-
-    A global object is provided in the global scope. That global object is given an initial set of
-    properties that includes :
-        ->  global constants such as Infinity, NaN ...
-        ->  global functions such as isNaN(), parseInt() ...
-        ->  constructor functions such as Date(), String(), Array() ...
-        ->  objects like Math, JSON ...
-
-    As evident till now, we don't need dot notation (object.property) or bracket notation (object[property])
-    to access the properties of the global oject. We can access them directly :
-        >>  parseInt("37",8)    // directly access a property of the global object
-            31
-
-    The global object will have self-referential property that provides us a reference to the global
-    object itself. That property is called 'window' in browser and 'global' in nodejs.
-        >>  window.Math ==== Math
-            true
-
-    ES2020 introduced a common self-referential property of the global object for all the runtime
-    environments , which is called 'globalThis'.
-
-    NOTE : 'globalThis' is available for versions >= 12.0.0.0
-
-
 
 VARIABLE DECLARATION
 --------------------
@@ -1393,190 +1199,5 @@ DESTRUCTURING ASSIGNMENT
             1           2
         >>  x2      >>  y2
             3           4
-
-
-PROPERTY ACCESS EXPRESSIONS
----------------------------
-
-    Two syntax for property access :
-        1)  Expression.identifier
-        2)  Expression[identifier]
-
-    1)  Expression.identifier
-        Here Expression is evaluated first , and it should specify an object, identifier specifies the
-        name of the desired property.
-        The value of the property named by the identifier is looked up in the object, and becomes the
-        overall value of the expression.
-
-    2)  Expression[Expression]
-        The Expression before "[" is evaluated first, and it specifies an object or an array. Then
-        the Expression inside "[]" is evaluated and converted to a string. This 2nd expression specifies
-        the name of the desired property or the index of the desired array element.
-
-    EXAMPLES :
-
-        >>  let b = {x:1 , y:{z:3}}
-        >>  let a = [b,4,[5,6]]
-
-        >>  b.x             >>  b.y.z
-            1                   3
-
-        >>  b['y']['z']     >>  a[1]        >>  a[2]['1']       >>  a[0]['x']
-            3                   4               6                   1
-
-        >>  b['y'].z        >>  b.y['z']
-            3                   3
-
-    When the expression before "." or "[" evaluates to either null or undefined, TypeError will be
-    thrown. Because these are the only two values in JS that can't have properties, other primitive
-    types such as number, string, boolean... will get wrapped around in their respective wrapper
-    class objects before we try to access their property.
-
-    Assuming that the expression before "." or "[" is neither null or undefined. Then if the property
-    (of an object) or the index (of an array) we are trying to access doesn't exist, then the whole
-    property access expression will evaluate to undefined.
-
-    >>  null.abc            >>  'hi'.xyz    // String class has no property named 'xyz'
-        TypeError               undefined
-
-    >>  let arr = [1,5,7]
-    >>  a[3]
-        undefined
-
-    >>  let ob = {name:"nik" , age:23}
-    >>  ob["gender"]    //  non existent property
-        undefined
-    >>  ob.name.xyz     //  "nik".xyz is undefined
-        undefined
-    >>  ob.gender.xyz   //  ob.gender evaluates to undefined, undefined.xyz will will throw TypeError
-        TypeError
-
-
-    Drawbacks of Expression.identifier syntax are :
-        1)  name of the property we are trying to access should be a legal identifier.
-        2)  we should know the name while writing the program.
-
-    
-
-CONDITIONAL PROPERTY ACCESS (ES2020)
-------------------------------------
-
-    syntax :
-        1)  expression?.identifier
-        2)  epxression?.[expression]
-
-    "?." -> optional chaining operator
-
-    When sub-expression to the left of "?." is either null or undefined, then the evaulation of the
-    whole expression is short circuited and the whole expression just evaluate to undefined, rather
-    than throwing TypeError.
-
-    NOTE :      .................................
-                |   member access (.)           |
-                |   computed member access ([]) |------>    All these operators have same precedence
-                |   function call (())          |           and associativity (left to right).
-                |   optional chaining (?.)      |
-                `````````````````````````````````
-
-    EXAMPLE :
-
-        >>  let a = {b:null}
-        >>  a.b?.c.d            //  a.b evaluates to null
-            undefined           //  null?.c will short circuit the evaulation of whole expression
-                                //  and the whole expression will just evaluate to undefined.
-                                //  We would have got TypeError if null.c was evaluated instead.
-
-        >>  let a = {b:{e:2}}
-        >>  a.b?.c.d            //  a.b evaluates to {e:2}
-            TypeError           //  {e:2}?.c will evaluate to undefined since there is no 'c' named 
-                                //  property in {e:2}
-                                //  undefined.d will evaluate to TypeError.
-                                //
-        >>  a?.['b']['c']       //  a?.['b'] evaluates to {e:2}
-            undefined           //  {e:2}['c'] evaluates to undefined.
-
-
-    Invocation expression and conditional invocation expression
-    -----------------------------------------------------------
-
-        <function-expression>(<comma separated list of 0 or more argument expressions>)
-
-        <function-expression> is evaluated first and then the multiple <argument-expression>(s) (if any)
-        are evaluated. If the called function doesn't return anything, the value of invocation expression
-        evaluates to undefined.
-
-        In case the <function-expression> evaluates to null, undefined, or any other non-function, a
-        TypeError is thrown.
-
-        So to avoid such TypeError to some degree, instead of using () for function invocation 
-        we can use ?.() :
-            <function-expression>?.(<comma separated list of 0 or more argument expressions>)
-        If the expression to the left of ?. is null or undefined, the invocation will be short 
-        circuited and the whole invocation expression will evaluate to undefined rather than a
-        TypeError.
-
-        >>  null()              >>  null?.()
-            TypeError               undefined
-
-        >>  undefined()         >> undefined?.()
-            TypeError              undefined
-
-
-        >>  let x = 5
-        >>  x()             //  non-function
-            TypeError
-
-        >>  x?.()           //  ?.  will only short-circuit the whole expression, if and only if
-            TypeError       //  the sub-expression to its left is either null or undefined.
-
-
-
-OPERATOR PRECEDENCE IN JAVASCRIPT
----------------------------------
-
-    precedence table : 
-    https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#table
-
-    lvalue :    lvalue is a historical term that means "an expression that can legally appear on the left
-                side of an assignment expression" . In JS , variables , properties of object and elements
-                of array are lvalues.
-
-
-    Associativity : When two operations with same precedence shares an operand, then their associativity 
-                    will decide which of the two will be performed first :
-                        ->  If associativity is left-to-right , then operator to the left of operand will
-                            be performed first and then the operator to the right of operand.
-                        ->  If associativity is right-to-left, then operator to the right of operand will
-                            be performed first and then the operator to the left of operand.
-
-                    Example,  (+) and (-) have same precedence and associativity L->R i.e., left to right.
-                    therefore the expression  10-5+5 will be equivalent to (10-5)+5 and not 10-(5+5).
-
-    Expressions are always parsed  from left to right. Precedence only takes over when two operators
-    with different precedence shares a common operand (conflict) , and associativity takes over when
-    two operators with same precedence shares a common operand (conflict).
-
-    EXAMPLE :
-        consider the expression,   x = 4 + 5 - 3 * 2
-
-        Since the expressions are parsed from left to right , we first encounter the operator (=) with
-        operands (x) and (4). (=) shares a common operand with (+) operator i.e., (4). And since (+)
-        has higher precendence than (=) , therefore (+) will be performed before (=). Now (+) also shares
-        a common operand with (-) i.e., (5). Both (+) and (-) have same precedence and since their 
-        associativity is left-to-right , therefore (+) will be performed before (-). After performing 
-        (+) operation , the expression has now become:   x = 9 - 3 * 2
-        Now once again parsing from left to right , (=) and (-) shares a common operand but precedence
-        of (-) is > that of (=) hence (-) will be performed before (=). (-) also shares a common 
-        operand with (*) which has higher precedence. Therefore (*) will be performed before (-).
-        After performing (*) operation , the expression has now become: x = 9 - 6
-        Again , since precedence of (-) is > precedence of (=) therefore (-) will be performed first.
-        After performing (-) operation , the expression becomes: x = 3
-        Now finally the assignment operation (=) will be performed , assigning the value (3) to (x).
-
-
-        NOTE :  notice how (+) is performed before (*) , even though precedence of (*) > precedence of (+).
-                This is because expression is being parsed from left to right , and they don't share a 
-                common operand to create a conflict.
-
 
 

@@ -1,0 +1,137 @@
+AUTOMATIC SEMICOLON INSERTION
+-----------------------------
+    https://www.bradoncode.com/blog/2015/08/26/javascript-semi-colon-insertion/
+
+
+    We have an option in JS to not put a (;) at the end of a statement even if its grammar rule requires 
+    you to do so. For example ,
+            var a			same as , 	    var a;
+            b = 23						    b = 23;
+
+    The compiler will automatically insert a semicolon there (not literally though!). Compiler not gonna change 
+    your source code , it will just pretend as if that location contains a (;).
+
+    This whole drama is just so that JS can distinguish one statement from another , and it sometimes leads to 
+    unexpected behaviour.
+
+    There are 3 rules and 2 overriding exceptions that governs its working.
+
+    NOTE :  A Token is the smallest element of a program that is meaningful to the compiler( keywords , 
+            identifiers , constants , special symbols , operators ).
+
+            Example of a grammar rule :
+            Grammar rule for return statement looks like:  return [no LineTerminator] <exp>;
+
+
+    RULE 1
+    ------
+        When reading tokens of a program from left to right , a token that doesn’t match a grammar rule 
+        has a semicolon inserted before it if either of the following conditions are met :
+            1. The error token is separated from the previous token , by at least one line terminator.
+            2. The error token is }.
+
+    
+        (1) basically means that if the first token on the next line appears to be in continuation of the 
+        grammar rule from the current line , then (;) will not be inserted .If not , then it will be 
+        inserted. 
+
+        Example , 		var a 			becomes,			var a;
+                        var b						    	var b
+        (;) is inserted on line 1 because "var a var" wouldn’t be in continuation of the grammar rule for 
+        variable declaration of line 1. 
+
+
+        Example,		var a 			same as ,			var a = 3 ;
+                        =
+                        3
+        No (;) was inserted on line 1 or line 2 because they all seem to be in continuation of the grammar 
+        rule for variable declaration of line 1.
+
+
+
+        Example for (2) condition ,
+                {return 3}			will become ,		{return 3;}
+        The grammar rule for the return statement was expecting a (;) after 3 , but instead it got }.  Hence 
+        } becomes the error token and a (;) was inserted before it.
+
+
+    RULE 2
+    ------
+        If the program is parsed until the end of the input (meaning that we have reached the end of file) 
+        and it is not yet a complete program , then a (;) is inserted at the end of file.
+
+        Example , suppose test.js consist of following two lines only :
+            var a = 3;
+            a++
+
+        Then a (;) will automatically be inserted at the EOF if required , in order to complete the program :
+            var a = 3;
+            a++;
+
+        NOTE :  Please note that only the statement whose grammar rule requires a (;) for termination is 
+                affected by ASI :-
+                empty	    	variable declaration	expression		do-while
+                continue		break					return			throw
+
+        Statements like if , while , for , do not require termination by (;) in their grammar rule , and 
+        hence are unaffected by ASI.
+
+
+    RULE 3
+    ------
+        For the following grammar rules that do not allow line terminators where indicated , if a line 
+        terminator is encountered , parser will try to save you by adding a semicolon before the first 
+        encountered line terminator.
+
+            Postfix expression:
+	            LHSExpression [no LineTerminator] ++
+	            LHSExpression [no LineTerminator] --
+
+            Continue statement :
+	            continue [no LineTerminator] identifier;
+
+            Break statement :
+                break [no LineTerminator] identifier;
+
+            Return statement :
+                return [no LineTerminator] <exp>;
+
+            Arrow functions :
+                arrowParameters [no LineTerminator] =>  conciseBody
+
+        Example , 
+
+            return 			will become , 			return ;
+            {									{
+                a: 23									a: 23
+            }									}
+
+
+
+        Example ,
+
+            a				will become , 			a ;
+            ++			    						++c ;
+            c
+
+
+    TWO EXCEPTIONS THAT OVERRIDE THE ABOVE RULES
+    --------------------------------------------
+
+        1)  A (;) is never inserted automatically inside the header of a for statement.
+
+                for(expression   ;   expression   ;   expression)
+            
+                        These two semicolons have to be inserted manually and are
+                        also compulsory . ASI won’t work inside the header of for.
+
+        2) A (;) is never automatically inserted if doing so results in an empty statement.
+
+                Example , 
+
+                suppose last line of our program is this ,
+                        for(var i=0 ; i < 10 ; ++i)
+
+                Then according to rule #2 , a (;) should have been inserted after it , in order to 
+                complete the program. But since doing so would result in an empty statement ,
+                hence JS won’t do it , thus resulting in an error.

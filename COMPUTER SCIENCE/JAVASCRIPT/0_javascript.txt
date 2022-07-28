@@ -1,0 +1,28 @@
+Two types of comments in JS :
+
+    //  this is  a single line comment
+
+    /*  this is a multiline
+        comment     */
+
+
+Identifiers can begin with either an ‘_’ , ‘$’ , or a letter. The subsequent characters can be letters , 
+digits , ‘$’ , ‘_’ .
+
+Many reserved words can’t be used as names for variables , constants , function or classes. But can be used 
+as a property within an object. (like : if / else / while / do / for / function / switch / class / …)
+    >> let obj = {};
+    >> obj.if = 23;     // OK
+
+Reserved words scenario is a little complicated in JS . For eg: "let" is allowed to be used as an identifier 
+when declared with "var" , but not allowed when declared with "const" or inside a class. 
+
+    >> var let = 23 ;  // OK   // it is allowed because of backward compatibility issue
+
+
+
+
+
+
+
+
