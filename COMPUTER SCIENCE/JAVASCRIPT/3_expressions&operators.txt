@@ -214,3 +214,265 @@ OPERATOR PRECEDENCE IN JAVASCRIPT
                 common operand to create a conflict.
 
 
+
+THE BINARY + OPERATOR
+---------------------
+
+    step 1) If either of the operand is an object, they will be converted to primitive by calling 
+            ToPrimitive(...) w/o passing any preferredType.
+    
+    step2)  After both the operands are primitive, if either of the operand is a string the other
+            is also converted to string (if not already) and concatenation is performed.
+
+            Else, if neither of the operands are string, then they are both converted to number 
+            (if not already) and added.
+
+    >>  true + true     //  both primitive, neither string. Hence they are converted to number.
+        2               //  true will become 1.
+    
+    >>  2 + null        //  both primitive, neither string. Hence they will be converted to number
+        2               //  if required. null be converted to 0.
+
+    >>  2 + undefined   //  both primitive, neither string. Hence they will be converted to number
+        NaN             //  if required. Since undefined when converted to number get NaN, 
+                        //  therefore we will get 2 + NaN i.e., NaN .
+
+    >>  1 + {}              //  (+) calls ToPrimitive(..) for object {} with no preferredType.
+        1[object Object]    //  Since no preferredType is provided, hint will be set to "default".
+                        //  {} does not define any [Symbol.ToPrimitive](..) method, therefore
+                        //  OrdinaryToPrimitive(..) will be called with hint==="number".
+                        //  OrdinaryToPrimitive(..) will call valueOf() first, but it will return
+                        //  a reference to {} itself i.e., a non-primitive value , therefore
+                        //  toString() will be called next. toString() on {} will return the 
+                        //  string "[object Object]" , which is primitive therefore it will be 
+                        //  returned to ToPrimitive(..) , which in turn will return it to (+).
+                        //  And now since one of the operand is a string , (+) will convert 1 to
+                        //  string too i.e., "1" and we will get their concatenation i.e.,  
+                        //  "1[object Object]" .
+
+
+UNARY ARITHMETIC OPERATORS  (+,-,++,--)
+---------------------------------------
+
+    They all have right-to-left precedence.
+    If operand is object then they will call ToPrimitive(..) with preferredType === "number".
+    If ToPrimitive(..) doesn't return a primitive of type number, ToNumber(..) will be called
+    for primitive-to-primitive conversion.
+
+    unary plus (+)  :   converts the operand to number (if not already) as mentioned above (or to NaN) 
+                        and returns the converted value. 
+
+    unary minus (+)  :  converts the operand to number (if not already) as mentioned above (or to NaN) 
+                        and change the sign of the result.
+
+    increment (++)  :   The operand must be an lvalue.  
+                        It converts the operand to a number, add 1 to it and assigns the incremented
+                        value back to the variable/element/property.
+
+                        The value returned depends on the relative position of (++) w.r.t operand :
+                            ++operand   =>  incremented value is returned
+                            operand++   =>  original value is returned
+
+                        Also note that ++x is not always the same as x=x+1 :
+
+                            >>  x = "1"         >>  x = "1"             
+                            >>  x = x + 1       >>  ++x
+                            >>  x                   2
+                                "11"            >>  x
+                                                    2
+
+
+
+    decrement (--)  :   The operand must be an lvalue.  
+                        It converts the operand to a number, subtract 1 from it and assigns the decremented
+                        value back to the variable/element/property.
+
+                        The value returned depends on the relative position of (--) w.r.t operand :
+                            --operand   =>  decremented value is returned
+                            operand--   =>  original value is returned
+
+
+    EXAMPLE :
+
+        >>  let a = [3]
+        >>  --a             //  ToPrimitive(..) will be called for [3] with preferredType==="number"
+            2               //  Array class doesn't define [Symbol.toPrimitive](..) method therefore
+        >>  a               //  OrdinaryToPrimitive(..) will be called with hint === "number".
+            2               //  OrdinaryToPrimitive(..) will first calle valueOf() on [3] , but Array
+                            //  class doesn't override the valueOf() of the Object class , therefore 
+                            //  a reference to the [3] will be returned i.e., not primitive. Therefore
+                            //  toString() will be called on [3] , which will return "3" . Since its
+                            //  primitive OrdinaryToPrimitive(..) will return "3" to ToPrimitive(..)
+                            //  which in turn will return it to (--) . 
+                            //  Now (--) will convert "3" to number by calling ToNumber(..) .
+                            //  "3" will become 3 , and finally (--) will subtract one from it to get
+                            //  2. 2 will be assigned to variable (a) and returned too.
+
+
+BITWISE OPERATORS (~ , | , & , ^ , << , >> , >>>)
+-------------------------------------------------
+
+    They expect integer operands and behave as if the operand are 32-bit signed integers.
+
+    They convert thir operands to number (if required).
+    Exception : NaN , Infinity , -Infinity all converts to 0 when used as operands of bitwise operators.
+
+    The range of 32-bit signed integer is :    [-2147483648 , +2147483647]
+    If operand is an integer outside this range, it will wrap around this range.
+    If operand is in binary, then any bit beyond the 32 least significant bits will be dropped.
+
+    >>  (2147483647 + 1) | 0     
+        -2147483648
+
+    >>  (-2147483648 - 1) | 0
+        2147483647
+
+    >>  253.4 & -1      // fractional parts are dropped       
+        253             //  -1 === 0xFFFFFFFF
+
+    >>  0x1234 & 0x00FF     //  BITWISE AND
+        52                  //  0x0034
+
+    >>  0x1234 | 0x00FF     //  BITWISE OR
+        4836                //  0x12FF
+
+    >>  0xFF00 ^ 0xF0F0     //  BITWISE XOR
+        4080                //  0x0FF0
+
+    >>  ~0x0F               //  BITWISE NOT
+        -16                 //  0xFFFFFFF0
+
+    >>  0xFFF00000FF | 0x0  //  EXTRA BITS (BEYOND 32 LSb(s)) WILL BE DROPPED OFF FOR FIRST OPERAND
+        -268435201          //  0xF00000FF
+
+    
+    Shift operations take two operands :    (32-bit signed int) [shift opr] (5-bit unsigned int)
+                                                                                    |
+                                                                                    V
+                                                                    no of bits to shift (0<=x<=31)
+    
+    >>  7 << 2      //  Left shift
+        28          //  MSb(s) are lost , 0s enter from right
+
+    >>  28 >> 2     //  Right shift with sign preserved
+                    //  LSb(s) are lost 
+    >>  -1 >> 4     //  if (MSb === 0)  0s enter from left
+        -1          //  if (MSb === 1)  1s enter from left  
+
+    >>  -1 >>> 4    //  Right shift with zero fill
+        268435455   //  LSb(s) are lost , 0s enter from left
+                    //  0xFFFFFFFF >>> 4 => 0x0FFFFFFF
+                    //      (-1)            (268435455)
+
+
+STRICT EQUALITY (===)
+---------------------
+    https://262.ecma-international.org/13.0/#sec-isstrictlyequal
+
+    1)  strict equality compares the two values as follows (no type conversion is performed):
+            
+            1.1) If two values have different types, they are not equal.
+
+            1.2) If both values are null or if both values are undefined then, they are equal.
+
+            1.3) If both values are true or if both values are false, they are equal.
+
+            1.4) If one or both values is NaN, they are not equal.
+
+            1.5) If both values are numbers and have same values, they are equal. +0 and -0 are equal.
+
+            1.6) If both values are strings and contains exactly same sequence of 16-bit values, they
+                 are equal.
+
+            1.7) If both values refer to same object, they are equal. If both refer to different objects
+                 (even if they're identical in properties), they are not equal.
+        
+
+EQUALITY WITH TYPE CONVERSION (==)
+----------------------------------
+    https://262.ecma-international.org/13.0/#sec-islooselyequal
+
+    **bigint not taken into account. Check docs.
+
+    1)  If the two values have same type, test them for strict equality. If they're strictly equal, they
+        are equal. If they're not strictly equal, they are not equal.
+
+    2)  If the two values have different tpyes, use the following rules :
+
+            2.1) null and undefined are equal.
+
+            2.2) If one value is a number and other a sring, convert the string to number and try again.
+
+            2.3) If either value is a true, convert to 1 and compare again. If either value is a false,
+                 convert it to 0 and compare again.
+
+            2.4) If one value is an object and other is number/string, then convert the object to 
+                 primtive and compare again.
+
+            2.5) Any other combination of values are not equal.
+
+    
+    NOTE : (==) provides no preferredType to ToPrimitive(..) for object-to-primtive conversion.
+
+
+
+->  !==     is NOT(STRICTLY EQUAL)
+    !=      is NOT(LOOSELY EQUAL)
+
+    for example, null and undefined are loosely equal but are not strictly equal.
+
+    >>  null !== undefined
+        true
+
+    >>  null != undefined
+        false
+
+
+
+COMPARISION OPERATOR
+--------------------
+
+    https://262.ecma-international.org/13.0/#sec-islessthan
+
+    **bigint not taken into account. Check docs.
+
+    comparision can be performed only on numbers and strings, so operands that are not of type number
+    or type string gets converted as follows :
+
+        1)  If either of the operand is an object, convert it to primitive with preferredType==="number".
+            Then compare again.
+        
+        2)  If after any required object-to-primitive conversion, both operands are string, we comapre them
+            by comparing (numerically) the 16-bit values that make up those strings.
+
+        3)  If after any required object-to-primitive conversion, atleast one of the operand is not a string,
+            then both operands are converted to numbers and compared numerically.
+
+    ->  +0 and -0 are considered equal.
+        Infinity is larger than any number other than itself.
+        -Infinity is smaller than any number other than itself.
+
+    ->  If either operand is NaN or converts to NaN, comparision operators will return false.
+
+    ->  comparision b/w numbers and bigint is allowed.
+
+    ->  Its clear that comparision operators favor numbers over strings. They only perform string
+        comparision when both operands are strings.
+
+        Binary (+) on the other hand favor strings over numbers, it perform concatenation if either
+        operand is a string.
+
+            >>  "11" + 3        //  3 is converted to "3"
+                "113"
+
+            >>  "11" < 3        //  "11" is converted to 11.
+                false
+
+            >>  "one" < 3       //  "one" is converted to NaN.
+                false           //  NaN < 3 evaluates to false.
+
+    ->  <= is just  NOT(>) .
+    ->  >=  is just NOT(<) .
+
+
+
