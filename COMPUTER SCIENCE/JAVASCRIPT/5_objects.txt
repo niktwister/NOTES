@@ -1,0 +1,134 @@
+
+OBJECT PROPERTIES
+-----------------
+    https://www.javascripttutorial.net/javascript-object-properties/
+
+    There are two types of property for objects :
+        1)  data property
+        2)  accessor property
+
+    data property
+    -------------
+
+        A data property stores data. Its attribute [[Value]] holds any JavaScript value.
+
+        A data property has 4 attributes :
+            1)  [[Value]]           :   any [default : undefined]
+                                        value of the property.
+            
+            2)  [[Writable]]        :   boolean [default : false]
+                                        Determines if [[Value]] of the property can be changes once set.
+
+            3)  [[Enumerable]]      :   boolean [default : false]
+                                        Determines if the property is enumerable using for..in loop or not.
+
+            4)  [[Configurable]]    :   boolean [default : false]
+                                        If this attribute is false then :
+                                            ->  we cannot delete the property.
+                                            ->  we cannot change the property from data to accessor and
+                                                vice-versa.
+                                            ->  we cannot alter any attribute other than [[Value]] and
+                                                [[Writable]]. (this statement holds true for accessor
+                                                properties too)
+
+        
+
+        Object.getOwnPropertyDescriptor(ob,prop)
+        ````````````````````````````````````````
+            This method will return the "property descriptor" for a property of an object , which
+            will show the property's attributes and their values.
+
+            >>  let user = {name:"anya",age:27}
+            >>  Object.getOwnPropertyDescriptor(user,"name")
+                {
+                    value : "anya",
+                    writable : "true",          //  This object is the property descriptor
+                    enumerable : "true",        //  for the key "name" in user
+                    configurable : "true"
+                }
+
+        Object.defineProperty(ob,prop,propDesc)
+        ```````````````````````````````````````
+            ->  If there is no property with key prop, a new own-property is created that has the 
+                attributes specified by propDesc.
+            ->  If there is a property with key prop, defining changes the property’s attributes so 
+                that they match propDesc.
+        
+            If we use the Object.defineProperty() method to define or re-define a property of the object, 
+            the default values of [[Configurable]], [[Enumerable]], and [[Writable]] are set to false 
+            unless otherwise specified. And the default value of [[Value]] is set to undefined unless 
+            otherwise specified.
+            
+            >>  let user = {name : "nik",age : 23}
+            >>  Object.defineProperty(user,"gender",{   value : 'M' ,
+                                                        writable : false ,
+                                                        enumerable : true 
+                })
+            
+            //  since [[Configurable]] is not provided , it will be set to its default value i.e., false
+            //  for the 'gender' property. Hence we won't be able to change the enumerable attribute for
+            //  the 'gender' property.   
+            
+            >>  user.gender
+                'M'
+            >>  user.gender = 'F'
+                'F'             //  will not throw error , but since 'gender' is not-writable , its value
+            >>  user.gender     //  will not change in user object.
+                'M'
+
+
+    accessor property
+    -----------------             
+
+        Similar to data properties, accessor properties also have [[Configurable]] and [[Enumerable]] 
+        attributes.
+
+        But the accessor properties have the [[Get]] and [[Set]] attributes instead of [[Value]] and 
+        [[Writable]].
+
+            [[Get]] :   function
+                        When we read data from an accessor property, the [[Get]] function is called 
+                        automatically to return a value. This function will have no parameter.
+
+            [[Set]] :   function
+                        If we assign a value to an accessor property, the [[Set]] function is called 
+                        automatically. This function will have a single paramter in which the value
+                        being assigned is passed.
+
+        NOTE :  Both [[Get]] and [[Set]] will be invoked on the object to which the property belongs,
+                therefore the value of "this" inside them will be the reference to that object.
+
+        To define an accessor property, you must use the Object.defineProperty() method : 
+
+        >>  let user = {firstName : "nikunj" , lastName : "pathak"}
+
+        >>  Object.defineProperty(user, 'name', {
+                get: function () {
+                    return `${this.firstName} ${this.lastName}`;
+                },
+                set: function (value) {
+                    if (typeof value !== "string")
+                        throw Error("can't assign non-string value to name!!");
+
+                    let parts = value.split(' ');
+                    if (parts.length == 2) {
+                        this.firstName = parts[0];
+                        this.lastName = parts[1];
+                    } else
+                        throw Error('Invalid name format');
+                }
+            })
+
+        >>  user.name
+            'nikunj pathak'
+        
+        >>  user.name = 23
+            Uncaught Error: can't assign non-string value to name!!
+
+        >>  user.name = 'anya'
+            Uncaught Error: Invalid name format
+
+        >>  user.name = 'anya taylor'
+        >>  user
+            {firstName: 'anya', lastName: 'taylor'}
+        

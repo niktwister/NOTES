@@ -475,4 +475,266 @@ COMPARISION OPERATOR
     ->  >=  is just NOT(<) .
 
 
+in OPERATOR
+-----------
+
+    property in object
+        |
+        ------------------> string / symbol / value that can be converted to string
+
+    returns true if the property can be found anywhere along the prototype chain of the object,
+    else returns false.
+
+    >>  let user = {
+            name : "nik" ,
+            id : 6080602 ,
+            age : 23
+        }
+
+    >>  "name" in user
+        true
+
+    >>  toString in user
+        true
+
+
+instanceof OPERATOR
+-------------------
+
+                                    ob instanceof func    
+                                    |               |
+                    object ----------               ---------- constructor function
+
+    
+    returns true iff func.prototype exists in the prototype chain of ob , else returns false.
+
+
+LOGICAL AND (&&)
+----------------
+
+    operand1 && operand2
+
+    operand1 is evaluated first. If operand1 is falsy the, the whole expression must be falsy, therefore 
+    && simply returns the falsy value of operand1 w/o evaluating operand2 (short circuiting).
+    On the otherhand if operand1 is truthy, then the value of whole expression will depend upon the value
+    of operand2 i.e., if operand2 is truthy the whole expression will be truthy and if operand2 is falsy
+    the whole expression must be falsy. Therfore in case operand1 is truthy, && will simply returns the 
+    evaluated value of operand2.
+
+    example of short circuiting :
+                (a===b) && stop();      // if (a) is not equal to (b) , stop() will not be called.
+                                        // same as   if(a===b){stop()};
+
+
+LOGICAL OR (||)
+---------------
+
+    operand1 || operand2
+
+    If operand1 evaluates to truthy, operand2 will not be evaluated (circuiting) and || will return the 
+    value of operand1.
+    If operand1 evaluates to falsy, operand2 will be evaluated and || will simply return the value of
+    operand2.
+
+    one of the usage of || is to select first truthy value in a set of alternative :
+
+        max = maxWidth || preferences.maxWidth || 500;     
+            //  this is equivalent to :
+            //  if(maxWidth){max = maxWidth}
+            //  else if(preferences.maxWidth){max = maxWidth}
+            //  else{max = 500;}
+            //
+            //  The usage of || this way will fall short if 0 is a valid value for maxWidth. Since 0
+            //  is falsy.
+
+    Prior to ES6 , || was used like above to provide default values to parameters in functions :
+
+        function greet(name){
+            
+            name = name || "stranger";          //  if name is not passed to greet(..), name will become
+                                                //  undefined. Since undefined is falsy value , therefore
+            console.log(`Hello!! ${name}`);     //  (name || "stranger") will evaluate to "stranger", hence
+                                                //  name will become "stranger".
+        }                                       //  If a non-empty string name is passed to greet(..) ,  
+                                                //  it will be truthy therefore (name || "stranger") will
+                                                //  evaluate to whatever is passed in name.
+    
+
+    But starting from ES6 , we can specify the default value of a paramter in the function itself :
+
+        function greet(name="stranger"){        //  If a default value is assigned to a paramter then, 
+            ..                                  //  it should either be the rightmost parameter or 
+        }                                       //  all the paramters to its right have also been assigned
+                                                //  some default value.
+                                                //
+                                                //  This whole drama of assigning default values to 
+                                                // paramters started since JS doesn't support overloading
+                                                //  functions.
+
+
+LOGICAL NOT (!)
+---------------
+
+    unlike && and || , ! will always evaluate to a boolean value true / false.
+
+    ! operand
+        | 
+        |..... if operand is truthy, ! will return false.
+        |
+        |..... if operand is falsy, ! will return true.
+
+
+FIRST DEFINED (??) (ES2020)
+---------------------------
+
+    operand1 ?? operand2
+
+    evaluates the operand1. If its neither null or undefined, the value of operand1 is returned 
+    without the evaluation of operand2 (short-circuiting).
+
+    Else if operand1 evaluates to null or undefined, the operand2 is evaluated and returned.
+
+    We saw before that || can be used to select the first truthy value as below : 
+        max = maxWidth || preferences.maxWidth || 500;
+    The problem with this approach is that all falsy values will be ignored. Falsy values like 0 ,
+    "" , or false can be perfectly valid values in certain circumstances. So it makes sense to pick
+    the first defined value (using ??) rather than the first truthy value (using ||) :
+        max = maxWidth ?? preferences.maxWidth ?? 500;
+    Now if maxWidth is 0, it will not be ignored.
+
+
+    NOTE :  relative precedence of (??) with (&& , ||) is ambiguous. Therefore brackets should be 
+            used when mixing (??) with (&& , ||) in an expression, or else we will get SyntaxError.
+
+            >>  1 ?? 2 || 3
+                SyntaxError
+            
+            >>  (1 ?? 2) || 3
+                1
+    
+            >>  null ?? (2 && 3)
+                3
+
+
+delete OPERATOR
+---------------
+
+    delete operator is used to remove own-configurable property from an object.
+    syntax :
+        delete oject.property
+        delete object["property"]
+
+    return value
+    ------------
+
+        true is returned in following cases for both strict and non-strict mode :
+            ->  After successfully deleting own configurable property.
+            ->  If the property is non-existent.
+            ->  After failing to delete not-own (inherited) property.
+            ->  meaningless expression
+        
+        false is returned in following cases for non-strict mode , error is thrown in strict mode :
+            ->  trying to delete own non-configurable property (TypeError in strict mode)
+            ->  trying to delete a variable or a function (SyntaxError in strict mode)
+
+    
+    NOTE : variables (declared using var) and functions that are declared globally also becomes properties
+            of the window object. But they still cannot be deleted using delete operator since they become
+            non-configurable properties.
+
+    NOTE :  delete operation has nothing to do with directly freeing memory. 
+            We can have objects as properties too. When we delete such properties , we are simply removing
+            their references from parent object. But as long as there exist another reference to them, they 
+            will survive.
+
+
+    Arrays are object too. Therefore we can delete array's element using delete.
+
+        >>  let arr = [0,10,20,30]
+        >>  arr
+            (4) [0,10,20,30]
+            {
+                0       :   0,
+                1       :   10,
+                2       :   20,
+                3       :   30,
+                length  :   4
+            }
+
+        >>  delete arr[2]
+            true
+        
+        >>  arr
+            (4) [0,10,empty,30]     //  As we can see, deleteing an array element won't change it's length.
+            {                       //  We are just left with a hole in our array.
+                0       :   0,
+                1       :   10,
+                3       :   30,
+                length  :   4
+            }
+
+
+typeof OPERATOR
+---------------
+
+    Takes a single operand, and returns its type.
+    .........................................
+    |   x                   |   typeof x    |
+    `````````````````````````````````````````
+    |   undefined           |   "undefined" |
+    -----------------------------------------
+    |   null                |   "object"    |   **legacy reasons.
+    -----------------------------------------
+    |   true/false          |   "boolean"   |
+    -----------------------------------------
+    |   any number of NaN   |   "number"    |
+    -----------------------------------------
+    |   any bigint          |   "bigint"    |
+    -----------------------------------------
+    |   any string          |   "string"    |
+    -----------------------------------------
+    |   any symbol          |   "symbol"    |
+    -----------------------------------------
+    |   any function        |   "function"  |
+    -----------------------------------------
+    |   any non-function    |   "object"    |
+    |       object          |               |
+    -----------------------------------------
+
+    NOTE :  even though functions are also objects, typeof differentiate b/w function objects and 
+            non-function objects.
+
+
+void OPERATOR
+-------------
+
+    void operand
+
+    It evaluates its operand, discard its value and return undefined.
+
+    >>  let counter = 0;
+    >>  const increment = () => void ++counter;
+    >>  increment()
+        undefined
+    >>  counter
+        1
+
+
+comma OPERATOR
+--------------
+
+    operand1 , operand2
+
+    (,) operator evaluates its left operand, then evaluates its right operand, and then returns the 
+    value of its right operand.
+
+    It has left-to-right associativity.
+
+    >>  1,2
+        2
+    
+    >>  let i,j,k;                 
+    >>  i = 0 , j = 1 , k = 2       //  (=) has higher precedence than (,)
+        2
+
 
