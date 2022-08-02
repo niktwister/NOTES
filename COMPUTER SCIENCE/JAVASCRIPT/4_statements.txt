@@ -1,0 +1,148 @@
+->  In switch statements, the switch expression is compared with all the case expressions using
+    === operator.
+
+->  In switch statements, the case expressions are evaluated at run-time. Unlike other langauges
+    such as c/c++ where case expressions are constants determined at compile-time.
+
+
+for/of LOOP
+-----------
+
+    syntax:
+    
+        for(element of iterable)
+            statement
+    
+
+    for/of loop works only with iterable objects. We can iterate through the items of an iterable using
+    for/of loop.
+                                .........................
+                                |                       |
+                                |           for(let element of iterable)
+                                |               statement           |
+                before every iteration this                     This expression is evaluated 1st and
+                variable will be assigned                       only once. It should evaluate to a 
+                the next element from the                       reference of an iterable object.
+                iterable object.
+
+    
+    >>  let arr = [10,20,30,40]     // Array objects are iterable
+    >>  for(let ele of arr)
+            console.log(ele);
+        10
+        20
+        30
+        40
+    
+
+    for/of loop will throw TypeError if we try to iterate through a non-iterable object :
+
+        >>  let user = {
+            name : "nik",
+            age : 27,
+            sex : 'M'
+            }
+        >>  for(let ele of user)
+                console.log(ele);
+            TypeError
+
+
+    In JS we are allowed to modify the object while we are iterating through it :
+
+        >>  let arr = [10,20,30,40,50,60]
+        >>  for(let ele of arr)
+                arr.pop();
+        >>  arr
+            [10,20,30]
+
+
+        >>  let ob = {a: 1, b: 2, c: 3, d: 4}       //  ob is not iterable hence we cannot use it with 
+                                                    //  for/of loop. But Object.entries(ob) returns
+                                                    //  an array (i.e., an iterable) which can be iterated 
+                                                    //  through.
+        >>  Object.entries(ob)
+            [["a",1],["b",2],["c",3],["d",4]]
+
+        >>  for(let [k,v] of Object.entries(ob))    //  Object.entries(ob) will be evaluated first, 
+                ob[k] = v**2;                       //  which will create an array object and return its
+                                                    //  reference.
+        >>  ob                                      //  The object ob is being modified in the body of
+            {   a: 1,                               //  the loop, but this wont impact the array object 
+                b: 4,                               //  that for/of loop has been iterating through since
+                c: 9,                               //  these two are entirely different objects that are
+                d: 16                               //  stored separately in memory.
+            }                                       //  Also note the use of destructuring assignment.
+
+
+for/in LOOP
+-----------
+
+    The for/in loop iterates over all the enumerable properties of an object that are keyed by strings
+    (ignoring ones keyed by symbols) , including inherited enumerable properties.
+
+                                                        
+                                            for(let prop in object)
+                                                statement      |
+                                                            This expression is evaluated 1st and
+                                                            only once. It should evaluate to a 
+                                                            reference of an object.
+                
+
+    If the object expression evaluates to null or undefined, then the loop will be skipped. On the other
+    hand if it evaluates to any other primitive value, then that value will be wrapped in an object and 
+    the loop will try to iterate through that object's enumerable string keyed properties.
+
+        >>  let user = {name : "nik" , age : 23}  // these properties are enumerable by default.
+
+        >>  user[Symbol('id')] = 6080602    //  adding a symbol keyed property.
+
+        >>  Object.defineProperty(user,'gender',{value:'M',enumerable:false}) 
+
+        >>  for(let prop in user) console.log(prop);
+            name                                        //  only string-keyed enumerable properties of 
+            age                                         //  user are iterated through.
+
+    Also note that in above example , even though user object inherit properties like toString, valueOf 
+    from Object , but they are not iterated through since these properties are non-enumerable.
+
+
+    another example with inherited properties : 
+
+        >>  let parent = {a : 1, b : 2}
+
+        >>  let child = {x : 3, y : 4}
+
+        >>  Object.setPrototypeOf(child,parent)     // child.[[prototype]] will be set to parent
+
+        >>  for(let prop in child) console.log(prop);
+            x
+            y
+            a
+            b
+    
+
+    ->  Please note that just like for/of loop, we can modify an object while looping through its properties
+        in a for/in loop. And that modification will be reflected while looping.
+
+        If while looping through an object's properties, we delete a property before it has been enumerated,
+        that property will not be enumerated.
+
+        Also if we define a new property while looping , that new property may or may not get enumerated.
+
+    
+    Order of enumeration in for/in loop :
+
+        1.  Own string-keyed properties whose names are non-negative integers are listed first, in 
+            numeric order from smallest to larget. ('0','1','2',...)
+
+        2.  All the remaining own string-keyed properties are listed in the order in which they were
+            added to the object. (In case of object literal, its same as the order in which they appear)
+
+        3.  Now to list the enumerable inherited properties, we travel up the prototype chain and
+            enumerate properties using rule 1,2 for each object along the prototype chain.
+
+        4.  A property will not be enumerated if another property by the same name has already been
+            enumerated , or even if a non-enumerable property by the same name has already been 
+            considered.
+
+
